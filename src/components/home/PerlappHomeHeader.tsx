@@ -51,19 +51,19 @@ export function PerlappHomeHeader({
           aria-label="Principal"
         >
           <Link href="/" className={`${navLink} font-bold text-perlapp-orange`}>
-            Home
+            Inicio
           </Link>
           <Link
             href="/explore"
             className={`${navLink} text-perlapp-teal dark:text-slate-400`}
           >
-            Explore
+            Explorar
           </Link>
           <Link
             href="/notifications"
             className={`${navLink} text-perlapp-teal dark:text-slate-400`}
           >
-            Notifications
+            Notificaciones
           </Link>
           <Link
             href={profileHref}

@@ -4,7 +4,7 @@ export const TOP_MERCHANTS = [
   {
     id: "1",
     title: "Café Aurora",
-    category: "Coffee & Bakery",
+    category: "Café y panadería",
     image:
       "https://lh3.googleusercontent.com/aida-public/AB6AXuD1hvNc74IgGa5QVkSwy2X-xkmdxfQzkE9UlbFi7cQ8dT2c7kGfgtQjZrxaM8s9vaS5buyMeBlzYAaJQlRwbJuTUeBSjMxteLeG1eC6S6kAaGKzjCLglkt0C5qejLrILwPU2uwumy6WCbFg94w6YabztRu6EgqsX1lh7880iSsdHnk-FAdIinxwjm_jZaWLocSEHpTgEG2eCnqAOVvqTyjEYrlT_kHSvT0KU6bvpQ7M-gWNEsnD0BcH4ulZnJBk0FR7PuABno05mCFN",
     alt: "Interior de cafetería orgánica rústica con iluminación cálida y mostradores de madera",
@@ -13,7 +13,7 @@ export const TOP_MERCHANTS = [
   {
     id: "2",
     title: "Verde Market",
-    category: "Fresh Groceries",
+    category: "Frescos y abarrotes",
     image:
       "https://lh3.googleusercontent.com/aida-public/AB6AXuDrpytgM2BgY_nUjzDUvl9vzS5jtJsZHSg3Z5BUtmtEkKMhBbWGZN5K3Pcu78qlIBkEBhrVoNFLvOO0YYQd3B0-Pqkqy4lfszzQHuor6GC5MdFCLTJK2K-CqZS9TaoY-oy9r3qmduwuoOTVak1_k4PfpMGhYfC4zapfbi0CfjJ9TBcra_Y9rSe_-8opUuxj545EqdQ18W-oevB3jjJ0mdHQkAcM_sZ7OzfqfaKPxPY-5UsNWutSXkfFxZou52Z-gTxAZtstO-UOBkZJ",
     alt: "Producto fresco vibrante en un mercado orgánico moderno",
@@ -22,7 +22,7 @@ export const TOP_MERCHANTS = [
   {
     id: "3",
     title: "Lumina Threads",
-    category: "Apparel",
+    category: "Ropa",
     image:
       "https://lh3.googleusercontent.com/aida-public/AB6AXuD1tXwsZ5sb8y4b1Vmlt36DokdribmL0xlVKBj7bLqfaH_PBDlWLTGF7i_18OL-CnJmgKpHrUtCNI7PT7EcZsDVN8j79oKcbokLGnd8bdmPQed-ghSUni_YH8cS_h6LHKOF0bZsbM--AXSN-5ywmLO2gPwauDXtATy2p3-LFLxfnaQ9Ap16BN07K1aSAQyO4rZJSsHFIWMTmsjI78DarGv6XiiGdGtX4QE6xqVv-3ge_aTNl3Sc-mimHdGplVQ-77zqQadtLhxCKCyZ",
     alt: "Boutique de ropa con prendas curadas",

@@ -11,18 +11,21 @@ import { Button } from "@/components/ui/button";
 import { getMerchantProfileById } from "@/lib/merchant-profile.mock";
 import { RECENT_POSTS } from "@/lib/perlapp-home.constants";
 import { useBuyerActivityStore } from "@/store/buyer-activity.store";
+import { useMarketConnectionsStore } from "@/store/market-connections.store";
 import { usePerlappRoleStore } from "@/store/perlapp-role.store";
 
 type TabKey = "actividad" | "favoritos";
 
 export function BuyerProfileView() {
   const role = usePerlappRoleStore((s) => s.role);
+  const activeMarketId = usePerlappRoleStore((s) => s.activeMarketId);
   const setRole = usePerlappRoleStore((s) => s.setRole);
   const [tab, setTab] = useState<TabKey>("actividad");
 
   const favoriteMerchantIds = useBuyerActivityStore((s) => s.favoriteMerchantIds);
   const interactedPostIds = useBuyerActivityStore((s) => s.interactedPostIds);
-  const connectionPairs = useBuyerActivityStore((s) => s.connectionPairs);
+  const marketRequests = useMarketConnectionsStore((s) => s.requests);
+  const acceptedPairs = marketRequests.filter((r) => r.status === "aceptada");
 
   const postsWithInteraction = RECENT_POSTS.filter((p) => interactedPostIds.includes(p.id));
   const favoriteMerchants = favoriteMerchantIds
@@ -36,24 +39,24 @@ export function BuyerProfileView() {
         <main className="mx-auto max-w-2xl px-perlapp-margin-mobile py-perlapp-lg md:px-perlapp-margin-desktop">
           <p className="font-display text-perlapp-headline-md text-perlapp-ink">Perfil de comercio</p>
           <p className="mt-2 text-perlapp-inkMuted">
-            Con el rol <strong>Market</strong> gestionas tu ficha pública. Las{" "}
+            Con el rol <strong>Comercio</strong> gestionas tu ficha pública. Las{" "}
             <strong>conexiones B2B</strong> entre comercios las creas en el home con{" "}
             <strong>Conectar</strong> entre dos comercios destacados.
           </p>
           <Button asChild className="mt-6 bg-perlapp-orange text-white hover:bg-perlapp-orange/90">
             <Link href="/merchant/me">Ir a mi comercio</Link>
           </Button>
-          {connectionPairs.length > 0 ? (
+          {acceptedPairs.length > 0 ? (
             <div className="mt-10">
-              <h2 className="font-display text-sm font-bold text-perlapp-ink">Conexiones entre markets</h2>
+              <h2 className="font-display text-sm font-bold text-perlapp-ink">Conexiones entre comercios</h2>
               <ul className="mt-3 flex flex-col gap-2">
-                {connectionPairs.map((pair) => {
-                  const a = getMerchantProfileById(pair.merchantIdA);
-                  const b = getMerchantProfileById(pair.merchantIdB);
+                {acceptedPairs.map((pair) => {
+                  const a = getMerchantProfileById(pair.fromMerchantId);
+                  const b = getMerchantProfileById(pair.toMerchantId);
                   if (!a || !b) return null;
                   return (
                     <li
-                      key={pair.key}
+                      key={pair.id}
                       className="flex items-center gap-2 rounded-xl border border-perlapp-line/40 bg-perlapp-white px-3 py-2 font-display text-sm"
                     >
                       <Link2 className="h-4 w-4 shrink-0 text-perlapp-tertiary" />
@@ -65,7 +68,11 @@ export function BuyerProfileView() {
                 })}
               </ul>
             </div>
-          ) : null}
+          ) : (
+            <p className="mt-8 text-sm text-perlapp-inkMuted">
+              No tienes conexiones aceptadas para {getMerchantProfileById(activeMarketId)?.displayName ?? "este comercio"}.
+            </p>
+          )}
         </main>
         <PerlappBottomNav activeTab="profile" />
         <CartDrawer />

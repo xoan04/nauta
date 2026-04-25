@@ -46,14 +46,14 @@ export function PerlappHome() {
       <PerlappHomeHeader />
 
       <main className="mx-auto flex w-full max-w-2xl flex-col gap-perlapp-lg pb-28 pt-20 md:pb-12">
-        {/* Top Merchants */}
+        {/* Comercios destacados */}
         <section className="w-full" aria-labelledby="top-merchants-heading">
           <div className="mb-perlapp-sm px-perlapp-margin-mobile md:px-perlapp-margin-desktop">
             <h2
               id="top-merchants-heading"
               className="font-display text-perlapp-headline-md leading-8 text-perlapp-ink"
             >
-              Top Merchants
+              Comercios destacados
             </h2>
           </div>
           <div className="no-scrollbar flex snap-x snap-mandatory gap-perlapp-sm overflow-x-auto px-perlapp-margin-mobile pb-perlapp-sm md:px-perlapp-margin-desktop">

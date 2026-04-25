@@ -14,7 +14,7 @@ function orderPhoneDigits(): string | undefined {
  */
 export function buildWhatsappOrderMessage(lines: CartLine[]): string {
   const total = cartTotal(lines);
-  const header = "¡Hola! Quiero hacer un pedido desde *Perlapp*:\n\n";
+  const header = "¡Hola! Quiero hacer un pedido desde *Perlapp* (precios en COP):\n\n";
 
   const body = lines
     .map((line) => {

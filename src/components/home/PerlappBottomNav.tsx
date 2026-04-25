@@ -44,11 +44,11 @@ export function PerlappBottomNav({ activeTab }: PerlappBottomNavProps) {
           strokeWidth={2.25}
           fill={activeTab === "home" ? "currentColor" : "none"}
         />
-        <span className="truncate">Home</span>
+        <span className="truncate">Inicio</span>
       </Link>
       <Link href="/explore" className={tabClass(activeTab === "explore")}>
         <Search className="mb-0.5 h-5 w-5 shrink-0 sm:h-6 sm:w-6" strokeWidth={2} />
-        <span className="truncate">Explore</span>
+        <span className="truncate">Explorar</span>
       </Link>
       <button
         type="button"
