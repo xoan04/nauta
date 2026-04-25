@@ -10,6 +10,23 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
+        /* Home Perlapp / Stitch — no sustituye tokens shadcn */
+        perlapp: {
+          canvas: "#fff8f6",
+          ink: "#261814",
+          inkMuted: "#5a413a",
+          white: "#ffffff",
+          line: "#e2bfb5",
+          surfaceLow: "#fff1ed",
+          surfaceContainer: "#ffe9e4",
+          surfaceVariant: "#f8ddd5",
+          orange: "#F15A29",
+          teal: "#004447",
+          tertiary: "#006389",
+          header: "#FDFCFB",
+          divider: "#E2E2E2",
+          navMuted: "#4A4A4A",
+        },
         /* shadcn CSS-variable tokens */
         background: "hsl(var(--background))",
         foreground: "hsl(var(--foreground))",
@@ -64,8 +81,47 @@ const config: Config = {
         md: "calc(var(--radius) - 2px)",
         sm: "calc(var(--radius) - 4px)",
       },
+      spacing: {
+        "perlapp-xs": "4px",
+        "perlapp-sm": "12px",
+        "perlapp-md": "24px",
+        "perlapp-lg": "40px",
+        "perlapp-margin-mobile": "16px",
+        "perlapp-margin-desktop": "32px",
+      },
+      fontSize: {
+        "perlapp-display-lg": [
+          "48px",
+          {
+            lineHeight: "56px",
+            letterSpacing: "-0.02em",
+            fontWeight: "800",
+          },
+        ],
+        "perlapp-headline-md": [
+          "24px",
+          { lineHeight: "32px", fontWeight: "600" },
+        ],
+        "perlapp-label-sm": [
+          "12px",
+          { lineHeight: "16px", fontWeight: "500" },
+        ],
+        "perlapp-label-md": [
+          "14px",
+          {
+            lineHeight: "20px",
+            letterSpacing: "0.01em",
+            fontWeight: "600",
+          },
+        ],
+      },
+      boxShadow: {
+        "perlapp-float": "0 16px 24px -12px rgba(0, 68, 71, 0.08)",
+        "perlapp-nav": "0 -4px 12px rgba(0, 68, 71, 0.05)",
+      },
       fontFamily: {
         sans: ["var(--font-sans)", "Inter", "system-ui", "sans-serif"],
+        display: ["var(--font-display)", "Manrope", "system-ui", "sans-serif"],
       },
     },
   },
