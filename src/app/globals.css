@@ -75,6 +75,21 @@
   }
   body {
     @apply bg-background text-foreground;
+    position: relative;
+  }
+  body::before {
+    content: '';
+    position: fixed;
+    inset: -50%;
+    width: 200%;
+    height: 200%;
+    background-image: url('/logo.png');
+    background-repeat: repeat;
+    background-size: 64px 64px;
+    opacity: 0.06;
+    pointer-events: none;
+    z-index: -1;
+    transform: rotate(-20deg);
   }
 }
 
