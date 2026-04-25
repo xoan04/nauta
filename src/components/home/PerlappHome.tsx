@@ -1,36 +1,28 @@
 "use client";
 
+import { Fragment } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { Plus } from "lucide-react";
+import { MerchantConnectBetween } from "@/components/perlapp/MerchantConnectBetween";
 import { CartDrawer } from "@/components/cart/CartDrawer";
 import { Button } from "@/components/ui/button";
-import { getFeaturedProductForMerchant, getProductForPost } from "@/lib/cart-catalog";
+import { getProductForPost } from "@/lib/cart-catalog";
 import {
   NEARBY_MERCHANTS,
   RECENT_POSTS,
   TOP_MERCHANTS,
 } from "@/lib/perlapp-home.constants";
+import { useBuyerActivityStore } from "@/store/buyer-activity.store";
 import { useCartStore } from "@/store/cart.store";
+import { usePerlappRoleStore } from "@/store/perlapp-role.store";
 import { PerlappHomeBottomNav } from "./PerlappHomeBottomNav";
 import { PerlappHomeHeader } from "./PerlappHomeHeader";
 
 export function PerlappHome() {
+  const role = usePerlappRoleStore((s) => s.role);
+  const registerPostInteraction = useBuyerActivityStore((s) => s.registerPostInteraction);
   const addItem = useCartStore((s) => s.addItem);
-
-  const addMerchantFeatured = (merchantId: string) => {
-    const p = getFeaturedProductForMerchant(merchantId);
-    if (!p) return;
-    addItem({
-      productId: p.productId,
-      name: p.name,
-      price: p.price,
-      imageUrl: p.imageUrl,
-      merchantId: p.merchantId,
-      merchantName: p.merchantName,
-      quantity: 1,
-    });
-  };
 
   const addFromPost = (postId: string) => {
     const p = getProductForPost(postId);
@@ -44,6 +36,9 @@ export function PerlappHome() {
       merchantName: p.merchantName,
       quantity: 1,
     });
+    if (role === "comprador") {
+      registerPostInteraction(postId);
+    }
   };
 
   return (
@@ -62,34 +57,43 @@ export function PerlappHome() {
             </h2>
           </div>
           <div className="no-scrollbar flex snap-x snap-mandatory gap-perlapp-sm overflow-x-auto px-perlapp-margin-mobile pb-perlapp-sm md:px-perlapp-margin-desktop">
-            {TOP_MERCHANTS.map((m) => (
-              <button
-                key={m.id}
-                type="button"
-                className="group relative h-40 w-[min(280px,85vw)] shrink-0 cursor-pointer snap-center overflow-hidden rounded-xl border-0 p-0 text-left shadow-perlapp-float outline-none ring-perlapp-orange focus-visible:ring-2"
-                onClick={() => addMerchantFeatured(m.id)}
-                aria-label={`Añadir producto destacado de ${m.title} al carrito`}
-              >
-                <Image
-                  src={m.image}
-                  alt={m.alt}
-                  fill
-                  className="object-cover transition-transform duration-500 group-hover:scale-105"
-                  sizes="280px"
-                />
-                <div
-                  className={`absolute inset-0 bg-gradient-to-t ${m.gradient}`}
-                  aria-hidden
-                />
-                <div className="absolute bottom-0 left-0 w-full p-perlapp-md">
-                  <span className="mb-perlapp-xs inline-block rounded-md border border-white/30 bg-white/20 px-2 py-1 font-display text-perlapp-label-sm leading-4 text-white backdrop-blur-md">
-                    {m.category}
-                  </span>
-                  <h3 className="font-display text-[20px] font-bold leading-tight text-white">
-                    {m.title}
-                  </h3>
-                </div>
-              </button>
+            {TOP_MERCHANTS.map((m, index) => (
+              <Fragment key={m.id}>
+                <Link
+                  href={`/merchant/${m.id}`}
+                  className="group relative block h-40 w-[min(280px,85vw)] shrink-0 snap-center overflow-hidden rounded-xl shadow-perlapp-float outline-none ring-perlapp-orange focus-visible:ring-2"
+                  aria-label={`Ver perfil de ${m.title}`}
+                >
+                  <Image
+                    src={m.image}
+                    alt={m.alt}
+                    fill
+                    className="object-cover transition-transform duration-500 group-hover:scale-105"
+                    sizes="280px"
+                  />
+                  <div
+                    className={`absolute inset-0 bg-gradient-to-t ${m.gradient}`}
+                    aria-hidden
+                  />
+                  <div className="absolute bottom-0 left-0 w-full p-perlapp-md">
+                    <span className="mb-perlapp-xs inline-block rounded-md border border-white/30 bg-white/20 px-2 py-1 font-display text-perlapp-label-sm leading-4 text-white backdrop-blur-md">
+                      {m.category}
+                    </span>
+                    <h3 className="font-display text-[20px] font-bold leading-tight text-white">
+                      {m.title}
+                    </h3>
+                  </div>
+                </Link>
+                {index < TOP_MERCHANTS.length - 1 ? (
+                  <MerchantConnectBetween
+                    left={{ id: m.id, title: m.title }}
+                    right={{
+                      id: TOP_MERCHANTS[index + 1]!.id,
+                      title: TOP_MERCHANTS[index + 1]!.title,
+                    }}
+                  />
+                ) : null}
+              </Fragment>
             ))}
           </div>
         </section>
@@ -106,10 +110,11 @@ export function PerlappHome() {
           </div>
           <div className="no-scrollbar flex items-start gap-perlapp-md overflow-x-auto px-perlapp-margin-mobile pb-perlapp-sm md:px-perlapp-margin-desktop">
             {NEARBY_MERCHANTS.map((item) => (
-              <button
-                key={item.id}
-                type="button"
-                className="flex w-[72px] shrink-0 cursor-pointer flex-col items-center gap-perlapp-xs"
+              <Link
+                key={item.merchantProfileId}
+                href={`/merchant/${item.merchantProfileId}`}
+                className="flex w-[72px] shrink-0 flex-col items-center gap-perlapp-xs rounded-xl outline-none ring-perlapp-orange transition-opacity hover:opacity-90 focus-visible:ring-2"
+                aria-label={`Ver perfil: ${item.label}`}
               >
                 <div
                   className={`flex h-16 w-16 items-center justify-center rounded-full p-0.5 ${
@@ -130,7 +135,7 @@ export function PerlappHome() {
                 <span className="w-full truncate text-center font-display text-perlapp-label-sm leading-4 text-perlapp-inkMuted">
                   {item.label}
                 </span>
-              </button>
+              </Link>
             ))}
             <Link
               href="/explore"
@@ -166,22 +171,29 @@ export function PerlappHome() {
                 className="flex flex-col gap-perlapp-sm rounded-xl border border-perlapp-line/30 bg-perlapp-white p-perlapp-md shadow-perlapp-float"
               >
                 <div className="flex items-center gap-perlapp-sm">
-                  <span className="relative block h-10 w-10 shrink-0 overflow-hidden rounded-full">
+                  <Link
+                    href={`/merchant/${post.merchantId}`}
+                    className="relative block h-10 w-10 shrink-0 overflow-hidden rounded-full outline-none ring-perlapp-orange ring-offset-2 ring-offset-perlapp-white transition-opacity hover:opacity-90 focus-visible:ring-2"
+                    aria-label={`Ver perfil de ${post.author}`}
+                  >
                     <Image
                       src={post.authorAvatar}
-                      alt={post.author}
+                      alt=""
                       fill
                       className="object-cover"
                       sizes="40px"
                     />
-                  </span>
-                  <div>
-                    <h4 className="font-display text-perlapp-label-md leading-5 text-perlapp-ink">
-                      {post.author}
-                    </h4>
-                    <p className="font-display text-[11px] text-perlapp-inkMuted">
-                      {post.time}
-                    </p>
+                  </Link>
+                  <div className="min-w-0">
+                    <Link
+                      href={`/merchant/${post.merchantId}`}
+                      className="block rounded-md outline-none ring-perlapp-orange focus-visible:ring-2"
+                    >
+                      <h4 className="font-display text-perlapp-label-md leading-5 text-perlapp-ink hover:underline">
+                        {post.author}
+                      </h4>
+                      <p className="font-display text-[11px] text-perlapp-inkMuted">{post.time}</p>
+                    </Link>
                   </div>
                 </div>
 

@@ -2,18 +2,40 @@
 
 import Link from "next/link";
 import { Search, ShoppingCart } from "lucide-react";
+import { PerlappRoleSwitcher } from "@/components/perlapp/PerlappRoleSwitcher";
 import { cartItemCount } from "@/lib/cart.utils";
+import { getProfileHrefForRole } from "@/store/perlapp-role.store";
 import { useCartStore } from "@/store/cart.store";
+import { usePerlappRoleStore } from "@/store/perlapp-role.store";
 
 const navLink =
   "font-display font-semibold text-base rounded-lg px-perlapp-sm py-perlapp-xs transition-colors hover:bg-slate-100 dark:hover:bg-slate-800";
 
-export function PerlappHomeHeader() {
+type PerlappHomeHeaderProps = {
+  /** Barra de navegación desktop (Home, Explore, …). */
+  showDesktopNav?: boolean;
+  /** Cabecera fija (home) o pegajosa (perfil comercio). */
+  position?: "fixed" | "sticky";
+};
+
+export function PerlappHomeHeader({
+  showDesktopNav = true,
+  position = "fixed",
+}: PerlappHomeHeaderProps) {
+  const role = usePerlappRoleStore((s) => s.role);
+  const profileHref = getProfileHrefForRole(role);
   const itemCount = useCartStore((s) => cartItemCount(s.items));
   const toggleDrawer = useCartStore((s) => s.toggleDrawer);
 
+  const positionClass =
+    position === "sticky"
+      ? "sticky top-0 z-40"
+      : "fixed top-0 left-0 right-0 z-40";
+
   return (
-    <header className="fixed top-0 left-0 right-0 z-40 border-b border-perlapp-divider bg-perlapp-header shadow-perlapp-float dark:border-slate-800 dark:bg-slate-950">
+    <header
+      className={`${positionClass} border-b border-perlapp-divider bg-perlapp-header shadow-perlapp-float dark:border-slate-800 dark:bg-slate-950`}
+    >
       <div className="mx-auto flex h-16 w-full max-w-7xl items-center justify-between px-4">
         <div className="flex items-center gap-perlapp-xs">
           <Link
@@ -24,7 +46,10 @@ export function PerlappHomeHeader() {
           </Link>
         </div>
 
-        <nav className="hidden items-center gap-perlapp-md md:flex" aria-label="Principal">
+        <nav
+          className={`hidden items-center gap-perlapp-md md:flex ${showDesktopNav ? "" : "md:hidden"}`}
+          aria-label="Principal"
+        >
           <Link href="/" className={`${navLink} font-bold text-perlapp-orange`}>
             Home
           </Link>
@@ -41,14 +66,15 @@ export function PerlappHomeHeader() {
             Notifications
           </Link>
           <Link
-            href="/profile"
+            href={profileHref}
             className={`${navLink} text-perlapp-teal dark:text-slate-400`}
           >
-            Profile
+            Perfil
           </Link>
         </nav>
 
         <div className="flex items-center gap-perlapp-sm">
+          <PerlappRoleSwitcher />
           <button
             type="button"
             aria-label="Buscar"

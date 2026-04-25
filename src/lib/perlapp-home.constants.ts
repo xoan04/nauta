@@ -30,9 +30,10 @@ export const TOP_MERCHANTS = [
   },
 ] as const;
 
+/** `merchantProfileId` = ruta `/merchant/[id]` del comercio. */
 export const NEARBY_MERCHANTS = [
   {
-    id: "1",
+    merchantProfileId: "1",
     label: "Panadería",
     ring: "gradient" as const,
     image:
@@ -40,7 +41,7 @@ export const NEARBY_MERCHANTS = [
     alt: "Logo de panadería local con croissant estilizado",
   },
   {
-    id: "2",
+    merchantProfileId: "2",
     label: "Botánica",
     ring: "gradient" as const,
     image:
@@ -48,7 +49,7 @@ export const NEARBY_MERCHANTS = [
     alt: "Logo de vivero con hoja verde",
   },
   {
-    id: "3",
+    merchantProfileId: "3",
     label: "Regalos",
     ring: "muted" as const,
     image:
@@ -56,7 +57,7 @@ export const NEARBY_MERCHANTS = [
     alt: "Icono de caja de regalo para tienda artesanal",
   },
   {
-    id: "4",
+    merchantProfileId: "4",
     label: "Tostador",
     ring: "muted" as const,
     image:
@@ -68,6 +69,7 @@ export const NEARBY_MERCHANTS = [
 export const RECENT_POSTS = [
   {
     id: "1",
+    merchantId: "1",
     author: "Café Aurora",
     authorAvatar:
       "https://lh3.googleusercontent.com/aida-public/AB6AXuABv_K-Uym0OFG1M-AdF5BWNnufefVEpInxEob_vvoPzE0OG0ruPO791yJ0v-v5ZmJ9JWWOnQ13Urod8lKKMaNWT63YdG9EutUS8RLECDCcYsEqI1dbkLcxy_fA8LR_AtJn12ojbUGrhiAHxmp-ln4Hd1aRJLOzFaRxVAEVmfJMRWYJ-DEsu2SMiSL_DrACltdqytZp_4Gm_nkKilpos1zBxMUfKZwF3bh5f_cAalVorbVStwO-ziDkGJQ9MaO2_zQ-nQdxecr8RIyi",
@@ -81,6 +83,7 @@ export const RECENT_POSTS = [
   },
   {
     id: "2",
+    merchantId: "2",
     author: "Verde Market",
     authorAvatar:
       "https://lh3.googleusercontent.com/aida-public/AB6AXuC4JiI9mqtYL9ypZO883JqAKfwLzdQEHXkXF77tcru_s0UXGcmcxgoUq9D8nJnWwWVnb6R9gQkRuezR8lGyplPD__lOXyrb-01kQfbbUkJ9NuhB1k4kbaUSWcW7O7ZFiY7pPvvZBLSfyJfxS4ftZunJ0iNDsX4EZSiPUdPuVXUSW3HXOpgQb1wjJuuN7qh1c5F-qhMP-jAVjoD3cOqFo2HYUxxpuwMwxbmDDpdZxt8ii_sf7ZGs8sOYq8-f47scx-FwHnI00Ul73823",
