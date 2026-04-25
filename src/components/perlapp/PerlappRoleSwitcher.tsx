@@ -16,7 +16,7 @@ export function PerlappRoleSwitcher() {
   const setRole = usePerlappRoleStore((s) => s.setRole);
   const setActiveMarketId = usePerlappRoleStore((s) => s.setActiveMarketId);
 
-  const marketOptions = ["1", "2", "3", "4", "ecovolt"];
+  const marketOptions = ["me", "1", "2", "3", "4", "ecovolt"];
 
   return (
     <div className="flex min-w-0 items-center gap-1">

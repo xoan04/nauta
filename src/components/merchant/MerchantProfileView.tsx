@@ -18,6 +18,7 @@ import {
 import { CartDrawer } from "@/components/cart/CartDrawer";
 import { PerlappBottomNav } from "@/components/home/PerlappBottomNav";
 import { PerlappHomeHeader } from "@/components/home/PerlappHomeHeader";
+import { MerchantProfileCatalog } from "@/components/merchant/MerchantProfileCatalog";
 import type { MerchantProfileData } from "@/lib/merchant-profile.types";
 import { useBuyerActivityStore } from "@/store/buyer-activity.store";
 import { useMarketConnectionsStore } from "@/store/market-connections.store";
@@ -39,7 +40,9 @@ export function MerchantProfileView({ merchant }: MerchantProfileViewProps) {
   const requests = useMarketConnectionsStore((s) => s.requests);
   const sendRequest = useMarketConnectionsStore((s) => s.sendRequest);
 
-  const [tab, setTab] = useState<"posts" | "info">("posts");
+  const [tab, setTab] = useState<"posts" | "catalog" | "info">("posts");
+
+  const isCatalogOwner = role === "market" && merchant.id === activeMarketId;
 
   const isBuyerFavorite = role === "comprador" && merchant.id !== "me";
   const isFavorite = favoriteMerchantIds.includes(merchant.id);
@@ -201,39 +204,63 @@ export function MerchantProfileView({ merchant }: MerchantProfileViewProps) {
         <div className="sticky top-16 z-30 flex border-b border-perlapp-line/50 bg-perlapp-white/90 backdrop-blur-md">
           <button
             type="button"
-            className="group relative flex flex-1 justify-center py-4 text-center transition-colors hover:bg-perlapp-surfaceVariant/30"
+            className="group relative flex min-w-0 flex-1 justify-center px-1 py-3 text-center transition-colors hover:bg-perlapp-surfaceVariant/30 sm:py-4"
             onClick={() => setTab("posts")}
           >
             <span
-              className={`font-display text-perlapp-label-md ${
+              className={`truncate font-display text-[13px] font-medium sm:text-perlapp-label-md ${
                 tab === "posts" ? "font-bold text-perlapp-orange" : "text-perlapp-inkMuted group-hover:text-perlapp-ink"
               }`}
             >
               Publicaciones
             </span>
             {tab === "posts" ? (
-              <span className="absolute bottom-0 left-1/2 h-1 w-12 -translate-x-1/2 rounded-t-full bg-perlapp-orange" />
+              <span className="absolute bottom-0 left-1/2 h-1 w-8 -translate-x-1/2 rounded-t-full bg-perlapp-orange sm:w-12" />
             ) : null}
           </button>
           <button
             type="button"
-            className="group relative flex flex-1 justify-center py-4 text-center transition-colors hover:bg-perlapp-surfaceVariant/30"
+            className="group relative flex min-w-0 flex-1 justify-center px-1 py-3 text-center transition-colors hover:bg-perlapp-surfaceVariant/30 sm:py-4"
+            onClick={() => setTab("catalog")}
+          >
+            <span
+              className={`truncate font-display text-[13px] font-medium sm:text-perlapp-label-md ${
+                tab === "catalog"
+                  ? "font-bold text-perlapp-orange"
+                  : "text-perlapp-inkMuted group-hover:text-perlapp-ink"
+              }`}
+            >
+              Catálogo
+            </span>
+            {tab === "catalog" ? (
+              <span className="absolute bottom-0 left-1/2 h-1 w-8 -translate-x-1/2 rounded-t-full bg-perlapp-orange sm:w-12" />
+            ) : null}
+          </button>
+          <button
+            type="button"
+            className="group relative flex min-w-0 flex-1 justify-center px-1 py-3 text-center transition-colors hover:bg-perlapp-surfaceVariant/30 sm:py-4"
             onClick={() => setTab("info")}
           >
             <span
-              className={`font-display text-perlapp-label-md ${
+              className={`truncate font-display text-[13px] font-medium sm:text-perlapp-label-md ${
                 tab === "info" ? "font-bold text-perlapp-orange" : "text-perlapp-inkMuted group-hover:text-perlapp-ink"
               }`}
             >
               Información
             </span>
             {tab === "info" ? (
-              <span className="absolute bottom-0 left-1/2 h-1 w-12 -translate-x-1/2 rounded-t-full bg-perlapp-orange" />
+              <span className="absolute bottom-0 left-1/2 h-1 w-8 -translate-x-1/2 rounded-t-full bg-perlapp-orange sm:w-12" />
             ) : null}
           </button>
         </div>
 
-        {tab === "posts" ? (
+        {tab === "catalog" ? (
+          <MerchantProfileCatalog
+            merchantId={merchant.id}
+            merchantName={merchant.displayName}
+            isOwner={isCatalogOwner}
+          />
+        ) : tab === "posts" ? (
           <div className="flex flex-col">
             {merchant.posts.map((post) => (
               <article

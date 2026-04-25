@@ -7,6 +7,7 @@ import { MerchantFeaturedConnectButton } from "@/components/perlapp/MerchantFeat
 import { CartDrawer } from "@/components/cart/CartDrawer";
 import { Button } from "@/components/ui/button";
 import { getProductForPost } from "@/lib/cart-catalog";
+import { merchantProfilePath } from "@/lib/merchant-profile.mock";
 import {
   NEARBY_MERCHANTS,
   RECENT_POSTS,
@@ -62,7 +63,7 @@ export function PerlappHome() {
                 className="relative h-40 w-[min(280px,85vw)] shrink-0 snap-center"
               >
                 <Link
-                  href={`/merchant/${m.id}`}
+                  href={merchantProfilePath(m.id)}
                   className="group relative block h-full w-full overflow-hidden rounded-xl shadow-perlapp-float outline-none ring-perlapp-orange focus-visible:ring-2"
                   aria-label={`Ver perfil de ${m.title}`}
                 >
@@ -106,7 +107,7 @@ export function PerlappHome() {
             {NEARBY_MERCHANTS.map((item) => (
               <Link
                 key={item.merchantProfileId}
-                href={`/merchant/${item.merchantProfileId}`}
+                href={merchantProfilePath(item.merchantProfileId)}
                 className="flex w-[72px] shrink-0 flex-col items-center gap-perlapp-xs rounded-xl outline-none ring-perlapp-orange transition-opacity hover:opacity-90 focus-visible:ring-2"
                 aria-label={`Ver perfil: ${item.label}`}
               >
@@ -132,7 +133,7 @@ export function PerlappHome() {
               </Link>
             ))}
             <Link
-              href="/explore"
+              href="/explorar"
               className="flex w-[72px] shrink-0 flex-col items-center gap-perlapp-xs"
             >
               <div className="flex h-16 w-16 items-center justify-center rounded-full border border-perlapp-line bg-perlapp-surfaceContainer text-perlapp-orange transition-colors hover:bg-perlapp-surfaceVariant">
@@ -166,7 +167,7 @@ export function PerlappHome() {
               >
                 <div className="flex items-center gap-perlapp-sm">
                   <Link
-                    href={`/merchant/${post.merchantId}`}
+                    href={merchantProfilePath(post.merchantId)}
                     className="relative block h-10 w-10 shrink-0 overflow-hidden rounded-full outline-none ring-perlapp-orange ring-offset-2 ring-offset-perlapp-white transition-opacity hover:opacity-90 focus-visible:ring-2"
                     aria-label={`Ver perfil de ${post.author}`}
                   >
@@ -180,7 +181,7 @@ export function PerlappHome() {
                   </Link>
                   <div className="min-w-0">
                     <Link
-                      href={`/merchant/${post.merchantId}`}
+                      href={merchantProfilePath(post.merchantId)}
                       className="block rounded-md outline-none ring-perlapp-orange focus-visible:ring-2"
                     >
                       <h4 className="font-display text-perlapp-label-md leading-5 text-perlapp-ink hover:underline">

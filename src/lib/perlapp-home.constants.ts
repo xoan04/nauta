@@ -30,7 +30,7 @@ export const TOP_MERCHANTS = [
   },
 ] as const;
 
-/** `merchantProfileId` = ruta `/merchant/[id]` del comercio. */
+/** `merchantProfileId` = clave interna del mock; la URL pública usa el slug (`merchantProfilePath`). */
 export const NEARBY_MERCHANTS = [
   {
     merchantProfileId: "1",
