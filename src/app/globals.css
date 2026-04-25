@@ -1,51 +1,71 @@
+@import "../styles/index.css";
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 240 10% 3.9%;
-    --card: 0 0% 100%;
-    --card-foreground: 240 10% 3.9%;
-    --popover: 0 0% 100%;
-    --popover-foreground: 240 10% 3.9%;
-    --primary: 240 5.9% 10%;
-    --primary-foreground: 0 0% 98%;
-    --secondary: 240 4.8% 95.9%;
-    --secondary-foreground: 240 5.9% 10%;
-    --muted: 240 4.8% 95.9%;
-    --muted-foreground: 240 3.8% 46.1%;
-    --accent: 240 4.8% 95.9%;
-    --accent-foreground: 240 5.9% 10%;
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 0 0% 98%;
-    --border: 240 5.9% 90%;
-    --input: 240 5.9% 90%;
-    --ring: 240 5.9% 10%;
-    --radius: 0.5rem;
+    /* Mapped from Perlapp palette → shadcn tokens (HSL) */
+    --background: 72 29% 93%;           /* Arena Suave #F1F3E9 */
+    --foreground: 163 52% 15%;          /* Deep Teal oscuro */
+
+    --card: 0 0% 99%;                   /* Blanco Perla */
+    --card-foreground: 163 52% 15%;
+
+    --popover: 0 0% 99%;
+    --popover-foreground: 163 52% 15%;
+
+    --primary: 15 88% 55%;              /* Naranja Perlapp #F15A29 */
+    --primary-foreground: 0 0% 99%;     /* Blanco Perla */
+
+    --secondary: 163 52% 24%;           /* Deep Teal #1D5C4A */
+    --secondary-foreground: 0 0% 99%;   /* Blanco Perla */
+
+    --muted: 72 15% 87%;                /* Sand ligeramente más oscuro */
+    --muted-foreground: 169 7% 52%;     /* Gris Piedra #7D8E8B */
+
+    --accent: 15 88% 95%;               /* Naranja muy suave */
+    --accent-foreground: 15 88% 40%;
+
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 99%;
+
+    --border: 169 7% 80%;
+    --input: 169 7% 80%;
+    --ring: 15 88% 55%;                 /* Naranja para focus rings */
+
+    --radius: 0.75rem;
   }
 
   .dark {
-    --background: 240 10% 3.9%;
-    --foreground: 0 0% 98%;
-    --card: 240 10% 3.9%;
-    --card-foreground: 0 0% 98%;
-    --popover: 240 10% 3.9%;
-    --popover-foreground: 0 0% 98%;
-    --primary: 0 0% 98%;
-    --primary-foreground: 240 5.9% 10%;
-    --secondary: 240 3.7% 15.9%;
-    --secondary-foreground: 0 0% 98%;
-    --muted: 240 3.7% 15.9%;
-    --muted-foreground: 240 5% 64.9%;
-    --accent: 240 3.7% 15.9%;
-    --accent-foreground: 0 0% 98%;
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 0 0% 98%;
-    --border: 240 3.7% 15.9%;
-    --input: 240 3.7% 15.9%;
-    --ring: 240 4.9% 83.9%;
+    --background: 163 52% 8%;
+    --foreground: 72 29% 93%;
+
+    --card: 163 52% 12%;
+    --card-foreground: 0 0% 99%;
+
+    --popover: 163 52% 12%;
+    --popover-foreground: 0 0% 99%;
+
+    --primary: 15 88% 55%;
+    --primary-foreground: 0 0% 99%;
+
+    --secondary: 163 30% 20%;
+    --secondary-foreground: 0 0% 99%;
+
+    --muted: 163 30% 18%;
+    --muted-foreground: 169 7% 65%;
+
+    --accent: 163 30% 20%;
+    --accent-foreground: 0 0% 99%;
+
+    --destructive: 0 63% 30%;
+    --destructive-foreground: 0 0% 99%;
+
+    --border: 163 30% 22%;
+    --input: 163 30% 22%;
+    --ring: 15 88% 55%;
   }
 }
 
