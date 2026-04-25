@@ -1,11 +1,12 @@
 "use client";
 
 import Link from "next/link";
-import { Search, ShoppingCart } from "lucide-react";
+import { Bell, Search, ShoppingCart } from "lucide-react";
 import { PerlappRoleSwitcher } from "@/components/perlapp/PerlappRoleSwitcher";
 import { cartItemCount } from "@/lib/cart.utils";
 import { getProfileHrefForRole } from "@/store/perlapp-role.store";
 import { useCartStore } from "@/store/cart.store";
+import { useMarketConnectionsStore } from "@/store/market-connections.store";
 import { usePerlappRoleStore } from "@/store/perlapp-role.store";
 
 const navLink =
@@ -23,9 +24,17 @@ export function PerlappHomeHeader({
   position = "fixed",
 }: PerlappHomeHeaderProps) {
   const role = usePerlappRoleStore((s) => s.role);
+  const activeMarketId = usePerlappRoleStore((s) => s.activeMarketId);
   const profileHref = getProfileHrefForRole(role);
   const itemCount = useCartStore((s) => cartItemCount(s.items));
   const toggleDrawer = useCartStore((s) => s.toggleDrawer);
+  const requests = useMarketConnectionsStore((s) => s.requests);
+  const pendingIncoming =
+    role === "market" && activeMarketId
+      ? requests.filter(
+          (r) => r.toMerchantId === activeMarketId && r.status === "pendiente"
+        ).length
+      : 0;
 
   const positionClass =
     position === "sticky"
@@ -60,12 +69,6 @@ export function PerlappHomeHeader({
             Explorar
           </Link>
           <Link
-            href="/notifications"
-            className={`${navLink} text-perlapp-teal dark:text-slate-400`}
-          >
-            Notificaciones
-          </Link>
-          <Link
             href={profileHref}
             className={`${navLink} text-perlapp-teal dark:text-slate-400`}
           >
@@ -75,6 +78,22 @@ export function PerlappHomeHeader({
 
         <div className="flex items-center gap-perlapp-sm">
           <PerlappRoleSwitcher />
+          <Link
+            href="/notifications"
+            className="relative hidden rounded-full p-perlapp-xs text-perlapp-orange transition-colors hover:bg-slate-100 dark:hover:bg-slate-800 md:inline-flex"
+            aria-label={
+              pendingIncoming > 0
+                ? `Notificaciones, ${pendingIncoming} solicitud${pendingIncoming === 1 ? "" : "es"} pendiente${pendingIncoming === 1 ? "" : "s"}`
+                : "Notificaciones"
+            }
+          >
+            <Bell className="h-6 w-6" strokeWidth={2} />
+            {pendingIncoming > 0 ? (
+              <span className="absolute -right-0.5 -top-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-perlapp-orange px-0.5 font-display text-[9px] font-bold leading-none text-white">
+                {pendingIncoming > 9 ? "9+" : pendingIncoming}
+              </span>
+            ) : null}
+          </Link>
           <button
             type="button"
             aria-label="Buscar"

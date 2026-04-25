@@ -20,7 +20,12 @@ import { PerlappBottomNav } from "@/components/home/PerlappBottomNav";
 import { PerlappHomeHeader } from "@/components/home/PerlappHomeHeader";
 import type { MerchantProfileData } from "@/lib/merchant-profile.types";
 import { useBuyerActivityStore } from "@/store/buyer-activity.store";
+import { useMarketConnectionsStore } from "@/store/market-connections.store";
 import { usePerlappRoleStore } from "@/store/perlapp-role.store";
+
+function pairKey(a: string, b: string): string {
+  return [a, b].sort().join("|");
+}
 
 type MerchantProfileViewProps = {
   merchant: MerchantProfileData;
@@ -28,17 +33,29 @@ type MerchantProfileViewProps = {
 
 export function MerchantProfileView({ merchant }: MerchantProfileViewProps) {
   const role = usePerlappRoleStore((s) => s.role);
+  const activeMarketId = usePerlappRoleStore((s) => s.activeMarketId);
   const favoriteMerchantIds = useBuyerActivityStore((s) => s.favoriteMerchantIds);
   const toggleFavoriteMerchant = useBuyerActivityStore((s) => s.toggleFavoriteMerchant);
+  const requests = useMarketConnectionsStore((s) => s.requests);
+  const sendRequest = useMarketConnectionsStore((s) => s.sendRequest);
 
   const [tab, setTab] = useState<"posts" | "info">("posts");
-  const [isMarketConnected, setIsMarketConnected] = useState(false);
 
   const isBuyerFavorite = role === "comprador" && merchant.id !== "me";
   const isFavorite = favoriteMerchantIds.includes(merchant.id);
-  /** Solo otro comercio (no el propio); el rol market conecta B2B. */
-  const showConectar = role === "market" && merchant.id !== "me";
-  const hasProfileActions = isBuyerFavorite || showConectar;
+  /** Otro comercio y no el comercio activo (no conectar contigo mismo). */
+  const showB2bConnect =
+    role === "market" && merchant.id !== "me" && merchant.id !== activeMarketId;
+  const key =
+    activeMarketId && merchant.id !== "me" ? pairKey(activeMarketId, merchant.id) : "";
+  const pairMatches = requests.filter(
+    (r) => pairKey(r.fromMerchantId, r.toMerchantId) === key
+  );
+  const hasAccepted = pairMatches.some((r) => r.status === "aceptada");
+  const hasPending = pairMatches.some((r) => r.status === "pendiente");
+  const canSendB2b = Boolean(activeMarketId) && !hasAccepted && !hasPending;
+
+  const hasProfileActions = isBuyerFavorite || showB2bConnect;
 
   return (
     <div className="min-h-screen bg-perlapp-canvas pb-28 text-perlapp-ink antialiased selection:bg-perlapp-orange/20 selection:text-perlapp-ink md:pb-0">
@@ -88,17 +105,34 @@ export function MerchantProfileView({ merchant }: MerchantProfileViewProps) {
                     />
                   </button>
                 ) : null}
-                {showConectar ? (
+                {showB2bConnect ? (
                   <button
                     type="button"
-                    onClick={() => setIsMarketConnected((v) => !v)}
-                    className={`rounded-full px-6 py-2 font-display text-perlapp-label-md shadow-[0_2px_0_0_#862300] transition-all active:scale-95 ${
-                      isMarketConnected
-                        ? "border border-perlapp-line bg-perlapp-surfaceContainer text-perlapp-ink shadow-none hover:bg-perlapp-surfaceVariant"
-                        : "bg-perlapp-orange text-white hover:bg-perlapp-orange/90 hover:translate-y-px hover:shadow-none"
+                    disabled={!canSendB2b}
+                    title={
+                      !activeMarketId
+                        ? "Elige tu comercio activo para enviar la solicitud."
+                        : hasAccepted
+                          ? "Conexión B2B activa con este comercio."
+                          : hasPending
+                            ? "Solicitud enviada. Revisa notificaciones para ver la respuesta."
+                            : "Enviar solicitud de conexión B2B"
+                    }
+                    onClick={() => {
+                      if (!activeMarketId || !canSendB2b) return;
+                      sendRequest(activeMarketId, merchant.id);
+                    }}
+                    className={`rounded-full px-6 py-2 font-display text-perlapp-label-md transition-all active:scale-95 ${
+                      hasAccepted
+                        ? "border border-emerald-400/60 bg-emerald-50 text-emerald-950 shadow-none hover:bg-emerald-100/90"
+                        : hasPending
+                          ? "border border-amber-400/70 bg-amber-50 text-amber-950 shadow-none hover:bg-amber-100/90"
+                          : canSendB2b
+                            ? "bg-perlapp-orange text-white shadow-[0_2px_0_0_#862300] hover:bg-perlapp-orange/90 hover:translate-y-px hover:shadow-none"
+                            : "cursor-not-allowed border border-perlapp-line bg-perlapp-surfaceVariant text-perlapp-inkMuted shadow-none"
                     }`}
                   >
-                    {isMarketConnected ? "Conectado" : "Conectar"}
+                    {hasAccepted ? "Conectado" : hasPending ? "Pendiente" : "Conectar"}
                   </button>
                 ) : null}
               </div>

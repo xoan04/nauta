@@ -1,10 +1,9 @@
 "use client";
 
-import { Fragment } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { Plus } from "lucide-react";
-import { MerchantConnectBetween } from "@/components/perlapp/MerchantConnectBetween";
+import { MerchantFeaturedConnectButton } from "@/components/perlapp/MerchantFeaturedConnectButton";
 import { CartDrawer } from "@/components/cart/CartDrawer";
 import { Button } from "@/components/ui/button";
 import { getProductForPost } from "@/lib/cart-catalog";
@@ -57,11 +56,14 @@ export function PerlappHome() {
             </h2>
           </div>
           <div className="no-scrollbar flex snap-x snap-mandatory gap-perlapp-sm overflow-x-auto px-perlapp-margin-mobile pb-perlapp-sm md:px-perlapp-margin-desktop">
-            {TOP_MERCHANTS.map((m, index) => (
-              <Fragment key={m.id}>
+            {TOP_MERCHANTS.map((m) => (
+              <div
+                key={m.id}
+                className="relative h-40 w-[min(280px,85vw)] shrink-0 snap-center"
+              >
                 <Link
                   href={`/merchant/${m.id}`}
-                  className="group relative block h-40 w-[min(280px,85vw)] shrink-0 snap-center overflow-hidden rounded-xl shadow-perlapp-float outline-none ring-perlapp-orange focus-visible:ring-2"
+                  className="group relative block h-full w-full overflow-hidden rounded-xl shadow-perlapp-float outline-none ring-perlapp-orange focus-visible:ring-2"
                   aria-label={`Ver perfil de ${m.title}`}
                 >
                   <Image
@@ -84,16 +86,8 @@ export function PerlappHome() {
                     </h3>
                   </div>
                 </Link>
-                {index < TOP_MERCHANTS.length - 1 ? (
-                  <MerchantConnectBetween
-                    left={{ id: m.id, title: m.title }}
-                    right={{
-                      id: TOP_MERCHANTS[index + 1]!.id,
-                      title: TOP_MERCHANTS[index + 1]!.title,
-                    }}
-                  />
-                ) : null}
-              </Fragment>
+                <MerchantFeaturedConnectButton merchantId={m.id} merchantTitle={m.title} />
+              </div>
             ))}
           </div>
         </section>

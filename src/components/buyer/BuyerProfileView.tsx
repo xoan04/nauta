@@ -40,8 +40,8 @@ export function BuyerProfileView() {
           <p className="font-display text-perlapp-headline-md text-perlapp-ink">Perfil de comercio</p>
           <p className="mt-2 text-perlapp-inkMuted">
             Con el rol <strong>Comercio</strong> gestionas tu ficha pública. Las{" "}
-            <strong>conexiones B2B</strong> entre comercios las creas en el home con{" "}
-            <strong>Conectar</strong> entre dos comercios destacados.
+            <strong>conexiones B2B</strong> entre comercios las creas en el home con el botón{" "}
+            <strong>Conectar</strong> en cada tarjeta de comercios destacados.
           </p>
           <Button asChild className="mt-6 bg-perlapp-orange text-white hover:bg-perlapp-orange/90">
             <Link href="/merchant/me">Ir a mi comercio</Link>
