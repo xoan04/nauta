@@ -153,9 +153,9 @@ export default function MerchantRegistrationPage() {
           </button>
         ) : (
           <Link
-            href="/"
+            href="/registro"
             className="flex items-center justify-center w-10 h-10 rounded-full hover:bg-brand-sand-dark transition-colors -ml-2 flex-shrink-0"
-            aria-label="Volver al inicio"
+            aria-label="Volver"
           >
             <ArrowLeft className="w-5 h-5 text-brand-teal" />
           </Link>
