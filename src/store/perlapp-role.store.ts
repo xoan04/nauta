@@ -1,5 +1,6 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
+import { merchantProfilePath } from "@/lib/merchant-profile.mock";
 import type { PerlappRole } from "@/types/perlapp-role.types";
 
 type PerlappRoleState = {
@@ -24,6 +25,6 @@ export const usePerlappRoleStore = create<PerlappRoleState>()(
 
 export function getProfileHrefForRole(role: PerlappRole): string {
   if (role === "comprador") return "/perfil";
-  if (role === "market") return "/merchant/me";
+  if (role === "market") return merchantProfilePath("me");
   return "/perfil";
 }

@@ -188,10 +188,27 @@ const ALIASES: Record<string, string> = {
   ecovoltsol: "ecovolt",
 };
 
+function findInternalIdBySlug(slug: string): string | undefined {
+  const s = slug.trim().toLowerCase();
+  for (const [id, m] of Object.entries(MERCHANTS)) {
+    if (m.slug.toLowerCase() === s) return id;
+  }
+  return undefined;
+}
+
+/** Resuelve clave interna del mock a partir de id interno, slug público o alias. */
 export function resolveMerchantProfileId(raw: string): string | undefined {
   const key = raw.trim().toLowerCase();
   const resolved = ALIASES[key] ?? key;
-  return MERCHANTS[resolved] ? resolved : undefined;
+  if (MERCHANTS[resolved]) return resolved;
+  return findInternalIdBySlug(resolved) ?? findInternalIdBySlug(key);
+}
+
+/** Ruta de perfil pública: siempre usa `slug` del comercio cuando existe en el mock. */
+export function merchantProfilePath(rawIdOrSlug: string): string {
+  const id = resolveMerchantProfileId(rawIdOrSlug);
+  if (!id) return `/merchant/${rawIdOrSlug.trim()}`;
+  return `/merchant/${MERCHANTS[id].slug}`;
 }
 
 export function getMerchantProfileById(rawId: string): MerchantProfileData | undefined {

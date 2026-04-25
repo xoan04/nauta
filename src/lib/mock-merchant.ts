@@ -11,8 +11,7 @@ export type RegistrationResult = {
   error?: string;
 };
 
-export async function registerMerchant(data: MerchantFormData): Promise<RegistrationResult> {
+export async function registerMerchant(_data: MerchantFormData): Promise<RegistrationResult> {
   await new Promise((r) => setTimeout(r, 1500));
-  console.log("[mock] registerMerchant →", { ...data, password: "***" });
   return { success: true, id: `merchant_${Date.now()}` };
 }

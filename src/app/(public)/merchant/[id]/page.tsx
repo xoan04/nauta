@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import { MerchantProfileView } from "@/components/merchant/MerchantProfileView";
-import { getMerchantProfileById } from "@/lib/merchant-profile.mock";
+import { getMerchantProfileById, merchantProfilePath } from "@/lib/merchant-profile.mock";
 
 type PageProps = {
   params: { id: string };
@@ -22,6 +22,10 @@ export default function MerchantProfilePage({ params }: PageProps) {
   const merchant = getMerchantProfileById(params.id);
   if (!merchant) {
     notFound();
+  }
+  const canonical = merchantProfilePath(merchant.id);
+  if (canonical !== `/merchant/${params.id}`) {
+    redirect(canonical);
   }
   return <MerchantProfileView merchant={merchant} />;
 }

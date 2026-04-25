@@ -63,7 +63,7 @@ export function PerlappHomeHeader({
             Inicio
           </Link>
           <Link
-            href="/explore"
+            href="/explorar"
             className={`${navLink} text-perlapp-teal dark:text-slate-400`}
           >
             Explorar

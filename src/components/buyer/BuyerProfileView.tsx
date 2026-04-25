@@ -8,7 +8,7 @@ import { CartDrawer } from "@/components/cart/CartDrawer";
 import { PerlappBottomNav } from "@/components/home/PerlappBottomNav";
 import { PerlappHomeHeader } from "@/components/home/PerlappHomeHeader";
 import { Button } from "@/components/ui/button";
-import { getMerchantProfileById } from "@/lib/merchant-profile.mock";
+import { getMerchantProfileById, merchantProfilePath } from "@/lib/merchant-profile.mock";
 import { RECENT_POSTS } from "@/lib/perlapp-home.constants";
 import { useBuyerActivityStore } from "@/store/buyer-activity.store";
 import { useMarketConnectionsStore } from "@/store/market-connections.store";
@@ -44,7 +44,7 @@ export function BuyerProfileView() {
             <strong>Conectar</strong> en cada tarjeta de comercios destacados.
           </p>
           <Button asChild className="mt-6 bg-perlapp-orange text-white hover:bg-perlapp-orange/90">
-            <Link href="/merchant/me">Ir a mi comercio</Link>
+            <Link href={merchantProfilePath("me")}>Ir a mi comercio</Link>
           </Button>
           {acceptedPairs.length > 0 ? (
             <div className="mt-10">
@@ -172,7 +172,7 @@ export function BuyerProfileView() {
                     className="rounded-xl border border-perlapp-line/40 bg-perlapp-canvas/40 p-3"
                   >
                     <Link
-                      href={`/merchant/${post.merchantId}`}
+                      href={merchantProfilePath(post.merchantId)}
                       className="font-display text-sm font-semibold text-perlapp-tertiary hover:underline"
                     >
                       {post.author}
@@ -196,7 +196,7 @@ export function BuyerProfileView() {
                   m ? (
                     <li key={m.id}>
                       <Link
-                        href={`/merchant/${m.id}`}
+                        href={merchantProfilePath(m.id)}
                         className="flex items-center gap-3 rounded-xl border border-perlapp-line/40 p-3 transition-colors hover:bg-perlapp-canvas/50"
                       >
                         <span className="relative block h-12 w-12 shrink-0 overflow-hidden rounded-full">
