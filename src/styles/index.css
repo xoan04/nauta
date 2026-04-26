@@ -1,0 +1,19 @@
+/* Perlapp — Brand Color Palette */
+
+:root {
+  /* Primary */
+  --color-orange: #F15A29;      /* Naranja Perlapp: CTAs, notificaciones, banners */
+  --color-teal: #1D5C4A;        /* Deep Teal: logotipo, títulos con autoridad */
+  --color-pearl: #FDFDFD;       /* Blanco Perla: texto sobre fondos oscuros/naranja */
+
+  /* Secondary / UI Support */
+  --color-stone: #7D8E8B;       /* Gris Piedra: iconos secundarios, bordes, descripciones */
+  --color-sand: #F1F3E9;        /* Arena Suave: fondos de pantalla y contenedores */
+
+  /* Derived tokens */
+  --color-orange-dark: #d44b1f;
+  --color-teal-dark: #154336;
+  --color-teal-light: #2a7a63;
+  --color-stone-light: #a8b5b2;
+  --color-sand-dark: #e2e4d8;
+}

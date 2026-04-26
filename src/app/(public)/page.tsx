@@ -1,22 +1,59 @@
-import Link from "next/link";
-import { Button } from "@/components/ui/button";
-import { APP_NAME } from "@/lib/constants";
+"use client";
 
-export default function LandingPage() {
+import { useEffect, useState } from "react";
+import { PerlappHome } from "@/components/home/PerlappHome";
+import { WelcomeScreen } from "@/components/home/WelcomeScreen";
+import { useAuthStore } from "@/store/auth.store";
+
+type Gate = "loading" | "home" | "welcome";
+
+export default function HomePage() {
+  const [gate, setGate] = useState<Gate>("loading");
+
+  useEffect(() => {
+    const resolve = () => {
+      const { isAuthenticated } = useAuthStore.getState();
+      if (isAuthenticated) {
+        setGate("home");
+        return;
+      }
+      const isGuest = sessionStorage.getItem("perlapp-guest") === "1";
+      setGate(isGuest ? "home" : "welcome");
+    };
+
+    if (useAuthStore.persist.hasHydrated()) {
+      resolve();
+    } else {
+      return useAuthStore.persist.onFinishHydration(resolve);
+    }
+  }, []);
+
+  // Listen to auth changes (e.g. after login inside WelcomeScreen)
+  const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
+  useEffect(() => {
+    if (isAuthenticated && gate !== "home") {
+      setGate("home");
+    }
+  }, [isAuthenticated, gate]);
+
+  if (gate === "loading") {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <span className="h-6 w-6 animate-spin rounded-full border-2 border-brand-teal border-t-transparent" />
+      </div>
+    );
+  }
+
+  if (gate === "home") {
+    return <PerlappHome />;
+  }
+
   return (
-    <div className="min-h-screen flex flex-col">
-      <main className="flex-1 flex flex-col items-center justify-center gap-6 px-4 text-center max-w-2xl mx-auto">
-        <h1 className="text-3xl sm:text-4xl font-bold tracking-tight">{APP_NAME}</h1>
-        <p className="text-muted-foreground text-balance">
-          Aplicación de demostración con Next.js 14, App Router y arquitectura Model → Service → Use Case → Hook →
-          View. Conecta con APIs externas y estado local con autenticación de prueba.
-        </p>
-        <div className="flex flex-col sm:flex-row gap-3">
-          <Button asChild size="lg">
-            <Link href="/login">Ir al inicio de sesión</Link>
-          </Button>
-        </div>
-      </main>
-    </div>
+    <WelcomeScreen
+      onGuest={() => {
+        sessionStorage.setItem("perlapp-guest", "1");
+        setGate("home");
+      }}
+    />
   );
 }
