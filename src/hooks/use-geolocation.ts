@@ -20,7 +20,7 @@ export function useGeolocation(): GeoState {
 
     setState({ status: "pending" });
 
-    const id = navigator.geolocation.watchPosition(
+    navigator.geolocation.getCurrentPosition(
       (pos) => {
         setState({
           status: "resolved",
@@ -37,8 +37,6 @@ export function useGeolocation(): GeoState {
       },
       { enableHighAccuracy: false, timeout: 10_000, maximumAge: 60_000 }
     );
-
-    return () => navigator.geolocation.clearWatch(id);
   }, []);
 
   return state;

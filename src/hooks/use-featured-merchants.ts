@@ -11,5 +11,6 @@ export function useFeaturedMerchants() {
     queryKey: ["featured-merchants", role],
     queryFn: () => fetchFeaturedMerchants(role as "market" | "comprador", token!),
     enabled: role !== "invitado" && !!token,
+    staleTime: 1000 * 60 * 5, // 5 minutes
   });
 }

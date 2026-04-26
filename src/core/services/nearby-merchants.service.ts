@@ -15,7 +15,7 @@ export type NearbyMerchantsParams = {
 export async function fetchNearbyMerchants(
   role: PerlappRole,
   token: string,
-  { lat, lng, radiusKm = 10, pageSize = 6 }: NearbyMerchantsParams
+  { lat, lng, radiusKm = 10, pageSize = 5 }: NearbyMerchantsParams
 ): Promise<PublicMerchantsListResponse> {
   const endpoint =
     role === "market"
