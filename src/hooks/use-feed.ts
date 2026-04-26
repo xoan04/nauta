@@ -13,6 +13,5 @@ export function useFeed() {
     initialPageParam: 1,
     getNextPageParam: (lastPage) =>
       lastPage.page < lastPage.total_pages ? lastPage.page + 1 : undefined,
-    staleTime: 1000 * 60 * 2, // 2 minutes
   });
 }

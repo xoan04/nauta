@@ -20,12 +20,24 @@ export function useGeolocation(): GeoState {
 
     setState({ status: "pending" });
 
-    navigator.geolocation.getCurrentPosition(
+    const id = navigator.geolocation.watchPosition(
       (pos) => {
-        setState({
-          status: "resolved",
-          lat: pos.coords.latitude,
-          lng: pos.coords.longitude,
+        const newLat = pos.coords.latitude;
+        const newLng = pos.coords.longitude;
+
+        setState((prev) => {
+          if (
+            prev.status === "resolved" &&
+            Math.abs(prev.lat - newLat) < 0.0001 &&
+            Math.abs(prev.lng - newLng) < 0.0001
+          ) {
+            return prev;
+          }
+          return {
+            status: "resolved",
+            lat: newLat,
+            lng: newLng,
+          };
         });
       },
       (err) => {
@@ -37,6 +49,8 @@ export function useGeolocation(): GeoState {
       },
       { enableHighAccuracy: false, timeout: 10_000, maximumAge: 60_000 }
     );
+
+    return () => navigator.geolocation.clearWatch(id);
   }, []);
 
   return state;
