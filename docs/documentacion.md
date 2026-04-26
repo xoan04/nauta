@@ -6,7 +6,7 @@
 
 ## 1. Cómo funciona la solución
 
-Nauta (Perlapp) es una **aplicación web frontend** construida con Next.js 14 que consume una API REST externa. Permite a usuarios registrarse como **compradores** o **comerciantes (merchants)**, explorar negocios locales en un mapa interactivo, gestionar productos y publicaciones, y conectar entre sí mediante un sistema de conexiones B2B.
+Nauta (Perlapp) es una **aplicación web frontend** construida con Next.js que consume una API REST externa. Permite a usuarios registrarse como **compradores** o **comerciantes (merchants)**, explorar negocios locales en un mapa interactivo, gestionar productos y publicaciones, y conectar entre sí mediante un sistema de conexiones B2B.
 
 ### Flujo completo
 
@@ -70,7 +70,7 @@ Nauta (Perlapp) es una **aplicación web frontend** construida con Next.js 14 qu
 ### Roles de usuario
 
 | Rol         | Descripción                                                                     |
-|-------------|---------------------------------------------------------------------------------|
+| ----------- | ------------------------------------------------------------------------------- |
 | `invitado`  | Usuario no autenticado. Puede explorar merchants y registrarse.                 |
 | `comprador` | Buyer registrado. Puede favoritar, ver perfiles y conectar con merchants.       |
 | `market`    | Merchant registrado. Gestiona su tienda, productos, publicaciones y conexiones. |
@@ -84,28 +84,57 @@ El middleware de Next.js (`src/middleware.ts`) intercepta cada request:
 - **Rutas protegidas** (`/dashboard`, `/profile`, `/settings`, `/notifications`, `/perfil`): si no hay cookie `auth-token`, redirige a `/login?redirect=[path]`.
 - **Ruta `/login`** con token válido: redirige a `/`.
 
+### Journey de merchant (gamificación)
+
+El registro del comerciante se hace en 5 pasos sencillos:
+
+- **Etapa 1: Datos básicos del negocio**  
+  Nombre del negocio, cómo trabaja (solo o con equipo), documento y fotos opcionales.
+
+- **Etapa 2: Actividad del negocio (Navegante CIIU)**  
+  El comerciante escribe a qué se dedica y el sistema lo clasifica automáticamente en su sector económico.  
+  En esta etapa se está enviando el código CIIU fijo como `"1"`.
+
+- **Etapa 3: Ubicación**  
+  Se guarda el municipio y la dirección del negocio.
+
+- **Etapa 4: Información financiera**  
+  Se solicitan datos como activos, ingresos anuales y cantidad de empleados.
+
+- **Etapa 5: Contacto y apoyo**  
+  Se registra teléfono, correo y si el comerciante quiere apoyo en ventas o financiamiento.
+
+### Publicaciones de merchant con IA
+
+Al crear una publicación, hay un botón para **“Mejorar descripción con IA”**:
+
+- Se envía una imagen del producto/negocio (jpg, png, etc.).
+- El texto de descripción es opcional.
+- La IA devuelve una versión mejorada del texto.
+- Esa versión reemplaza automáticamente el texto escrito antes de publicar.
+
 ---
 
 ## 2. Stack tecnológico
 
-| Tecnología         | Versión   | Uso                                                              |
-|--------------------|-----------|------------------------------------------------------------------|
-| **Next.js**        | 14.2.35   | Framework React con App Router, SSR y middleware                 |
-| **React**          | ^18.2.0   | Librería de UI                                                   |
-| **TypeScript**     | ^5        | Tipado estático strict en todo el proyecto                       |
-| **Tailwind CSS**   | ^3.4.1    | Estilos utilitarios y diseño responsive                          |
-| **shadcn/ui**      | —         | Componentes UI pre-construidos (Radix UI + Tailwind)             |
-| **TanStack Query** | ^5.62.8   | Fetching de datos, caché, estados de loading/error               |
-| **Zustand**        | ^5.0.2    | Estado global del cliente (auth, carrito, rol, UI)               |
-| **Zod**            | ^3.24.1   | Validación de schemas y DTOs en runtime                          |
-| **Leaflet**        | ^1.9.4    | Mapa interactivo para explorar y registrar merchants             |
-| **react-leaflet**  | ^4.2.1    | Bindings React para Leaflet                                      |
-| **react-hook-form**| ^7.53.0   | Gestión de formularios con validación integrada                  |
-| **Lucide React**   | ^0.468.0  | Iconos SVG                                                       |
-| **Prettier**       | ^3.4.2    | Formateo de código                                               |
-| **ESLint**         | ^8        | Linter (con `eslint-config-next`)                                |
-| **PostCSS**        | ^8        | Procesamiento de CSS (requerido por Tailwind)                    |
-| **Autoprefixer**   | ^10.4.20  | Prefijos CSS automáticos para compatibilidad cross-browser       |
+| Tecnología          | Versión  | Uso                                                        |
+| ------------------- | -------- | ---------------------------------------------------------- |
+| **Next.js**         | 14.2.35  | Framework React con App Router, SSR y middleware           |
+| **React**           | ^18.2.0  | Librería de UI                                             |
+| **TypeScript**      | ^5       | Tipado estático strict en todo el proyecto                 |
+| **Tailwind CSS**    | ^3.4.1   | Estilos utilitarios y diseño responsive                    |
+| **shadcn/ui**       | —        | Componentes UI pre-construidos (Radix UI + Tailwind)       |
+| **TanStack Query**  | ^5.62.8  | Fetching de datos, caché, estados de loading/error         |
+| **Zustand**         | ^5.0.2   | Estado global del cliente (auth, carrito, rol, UI)         |
+| **Zod**             | ^3.24.1  | Validación de schemas y DTOs en runtime                    |
+| **Leaflet**         | ^1.9.4   | Mapa interactivo para explorar y registrar merchants       |
+| **react-leaflet**   | ^4.2.1   | Bindings React para Leaflet                                |
+| **react-hook-form** | ^7.53.0  | Gestión de formularios con validación integrada            |
+| **Lucide React**    | ^0.468.0 | Iconos SVG                                                 |
+| **Prettier**        | ^3.4.2   | Formateo de código                                         |
+| **ESLint**          | ^8       | Linter (con `eslint-config-next`)                          |
+| **PostCSS**         | ^8       | Procesamiento de CSS (requerido por Tailwind)              |
+| **Autoprefixer**    | ^10.4.20 | Prefijos CSS automáticos para compatibilidad cross-browser |
 
 ---
 
@@ -113,38 +142,41 @@ El middleware de Next.js (`src/middleware.ts`) intercepta cada request:
 
 ### API Backend — Kodelabs Apihack
 
-| Servicio                           | URL base                             | Descripción                                      |
-|------------------------------------|--------------------------------------|--------------------------------------------------|
-| **Apihack API**                    | `https://apihack.kodelabs.dev`       | Backend REST principal para auth, merchants, buyers, productos, publicaciones y conexiones B2B |
-| **Apihack S3 (imágenes)**         | `https://s3hack.kodelabs.dev`        | Almacenamiento de imágenes (fotos de productos, perfiles, etc.)  |
+| Servicio                  | URL base                       | Descripción                                                                                    |
+| ------------------------- | ------------------------------ | ---------------------------------------------------------------------------------------------- |
+| **Apihack API**           | `https://apihack.kodelabs.dev` | Backend REST principal para auth, merchants, buyers, productos, publicaciones y conexiones B2B |
+| **Apihack S3 (imágenes)** | `https://s3hack.kodelabs.dev`  | Almacenamiento de imágenes (fotos de productos, perfiles, etc.)                                |
 
 #### Endpoints principales consumidos
 
-| Método | Endpoint                                | Uso                                     |
-|--------|----------------------------------------|-----------------------------------------|
-| POST   | `/api/v1/auth/login`                   | Autenticación (email + password)        |
-| POST   | `/api/v1/public/buyers`                | Registro de comprador                   |
-| POST   | `/api/v1/public/merchants`             | Registro de merchant                    |
-| GET    | `/api/v1/public/merchants`             | Listado público de merchants            |
-| GET    | `/api/v1/merchants/{id}`               | Detalle de un merchant                  |
-| GET    | `/api/v1/merchants/{id}/products`      | Productos de un merchant                |
-| GET    | `/api/v1/merchants/{id}/posts`         | Publicaciones de un merchant            |
-| POST   | `/api/v1/merchants/{id}/products`      | Crear producto                          |
-| PUT    | `/api/v1/merchants/{id}/products/{id}` | Actualizar producto                     |
-| DELETE | `/api/v1/merchants/{id}/products/{id}` | Eliminar producto                       |
-| POST   | `/api/v1/merchants/{id}/posts`         | Crear publicación                       |
-| PUT    | `/api/v1/merchants/{id}/posts/{id}`    | Actualizar publicación                  |
-| DELETE | `/api/v1/merchants/{id}/posts/{id}`    | Eliminar publicación                    |
-| GET    | `/api/v1/public/merchants/nearby`      | Merchants cercanos por geolocalización  |
-| GET    | `/api/v1/feed`                         | Feed de publicaciones                   |
+| Método | Endpoint                                     | Uso                                       |
+| ------ | -------------------------------------------- | ----------------------------------------- |
+| POST   | `/api/v1/auth/login`                         | Autenticación (email + password)          |
+| POST   | `/api/v1/public/buyers`                      | Registro de comprador                     |
+| POST   | `/api/v1/public/merchants`                   | Registro de merchant                      |
+| GET    | `/api/v1/public/merchants`                   | Listado público de merchants              |
+| GET    | `/api/v1/merchants/{id}`                     | Detalle de un merchant                    |
+| GET    | `/api/v1/merchants/{id}/products`            | Productos de un merchant                  |
+| GET    | `/api/v1/merchants/{id}/posts`               | Publicaciones de un merchant              |
+| POST   | `/api/v1/merchants/{id}/products`            | Crear producto                            |
+| PUT    | `/api/v1/merchants/{id}/products/{id}`       | Actualizar producto                       |
+| DELETE | `/api/v1/merchants/{id}/products/{id}`       | Eliminar producto                         |
+| POST   | `/api/v1/merchants/{id}/posts`               | Crear publicación                         |
+| POST   | `/api/v1/merchant/posts/improve-description` | Mejorar descripción de publicación con IA |
+| PUT    | `/api/v1/merchants/{id}/posts/{id}`          | Actualizar publicación                    |
+| DELETE | `/api/v1/merchants/{id}/posts/{id}`          | Eliminar publicación                      |
+| POST   | `/api/v1/merchant/classify-commerce`         | Clasificar comercio para etapa CIIU       |
+| GET    | `/api/v1/public/merchants/nearby`            | Merchants cercanos por geolocalización    |
+| GET    | `/api/v1/feed`                               | Feed de publicaciones                     |
 
 ### WhatsApp (pedidos)
 
-El carrito de compras genera un enlace de WhatsApp (`https://wa.me/...`) con el resumen del pedido. El número de destino se configura mediante la variable de entorno `NEXT_PUBLIC_WHATSAPP_ORDER_NUMBER`.
+El carrito de compras genera un enlace de WhatsApp (`https://wa.me/...`) con el resumen del pedido. El número de destino es la del comerciante.
 
 ### Leaflet / OpenStreetMap
 
 Los mapas interactivos utilizan **Leaflet** con tiles de **OpenStreetMap** para:
+
 - Explorar merchants en `/explorar`
 - Seleccionar ubicación durante el registro de merchants
 
@@ -254,15 +286,15 @@ src/
 
 ### Estado global (Zustand stores)
 
-| Store                        | Clave localStorage             | Qué guarda                                         |
-|------------------------------|--------------------------------|-----------------------------------------------------|
-| `auth.store`                 | `auth-storage`                 | Usuario, token, expiresAt, profiles                 |
-| `perlapp-role.store`         | `perlapp-role`                 | Rol de UI (`invitado` / `comprador` / `market`), activeMarketId |
-| `cart.store`                 | `perlapp-cart`                 | Ítems del carrito de compras                        |
-| `merchant-catalog.store`     | `perlapp-merchant-catalog`     | Catálogo de productos por merchant                  |
-| `buyer-activity.store`       | `perlapp-buyer-activity`       | Favoritos, posts interactuados, conexiones          |
-| `market-connections.store`   | `perlapp-market-connections`   | Solicitudes de conexión B2B entre merchants         |
-| `ui.store`                   | `ui-storage`                   | Estado del sidebar (abierto/cerrado)                |
+| Store                      | Clave localStorage           | Qué guarda                                                      |
+| -------------------------- | ---------------------------- | --------------------------------------------------------------- |
+| `auth.store`               | `auth-storage`               | Usuario, token, expiresAt, profiles                             |
+| `perlapp-role.store`       | `perlapp-role`               | Rol de UI (`invitado` / `comprador` / `market`), activeMarketId |
+| `cart.store`               | `perlapp-cart`               | Ítems del carrito de compras                                    |
+| `merchant-catalog.store`   | `perlapp-merchant-catalog`   | Catálogo de productos por merchant                              |
+| `buyer-activity.store`     | `perlapp-buyer-activity`     | Favoritos, posts interactuados, conexiones                      |
+| `market-connections.store` | `perlapp-market-connections` | Solicitudes de conexión B2B entre merchants                     |
+| `ui.store`                 | `ui-storage`                 | Estado del sidebar (abierto/cerrado)                            |
 
 ### HTTP Client
 
@@ -307,11 +339,11 @@ El cliente HTTP centralizado (`src/core/http/http-client.ts`) proporciona:
 
    Variables disponibles:
 
-   | Variable                           | Valor por defecto                    | Descripción                                        |
-   |------------------------------------|--------------------------------------|----------------------------------------------------|
-   | `NEXT_PUBLIC_API_URL`              | `https://jsonplaceholder.typicode.com` | URL de API pública de ejemplo                    |
-   | `NEXT_PUBLIC_APIHACK_BASE_URL`     | `https://apihack.kodelabs.dev`       | Backend Perlapp (registro, auth, merchants, etc.)  |
-   | `NEXT_PUBLIC_WHATSAPP_ORDER_NUMBER`| *(vacío)*                            | Número de WhatsApp para pedidos (formato internacional) |
+   | Variable                            | Valor por defecto                      | Descripción                                             |
+   | ----------------------------------- | -------------------------------------- | ------------------------------------------------------- |
+   | `NEXT_PUBLIC_API_URL`               | `https://jsonplaceholder.typicode.com` | URL de API pública de ejemplo                           |
+   | `NEXT_PUBLIC_APIHACK_BASE_URL`      | `https://apihack.kodelabs.dev`         | Backend Perlapp (registro, auth, merchants, etc.)       |
+   | `NEXT_PUBLIC_WHATSAPP_ORDER_NUMBER` | _(vacío)_                              | Número de WhatsApp para pedidos (formato internacional) |
 
 4. **Iniciar el servidor de desarrollo**
 
@@ -323,16 +355,16 @@ El cliente HTTP centralizado (`src/core/http/http-client.ts`) proporciona:
 
 5. **Credenciales de prueba**
 
-   | Campo    | Valor              |
-   |----------|--------------------|
+   | Campo    | Valor                |
+   | -------- | -------------------- |
    | Email    | `test@hackathon.dev` |
-   | Password | `hackathon123`     |
+   | Password | `hackathon123`       |
 
 ### Otros comandos útiles
 
-| Comando            | Descripción                              |
-|--------------------|------------------------------------------|
-| `npm run build`    | Genera el build de producción            |
-| `npm run start`    | Inicia el servidor de producción         |
-| `npm run lint`     | Ejecuta el linter (ESLint)               |
-| `npm run format`   | Formatea el código con Prettier          |
+| Comando          | Descripción                      |
+| ---------------- | -------------------------------- |
+| `npm run build`  | Genera el build de producción    |
+| `npm run start`  | Inicia el servidor de producción |
+| `npm run lint`   | Ejecuta el linter (ESLint)       |
+| `npm run format` | Formatea el código con Prettier  |
