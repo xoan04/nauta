@@ -74,7 +74,6 @@ export default function MerchantRegistrationPage() {
   const [errors, setErrors] = useState<Partial<Record<keyof FormData, string>>>({});
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
-  const [submitted, setSubmitted] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
 
@@ -140,28 +139,6 @@ export default function MerchantRegistrationPage() {
     setSubmitError(null);
     setStep((s) => s - 1);
   };
-
-  if (submitted) {
-    return (
-      <div className="min-h-screen bg-brand-sand flex flex-col items-center justify-center px-4 text-center gap-5">
-        <div className="w-20 h-20 rounded-full bg-brand-teal flex items-center justify-center shadow-lg">
-          <Check className="w-10 h-10 text-white" />
-        </div>
-        <div>
-          <h1 className="text-2xl font-bold text-brand-teal mb-1">¡Listo, {data.businessName}!</h1>
-          <p className="text-sm text-brand-stone max-w-[280px] mx-auto">
-            Tu negocio ha sido registrado. Pronto podrás gestionar tu perfil en Perlapp.
-          </p>
-        </div>
-        <Link
-          href="/"
-          className="mt-2 px-6 py-3 bg-brand-orange text-white font-semibold rounded-xl text-sm hover:bg-brand-orange-dark transition-colors"
-        >
-          Volver al inicio
-        </Link>
-      </div>
-    );
-  }
 
   return (
     <div className="min-h-screen bg-brand-sand flex flex-col">

@@ -126,7 +126,7 @@ export function MerchantProfileCatalog({ merchantId, merchantName, isOwner }: Me
       await refreshProducts();
     },
   });
-  const { mutateAsync: deleteApiProduct, isPending: isDeletingApiProduct } = useMutation({
+  const { mutateAsync: deleteApiProduct } = useMutation({
     mutationFn: async (productId: string) => {
       if (!token) {
         throw new Error("Tu sesión expiró. Inicia sesión de nuevo.");
@@ -446,7 +446,7 @@ export function MerchantProfileCatalog({ merchantId, merchantName, isOwner }: Me
                     placeholder="https://... o vacío"
                   />
                   <span className="font-sans text-xs text-perlapp-inkMuted">
-                    Si la dejas vacía, el producto se muestra con un marcador "Sin foto".
+                    Si la dejas vacía, el producto se muestra con un marcador &quot;Sin foto&quot;.
                   </span>
                 </label>
               )}

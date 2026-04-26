@@ -39,12 +39,15 @@ export async function createMerchantProduct(
   if (!response.ok) {
     if (typeof payload === "object" && payload && "message" in payload) {
       const message = (payload as { message?: unknown }).message;
-      throw new HttpError(response.status, typeof message === "string" ? message : "No se pudo crear el producto");
+      throw new HttpError({
+        status: response.status,
+        message: typeof message === "string" ? message : "No se pudo crear el producto",
+      });
     }
     if (typeof payload === "string" && payload.trim()) {
-      throw new HttpError(response.status, payload);
+      throw new HttpError({ status: response.status, message: payload });
     }
-    throw new HttpError(response.status, "No se pudo crear el producto");
+    throw new HttpError({ status: response.status, message: "No se pudo crear el producto" });
   }
 
   if (payload && typeof payload === "object") {
