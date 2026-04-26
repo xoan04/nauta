@@ -100,7 +100,7 @@ export function FeedPostCard({ post, merchantHref }: Props) {
           {/* Share action row */}
           <div className="mt-3 flex items-center">
             <SharePostButton
-              postUrl={post.url || undefined}
+              postUrl={merchantHref}
               shareText={`${post.business.name}: ${post.content.slice(0, 100)}${post.content.length > 100 ? "…" : ""}`}
             />
           </div>

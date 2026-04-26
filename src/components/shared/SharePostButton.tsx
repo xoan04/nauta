@@ -103,12 +103,15 @@ export function SharePostButton({
   const [copied, setCopied] = useState(false);
   const panelRef = useRef<HTMLDivElement>(null);
 
-  const resolvedUrl =
-    postUrl && postUrl.startsWith("http")
-      ? postUrl
-      : typeof window !== "undefined"
-      ? window.location.href
-      : "";
+  const resolvedUrl = (() => {
+    if (typeof window === "undefined") {
+      return postUrl && /^https?:\/\//i.test(postUrl) ? postUrl : "";
+    }
+    if (!postUrl) return window.location.href;
+    if (/^https?:\/\//i.test(postUrl)) return postUrl;
+    if (postUrl.startsWith("/")) return new URL(postUrl, window.location.origin).href;
+    return window.location.href;
+  })();
 
   const encodedUrl = encodeURIComponent(resolvedUrl);
   const encodedText = encodeURIComponent(shareText);

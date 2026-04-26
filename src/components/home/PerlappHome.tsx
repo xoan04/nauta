@@ -118,13 +118,13 @@ export function PerlappHome() {
               </p>
               <div className="flex flex-wrap gap-perlapp-sm">
                 <Link
-                  href="/auth/register"
+                  href="/registro"
                   className="rounded-xl bg-white px-5 py-2.5 font-display text-sm font-semibold text-perlapp-orange shadow transition hover:bg-white/90 active:scale-95"
                 >
                   Crear cuenta gratis
                 </Link>
                 <Link
-                  href="/auth/login"
+                  href="/login"
                   className="rounded-xl border border-white/40 bg-white/10 px-5 py-2.5 font-display text-sm font-semibold text-white backdrop-blur-sm transition hover:bg-white/20 active:scale-95"
                 >
                   Iniciar sesión

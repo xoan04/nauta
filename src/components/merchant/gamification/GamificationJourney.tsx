@@ -10,14 +10,12 @@ import { Textarea } from "@/components/ui/textarea";
 import { useAuthStore } from "@/store/auth.store";
 import { useMerchantGamification } from "@/hooks/use-merchant-gamification";
 import {
-  fetchEconomicSectors,
   fetchMunicipalities,
   completeStage1,
   completeStage2,
   completeStage3,
   completeStage4,
   completeStage5,
-  type EconomicSector,
   type Municipality,
 } from "@/core/services/merchant-gamification.service";
 import { merchantGamificationQueryKey } from "@/hooks/use-merchant-gamification";
@@ -27,8 +25,30 @@ import { useQueryClient } from "@tanstack/react-query";
 // Para completar: business_name, works_alone, identification_type,
 //                identification_number, photo?, photo_banner?
 
-function Stage1({ token, onDone }: { token: string; onDone: () => void }) {
+function Stage1({
+  token,
+  onDone,
+  initialBusinessName,
+}: {
+  token: string;
+  onDone: () => void;
+  initialBusinessName?: string | null;
+}) {
   const [businessName, setBusinessName] = useState("");
+  const seededBusinessNameFromUser = useRef(false);
+
+  useEffect(() => {
+    const n = initialBusinessName?.trim();
+    if (!n || seededBusinessNameFromUser.current) return;
+    setBusinessName((prev) => {
+      if (prev !== "") {
+        seededBusinessNameFromUser.current = true;
+        return prev;
+      }
+      seededBusinessNameFromUser.current = true;
+      return n;
+    });
+  }, [initialBusinessName]);
   const [worksAlone, setWorksAlone] = useState<boolean>(true);
   const [idType, setIdType] = useState("CC");
   const [idNumber, setIdNumber] = useState("");
@@ -185,32 +205,22 @@ function Stage1({ token, onDone }: { token: string; onDone: () => void }) {
 }
 
 // ─── Stage 2: Actividad económica ─────────────────────────────────────────────
-// Para completar: activity_description, economic_sector_ids[], ciiu_code=""
+// API: activity_description, economic_sector_ids[] (vacío), ciiu_code=""
 
 function Stage2({ token, onDone }: { token: string; onDone: () => void }) {
   const [description, setDescription] = useState("");
-  const [sectors, setSectors] = useState<EconomicSector[]>([]);
-  const [selectedIds, setSelectedIds] = useState<string[]>([]);
-  const [loadingSectors, setLoadingSectors] = useState(true);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    fetchEconomicSectors(token)
-      .then(setSectors)
-      .catch(() => setSectors([]))
-      .finally(() => setLoadingSectors(false));
-  }, [token]);
-
-  const toggle = (id: string) =>
-    setSelectedIds((prev) => (prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]));
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setError(null);
     try {
-      await completeStage2({ activity_description: description, economic_sector_ids: selectedIds }, token);
+      await completeStage2(
+        { activity_description: description, economic_sector_ids: [] },
+        token
+      );
       onDone();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Algo salió mal. Intenta de nuevo.");
@@ -230,7 +240,7 @@ function Stage2({ token, onDone }: { token: string; onDone: () => void }) {
           Aparece donde te buscan
         </h2>
         <p className="mt-2 font-display text-sm text-white/85">
-          Define tu actividad y sector para aparecer en los <strong>Comercios Destacados</strong> junto a negocios como el tuyo.
+          Define tu actividad para aparecer en los <strong>Comercios Destacados</strong> junto a negocios como el tuyo.
         </p>
       </div>
 
@@ -248,51 +258,13 @@ function Stage2({ token, onDone }: { token: string; onDone: () => void }) {
           />
         </div>
 
-        <div>
-          <Label className="font-display text-sm font-semibold text-perlapp-ink">
-            ¿En qué sector está tu negocio?
-          </Label>
-          <p className="mb-2 mt-0.5 font-display text-xs text-perlapp-inkMuted">
-            Selecciona todos los que apliquen
-          </p>
-          {loadingSectors ? (
-            <div className="flex flex-wrap gap-2">
-              {[1, 2, 3, 4].map((i) => (
-                <div key={i} className="h-9 w-28 animate-pulse rounded-full bg-perlapp-line/40" />
-              ))}
-            </div>
-          ) : sectors.length === 0 ? (
-            <p className="font-display text-xs text-perlapp-inkMuted">No se pudieron cargar los sectores.</p>
-          ) : (
-            <div className="flex flex-wrap gap-2">
-              {sectors.map((s) => {
-                const sel = selectedIds.includes(s.id);
-                return (
-                  <button
-                    key={s.id}
-                    type="button"
-                    onClick={() => toggle(s.id)}
-                    className={`rounded-full border-2 px-4 py-1.5 font-display text-sm font-medium transition-all ${
-                      sel
-                        ? "border-blue-500 bg-blue-50 text-blue-700"
-                        : "border-perlapp-line bg-perlapp-white text-perlapp-inkMuted hover:border-blue-300"
-                    }`}
-                  >
-                    {s.name}
-                  </button>
-                );
-              })}
-            </div>
-          )}
-        </div>
-
         {error && (
           <p className="rounded-xl bg-red-50 px-4 py-3 font-display text-sm text-red-700">{error}</p>
         )}
 
         <Button
           type="submit"
-          disabled={loading || selectedIds.length === 0 || !description.trim()}
+          disabled={loading || !description.trim()}
           className="w-full bg-blue-600 font-display text-white hover:bg-blue-700"
         >
           {loading ? "Guardando…" : "Aparecer en Destacados →"}
@@ -678,6 +650,7 @@ function AllDoneScreen({ onClose }: { onClose: () => void }) {
 export function GamificationJourney() {
   const router = useRouter();
   const token = useAuthStore((s) => s.token);
+  const initialBusinessName = useAuthStore((s) => s.user?.name?.trim() || null);
   const queryClient = useQueryClient();
   const { data: gamification, isPending } = useMerchantGamification();
 
@@ -723,7 +696,9 @@ export function GamificationJourney() {
       </div>
 
       <main className="mx-auto flex w-full max-w-xl flex-col gap-6 px-4 py-6">
-        {currentStage === 1 && token && <Stage1 token={token} onDone={handleDone} />}
+        {currentStage === 1 && token && (
+          <Stage1 token={token} onDone={handleDone} initialBusinessName={initialBusinessName} />
+        )}
         {currentStage === 2 && token && <Stage2 token={token} onDone={handleDone} />}
         {currentStage === 3 && token && <Stage3 token={token} onDone={handleDone} />}
         {currentStage === 4 && token && <Stage4 token={token} onDone={handleDone} />}

@@ -8,12 +8,7 @@ export async function fetchFeed(
   page = 1,
   pageSize = 10
 ): Promise<FeedResponse> {
-  const endpoint =
-    role === "market"
-      ? "/api/v1/merchant/feed"
-      : role === "comprador"
-        ? "/api/v1/buyer/feed"
-        : "/api/v1/feed";
+  const endpoint = role === "market" ? "/api/v1/merchant/feed" : "/api/v1/feed";
 
   const raw = await apihackPublicClient.get<unknown>(endpoint, {
     token: token ?? undefined,
