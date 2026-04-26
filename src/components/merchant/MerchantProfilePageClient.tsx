@@ -43,5 +43,5 @@ export function MerchantProfilePageClient({ userId }: MerchantProfilePageClientP
     );
   }
 
-  return <MerchantProfileView merchant={data} onRefresh={refetch} />;
+  return <MerchantProfileView merchant={data} onRefresh={async () => { await refetch(); }} />;
 }

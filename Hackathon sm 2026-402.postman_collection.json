@@ -718,6 +718,355 @@
           ]
         },
         {
+          "name": "Dashboard",
+          "item": [
+            {
+              "name": "Dashboard KPIS",
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{token}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{URL}}/api/v1/admin/dashboard/kpis",
+                  "host": [
+                    "{{URL}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "admin",
+                    "dashboard",
+                    "kpis"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Dashboard funnel",
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{token}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{URL}}/api/v1/admin/dashboard/funnel",
+                  "host": [
+                    "{{URL}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "admin",
+                    "dashboard",
+                    "funnel"
+                  ]
+                }
+              },
+              "response": []
+            }
+          ]
+        },
+        {
+          "name": "Merchants",
+          "item": [
+            {
+              "name": "Finally",
+              "item": [
+                {
+                  "name": "Get Merchants finally step 5",
+                  "request": {
+                    "auth": {
+                      "type": "bearer",
+                      "bearer": [
+                        {
+                          "key": "token",
+                          "value": "{{token}}",
+                          "type": "string"
+                        }
+                      ]
+                    },
+                    "method": "GET",
+                    "header": [],
+                    "url": {
+                      "raw": "{{URL}}/api/v1/admin/merchants/awaiting-stage-6-approval",
+                      "host": [
+                        "{{URL}}"
+                      ],
+                      "path": [
+                        "api",
+                        "v1",
+                        "admin",
+                        "merchants",
+                        "awaiting-stage-6-approval"
+                      ]
+                    }
+                  },
+                  "response": []
+                },
+                {
+                  "name": "Get merchan by id step 5",
+                  "request": {
+                    "auth": {
+                      "type": "bearer",
+                      "bearer": [
+                        {
+                          "key": "token",
+                          "value": "{{token}}",
+                          "type": "string"
+                        }
+                      ]
+                    },
+                    "method": "GET",
+                    "header": [],
+                    "url": {
+                      "raw": "{{URL}}/api/v1/admin/merchants/:userId/full",
+                      "host": [
+                        "{{URL}}"
+                      ],
+                      "path": [
+                        "api",
+                        "v1",
+                        "admin",
+                        "merchants",
+                        ":userId",
+                        "full"
+                      ],
+                      "variable": [
+                        {
+                          "key": "userId",
+                          "value": ""
+                        }
+                      ]
+                    }
+                  },
+                  "response": []
+                },
+                {
+                  "name": "Update merchant by id for step 6",
+                  "request": {
+                    "auth": {
+                      "type": "bearer",
+                      "bearer": [
+                        {
+                          "key": "token",
+                          "value": "{{token}}",
+                          "type": "string"
+                        }
+                      ]
+                    },
+                    "method": "POST",
+                    "header": [],
+                    "body": {
+                      "mode": "raw",
+                      "raw": "{\n    \"comment\": \"Texto obligatorio del aval (1–4000 caracteres)\",\n    \"is_commerce_chamber_registered\": true\n}",
+                      "options": {
+                        "raw": {
+                          "language": "json"
+                        }
+                      }
+                    },
+                    "url": {
+                      "raw": "{{URL}}/api/v1/admin/merchants/:userId/approve-stage-6",
+                      "host": [
+                        "{{URL}}"
+                      ],
+                      "path": [
+                        "api",
+                        "v1",
+                        "admin",
+                        "merchants",
+                        ":userId",
+                        "approve-stage-6"
+                      ],
+                      "variable": [
+                        {
+                          "key": "userId",
+                          "value": ""
+                        }
+                      ]
+                    }
+                  },
+                  "response": []
+                }
+              ]
+            },
+            {
+              "name": "Merchants KPIS",
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{token}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{URL}}/api/v1/merchant/merchants/kpis",
+                  "host": [
+                    "{{URL}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "merchant",
+                    "merchants",
+                    "kpis"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Get merchants",
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{token}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{URL}}/api/v1/merchant/merchants",
+                  "host": [
+                    "{{URL}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "merchant",
+                    "merchants"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Merchant busines onboarding",
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{token}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{URL}}/api/v1/merchant/businesses/onboarding",
+                  "host": [
+                    "{{URL}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "merchant",
+                    "businesses",
+                    "onboarding"
+                  ]
+                }
+              },
+              "response": []
+            }
+          ]
+        },
+        {
+          "name": "Economic sectors",
+          "item": [
+            {
+              "name": "Get economic sectors",
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{token}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{URL}}/api/v1/economic-sectors",
+                  "host": [
+                    "{{URL}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "economic-sectors"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Get economic sectors",
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{token}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{URL}}/api/v1/economic-sectors/kpis",
+                  "host": [
+                    "{{URL}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "economic-sectors",
+                    "kpis"
+                  ]
+                }
+              },
+              "response": []
+            }
+          ]
+        },
+        {
           "name": "Login",
           "event": [
             {
@@ -877,7 +1226,7 @@
               ]
             },
             {
-              "name": "Get merchants",
+              "name": "Merchants",
               "item": [
                 {
                   "name": "Get merchants",
@@ -904,63 +1253,6 @@
                         "v1",
                         "buyer",
                         "merchants"
-                      ]
-                    }
-                  },
-                  "response": []
-                },
-                {
-                  "name": "Get merchants filter",
-                  "request": {
-                    "auth": {
-                      "type": "bearer",
-                      "bearer": [
-                        {
-                          "key": "token",
-                          "value": "{{token}}",
-                          "type": "string"
-                        }
-                      ]
-                    },
-                    "method": "GET",
-                    "header": [],
-                    "url": {
-                      "raw": "{{URL}}/api/v1/buyer/merchants?municipality_id=<uuid>&nearby_lat=11.2408&nearby_lng=-74.1990&nearby_radius_km=10&page=1&page_size=20",
-                      "host": [
-                        "{{URL}}"
-                      ],
-                      "path": [
-                        "",
-                        "api",
-                        "v1",
-                        "buyer",
-                        "merchants"
-                      ],
-                      "query": [
-                        {
-                          "key": "municipality_id",
-                          "value": "<uuid>"
-                        },
-                        {
-                          "key": "nearby_lat",
-                          "value": "11.2408"
-                        },
-                        {
-                          "key": "nearby_lng",
-                          "value": "-74.1990"
-                        },
-                        {
-                          "key": "nearby_radius_km",
-                          "value": "10"
-                        },
-                        {
-                          "key": "page",
-                          "value": "1"
-                        },
-                        {
-                          "key": "page_size",
-                          "value": "20"
-                        }
                       ]
                     }
                   },
@@ -996,6 +1288,70 @@
                     }
                   },
                   "response": []
+                },
+                {
+                  "name": "Get merchants filter sectors CRUSTERS",
+                  "request": {
+                    "auth": {
+                      "type": "bearer",
+                      "bearer": [
+                        {
+                          "key": "token",
+                          "value": "{{token}}",
+                          "type": "string"
+                        }
+                      ]
+                    },
+                    "method": "GET",
+                    "header": [],
+                    "url": {
+                      "raw": "{{URL}}/api/v1/buyer/merchants?economic_sector_id=uuid1&economic_sector_id=uuuid2&municipality_id=<uuid>&nearby_lat=11.2408&nearby_lng=-74.1990&nearby_radius_km=10&page=1&page_size=20",
+                      "host": [
+                        "{{URL}}"
+                      ],
+                      "path": [
+                        "api",
+                        "v1",
+                        "buyer",
+                        "merchants"
+                      ],
+                      "query": [
+                        {
+                          "key": "economic_sector_id",
+                          "value": "uuid1"
+                        },
+                        {
+                          "key": "economic_sector_id",
+                          "value": "uuuid2"
+                        },
+                        {
+                          "key": "municipality_id",
+                          "value": "<uuid>"
+                        },
+                        {
+                          "key": "nearby_lat",
+                          "value": "11.2408"
+                        },
+                        {
+                          "key": "nearby_lng",
+                          "value": "-74.1990"
+                        },
+                        {
+                          "key": "nearby_radius_km",
+                          "value": "10"
+                        },
+                        {
+                          "key": "page",
+                          "value": "1"
+                        },
+                        {
+                          "key": "page_size",
+                          "value": "20"
+                        }
+                      ]
+                    }
+                  },
+                  "response": []
                 }
               ]
             }
@@ -1022,6 +1378,83 @@
                     },
                     "method": "GET",
                     "header": [],
+                    "url": {
+                      "raw": "{{URL}}/api/v1/merchant/profile",
+                      "host": [
+                        "{{URL}}"
+                      ],
+                      "path": [
+                        "api",
+                        "v1",
+                        "merchant",
+                        "profile"
+                      ]
+                    }
+                  },
+                  "response": []
+                },
+                {
+                  "name": "Update profile merchant",
+                  "request": {
+                    "auth": {
+                      "type": "bearer",
+                      "bearer": [
+                        {
+                          "key": "token",
+                          "value": "{{token}}",
+                          "type": "string"
+                        }
+                      ]
+                    },
+                    "method": "PUT",
+                    "header": [],
+                    "body": {
+                      "mode": "formdata",
+                      "formdata": [
+                        {
+                          "key": "name",
+                          "value": "",
+                          "type": "text",
+                          "uuid": "694e36f9-78e3-42d3-bfe4-32d425174a3d"
+                        },
+                        {
+                          "key": "phone",
+                          "value": "",
+                          "type": "text",
+                          "uuid": "43481333-d2c7-4bf7-a733-87ff270adcfe"
+                        },
+                        {
+                          "key": "latitude",
+                          "value": "",
+                          "type": "text",
+                          "uuid": "e1f1ac97-126e-4c28-87de-9f8d6182ddd8"
+                        },
+                        {
+                          "key": "longitude",
+                          "value": "",
+                          "type": "text",
+                          "uuid": "03db20b1-3bd5-4fb8-aa72-d8a3a6f95c09"
+                        },
+                        {
+                          "key": "municipality_id",
+                          "value": "",
+                          "type": "text",
+                          "uuid": "179d8a24-da05-4914-b1b8-4c45a7e0eed9"
+                        },
+                        {
+                          "key": "photo",
+                          "type": "file",
+                          "uuid": "ee3e495e-12f2-42dc-ae61-5b9ca855ead9",
+                          "value": null
+                        },
+                        {
+                          "key": "photo_banner",
+                          "type": "file",
+                          "uuid": "51ef49a4-d7eb-4c65-9f23-18b0a97a488e",
+                          "value": null
+                        }
+                      ]
+                    },
                     "url": {
                       "raw": "{{URL}}/api/v1/merchant/profile",
                       "host": [
@@ -1525,13 +1958,50 @@
                     "method": "PUT",
                     "header": [],
                     "body": {
-                      "mode": "raw",
-                      "raw": "{\n    \"business_name\": \"Panaderia Don Pepe\",\n    \"works_alone\": true,\n    \"identification_type\": \"CC\",\n    \"identification_number\": \"123456789\"\n}",
-                      "options": {
-                        "raw": {
-                          "language": "json"
+                      "mode": "formdata",
+                      "formdata": [
+                        {
+                          "key": "business_name",
+                          "value": "",
+                          "type": "text",
+                          "uuid": "9acfffa7-035e-4077-9b27-4a888b6c6b00"
+                        },
+                        {
+                          "key": "works_alone\n",
+                          "value": "",
+                          "description": "true/false",
+                          "type": "text",
+                          "uuid": "34b0a78e-e995-4141-a4d5-1dff8f98ab9a"
+                        },
+                        {
+                          "key": "identification_type",
+                          "value": "",
+                          "description": "text",
+                          "type": "text",
+                          "uuid": "16066973-8fb0-41ea-80ff-eb4a9bcce7e3"
+                        },
+                        {
+                          "key": "identification_number",
+                          "value": "",
+                          "description": "text",
+                          "type": "text",
+                          "uuid": "1a07da94-3e84-44ee-bf68-148ebd344bcb"
+                        },
+                        {
+                          "key": "photo",
+                          "description": " máx. 5 MB",
+                          "type": "file",
+                          "uuid": "281cdc8d-f5d4-4252-981b-5e8a426fabd8",
+                          "value": null
+                        },
+                        {
+                          "key": "photo_banner",
+                          "description": " máx. 5 MB",
+                          "type": "file",
+                          "uuid": "e569cf9f-7378-44d5-9e36-ba2bbe5c9b12",
+                          "value": null
                         }
-                      }
+                      ]
                     },
                     "url": {
                       "raw": "{{URL}}/api/v1/merchant/businesses/onboarding/stages/1",
@@ -1767,10 +2237,67 @@
               "name": "Feed",
               "item": [
                 {
-                  "name": "Get",
+                  "name": "Get feed merchant",
+                  "request": {
+                    "auth": {
+                      "type": "bearer",
+                      "bearer": [
+                        {
+                          "key": "token",
+                          "value": "{{token}}",
+                          "type": "string"
+                        }
+                      ]
+                    },
+                    "method": "GET",
+                    "header": [],
+                    "url": {
+                      "raw": "{{URL}}/api/v1/merchant/feed?economic_sector_id=u1&economic_sector_id=u2",
+                      "host": [
+                        "{{URL}}"
+                      ],
+                      "path": [
+                        "api",
+                        "v1",
+                        "merchant",
+                        "feed"
+                      ],
+                      "query": [
+                        {
+                          "key": "economic_sector_id",
+                          "value": "u1"
+                        },
+                        {
+                          "key": "economic_sector_id",
+                          "value": "u2"
+                        }
+                      ]
+                    }
+                  },
+                  "response": []
+                },
+                {
+                  "name": "Get feed merchant by id",
                   "request": {
                     "method": "GET",
-                    "header": []
+                    "header": [],
+                    "url": {
+                      "raw": "{{URL}}/merchant/feed/:postId",
+                      "host": [
+                        "{{URL}}"
+                      ],
+                      "path": [
+                        "merchant",
+                        "feed",
+                        ":postId"
+                      ],
+                      "variable": [
+                        {
+                          "key": "postId",
+                          "value": ""
+                        }
+                      ]
+                    }
                   },
                   "response": []
                 }
@@ -1856,7 +2383,7 @@
                     "method": "GET",
                     "header": [],
                     "url": {
-                      "raw": "{{URL}}/api/v1/merchant/merchant?economic_sector_id=uuid1&economic_sector_id=uuid2",
+                      "raw": "{{URL}}/api/v1/merchant/merchant?economic_sector_id=uuid1&economic_sector_id=uuid2&municipality_id=<uuid>&nearby_lat=11.2408&nearby_lng=-74.1990&nearby_radius_km=10&page=1&page_size=20",
                       "host": [
                         "{{URL}}"
                       ],
@@ -1874,6 +2401,36 @@
                         {
                           "key": "economic_sector_id",
                           "value": "uuid2"
+                        },
+                        {
+                          "key": "municipality_id",
+                          "value": "<uuid>",
+                          "type": "text"
+                        },
+                        {
+                          "key": "nearby_lat",
+                          "value": "11.2408",
+                          "type": "text"
+                        },
+                        {
+                          "key": "nearby_lng",
+                          "value": "-74.1990",
+                          "type": "text"
+                        },
+                        {
+                          "key": "nearby_radius_km",
+                          "value": "10",
+                          "type": "text"
+                        },
+                        {
+                          "key": "page",
+                          "value": "1",
+                          "type": "text"
+                        },
+                        {
+                          "key": "page_size",
+                          "value": "20",
+                          "type": "text"
                         }
                       ]
                     }

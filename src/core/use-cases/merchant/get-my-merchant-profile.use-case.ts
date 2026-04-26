@@ -86,6 +86,7 @@ export async function getMyMerchantProfileUseCase(token: string): Promise<MyMerc
       followersCount: "0",
       verified: false,
       posts: mappedPosts,
+      products: [],
       infoExtra: coords || undefined,
     },
   };

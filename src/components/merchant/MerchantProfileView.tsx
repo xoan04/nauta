@@ -23,22 +23,16 @@ import { MerchantProfileCatalog } from "@/components/merchant/MerchantProfileCat
 import { MerchantPostFAB } from "@/components/merchant/MerchantPostFAB";
 import { deleteMerchantPostUseCase } from "@/core/use-cases/merchant/delete-merchant-post.use-case";
 import { updateMerchantPostUseCase } from "@/core/use-cases/merchant/update-merchant-post.use-case";
-import { useMasterPublicationTypes } from "@/hooks/use-master-publication-types";
 import type { MerchantProfileData } from "@/lib/merchant-profile.types";
 import type { MerchantPost } from "@/lib/merchant-profile.types";
 import { useAuthStore } from "@/store/auth.store";
 import { useBuyerActivityStore } from "@/store/buyer-activity.store";
-import { useMarketConnectionsStore } from "@/store/market-connections.store";
 import { usePerlappRoleStore } from "@/store/perlapp-role.store";
 import { DEFAULT_POST_CATEGORY_ID } from "@/lib/constants";
 
-function pairKey(a: string, b: string): string {
-  return [a, b].sort().join("|");
-}
-
 type MerchantProfileViewProps = {
   merchant: MerchantProfileData;
-  onRefresh?: () => Promise<any>;
+  onRefresh?: () => Promise<void>;
 };
 
 export function MerchantProfileView({ merchant, onRefresh }: MerchantProfileViewProps) {
@@ -47,8 +41,6 @@ export function MerchantProfileView({ merchant, onRefresh }: MerchantProfileView
   const token = useAuthStore((s) => s.token);
   const favoriteMerchantIds = useBuyerActivityStore((s) => s.favoriteMerchantIds);
   const toggleFavoriteMerchant = useBuyerActivityStore((s) => s.toggleFavoriteMerchant);
-  const requests = useMarketConnectionsStore((s) => s.requests);
-  const sendRequest = useMarketConnectionsStore((s) => s.sendRequest);
 
   const [tab, setTab] = useState<"posts" | "catalog">("posts");
   const [posts, setPosts] = useState<MerchantPost[]>(merchant.posts);
@@ -92,7 +84,7 @@ export function MerchantProfileView({ merchant, onRefresh }: MerchantProfileView
       });
     },
   });
-  const { mutateAsync: deletePost, isPending: isDeletingPost } = useMutation({
+  const { mutateAsync: deletePost } = useMutation({
     mutationFn: async (postId: string) => {
       if (!token) throw new Error("Tu sesión expiró. Inicia sesión de nuevo.");
       await deleteMerchantPostUseCase(token, postId);

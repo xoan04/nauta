@@ -1,5 +1,19 @@
 import { z } from "zod";
 
+export const gamificationSchema = z.object({
+  has_default_business: z.boolean(),
+  stage_dream_architect: z.boolean(),
+  stage_ciiu_navigator: z.boolean(),
+  stage_territorial_ambassador: z.boolean(),
+  stage_microenterprise_titan: z.boolean(),
+  stage_connections_master: z.boolean(),
+  stage_samaria_pro_entrepreneur: z.boolean(),
+  current_stage: z.number(),
+  onboarding_completed: z.boolean(),
+});
+
+export type Gamification = z.infer<typeof gamificationSchema>;
+
 const myMerchantUserSchema = z.object({
   id: z.string(),
   email: z.string().email(),
@@ -31,6 +45,7 @@ export const merchantMyProfileResponseSchema = z.object({
   current_role: z.string(),
   has_builder_profile: z.boolean(),
   has_labour_profile: z.boolean(),
+  gamification: gamificationSchema.optional().nullable(),
 });
 
 export type MerchantMyProfileResponse = z.infer<typeof merchantMyProfileResponseSchema>;

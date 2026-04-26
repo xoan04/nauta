@@ -29,6 +29,7 @@ const MERCHANTS: Record<string, MerchantProfileData> = {
         stats: { comments: 2, reposts: 0, likes: 15, views: "210" },
       },
     ],
+    products: [],
   },
   ecovolt: {
     id: "ecovolt",
@@ -67,6 +68,7 @@ const MERCHANTS: Record<string, MerchantProfileData> = {
         stats: { comments: 12, reposts: 2, likes: 89, views: "1.8k" },
       },
     ],
+    products: [],
   },
   "1": {
     id: "1",
@@ -97,6 +99,7 @@ const MERCHANTS: Record<string, MerchantProfileData> = {
         stats: { comments: 18, reposts: 4, likes: 96, views: "2.1k" },
       },
     ],
+    products: [],
   },
   "2": {
     id: "2",
@@ -127,6 +130,7 @@ const MERCHANTS: Record<string, MerchantProfileData> = {
         stats: { comments: 9, reposts: 1, likes: 54, views: "980" },
       },
     ],
+    products: [],
   },
   "4": {
     id: "4",
@@ -154,6 +158,7 @@ const MERCHANTS: Record<string, MerchantProfileData> = {
         stats: { comments: 4, reposts: 1, likes: 42, views: "560" },
       },
     ],
+    products: [],
   },
   "3": {
     id: "3",
@@ -181,6 +186,7 @@ const MERCHANTS: Record<string, MerchantProfileData> = {
         stats: { comments: 6, reposts: 3, likes: 201, views: "3.4k" },
       },
     ],
+    products: [],
   },
 };
 

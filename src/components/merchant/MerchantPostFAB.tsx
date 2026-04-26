@@ -5,7 +5,6 @@ import { Camera, Plus, X, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { HttpError } from "@/core/http";
 import { createMerchantPostUseCase } from "@/core/use-cases/merchant/create-merchant-post.use-case";
-import { useMasterPublicationTypes } from "@/hooks/use-master-publication-types";
 import { useAuthStore } from "@/store/auth.store";
 import { usePerlappRoleStore } from "@/store/perlapp-role.store";
 import { useQueryClient } from "@tanstack/react-query";
@@ -15,8 +14,7 @@ export function MerchantPostFAB() {
   const role = usePerlappRoleStore((s) => s.role);
   const token = useAuthStore((s) => s.token);
   const queryClient = useQueryClient();
-  const { data: publicationTypesData } = useMasterPublicationTypes();
-  const publicationTypes = publicationTypesData?.publication_types ?? [];
+
 
   const [isOpen, setIsOpen] = useState(false);
   const [postContent, setPostContent] = useState("");
