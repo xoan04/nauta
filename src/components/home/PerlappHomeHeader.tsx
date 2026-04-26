@@ -1,16 +1,32 @@
 "use client";
 
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
-import { Bell, Search, ShoppingCart } from "lucide-react";
-import { PerlappRoleSwitcher } from "@/components/perlapp/PerlappRoleSwitcher";
+import { useRouter } from "next/navigation";
+import { Bell, LogOut, Search, ShoppingCart } from "lucide-react";
 import { cartItemCount } from "@/lib/cart.utils";
+import type { PerlappRole } from "@/types/perlapp-role.types";
 import { getProfileHrefForRole } from "@/store/perlapp-role.store";
+import { useAuthStore } from "@/store/auth.store";
 import { useCartStore } from "@/store/cart.store";
 import { useMarketConnectionsStore } from "@/store/market-connections.store";
 import { usePerlappRoleStore } from "@/store/perlapp-role.store";
 
 const navLink =
   "font-display font-semibold text-base rounded-lg px-perlapp-sm py-perlapp-xs transition-colors hover:bg-slate-100 dark:hover:bg-slate-800";
+
+const ROLE_LABELS: Record<PerlappRole, string> = {
+  invitado: "Invitado",
+  comprador: "Comprador",
+  market: "Comercio",
+};
+
+function userInitials(name: string): string {
+  const parts = name.trim().split(/\s+/).filter(Boolean);
+  if (parts.length >= 2) return `${parts[0]![0] ?? ""}${parts[1]![0] ?? ""}`.toUpperCase();
+  const single = parts[0] ?? "?";
+  return single.slice(0, 2).toUpperCase();
+}
 
 type PerlappHomeHeaderProps = {
   /** Barra de navegación desktop (Home, Explore, …). */
@@ -23,6 +39,14 @@ export function PerlappHomeHeader({
   showDesktopNav = true,
   position = "fixed",
 }: PerlappHomeHeaderProps) {
+  const router = useRouter();
+  const [menuOpen, setMenuOpen] = useState(false);
+  const menuRef = useRef<HTMLDivElement>(null);
+
+  const user = useAuthStore((s) => s.user);
+  const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
+  const logout = useAuthStore((s) => s.logout);
+
   const role = usePerlappRoleStore((s) => s.role);
   const activeMarketId = usePerlappRoleStore((s) => s.activeMarketId);
   const profileHref = getProfileHrefForRole(role);
@@ -35,6 +59,30 @@ export function PerlappHomeHeader({
           (r) => r.toMerchantId === activeMarketId && r.status === "pendiente"
         ).length
       : 0;
+
+  useEffect(() => {
+    if (!menuOpen) return;
+    const onDoc = (e: MouseEvent) => {
+      if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
+        setMenuOpen(false);
+      }
+    };
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setMenuOpen(false);
+    };
+    document.addEventListener("mousedown", onDoc);
+    document.addEventListener("keydown", onKey);
+    return () => {
+      document.removeEventListener("mousedown", onDoc);
+      document.removeEventListener("keydown", onKey);
+    };
+  }, [menuOpen]);
+
+  const handleLogout = () => {
+    setMenuOpen(false);
+    logout();
+    router.push("/");
+  };
 
   const positionClass =
     position === "sticky"
@@ -68,16 +116,17 @@ export function PerlappHomeHeader({
           >
             Explorar
           </Link>
-          <Link
-            href={profileHref}
-            className={`${navLink} text-perlapp-teal dark:text-slate-400`}
-          >
-            Perfil
-          </Link>
+          {isAuthenticated ? (
+            <Link
+              href={profileHref}
+              className={`${navLink} text-perlapp-teal dark:text-slate-400`}
+            >
+              Perfil
+            </Link>
+          ) : null}
         </nav>
 
         <div className="flex items-center gap-perlapp-sm">
-          <PerlappRoleSwitcher />
           <Link
             href="/notifications"
             className="relative hidden rounded-full p-perlapp-xs text-perlapp-orange transition-colors hover:bg-slate-100 dark:hover:bg-slate-800 md:inline-flex"
@@ -114,6 +163,49 @@ export function PerlappHomeHeader({
               </span>
             ) : null}
           </button>
+
+          {isAuthenticated && user ? (
+            <div className="relative flex shrink-0" ref={menuRef}>
+              <button
+                type="button"
+                onClick={() => setMenuOpen((o) => !o)}
+                className="flex h-10 w-10 items-center justify-center rounded-full bg-perlapp-orange text-sm font-bold text-white shadow-sm ring-2 ring-transparent transition hover:bg-perlapp-orange/90 focus-visible:outline-none focus-visible:ring-perlapp-orange/40"
+                aria-expanded={menuOpen}
+                aria-haspopup="true"
+                aria-label="Menú de cuenta"
+              >
+                <span className="font-display tracking-tight">{userInitials(user.name)}</span>
+              </button>
+              {menuOpen ? (
+                <div
+                  className="absolute right-0 top-full z-50 mt-2 w-[min(17rem,calc(100vw-2rem))] rounded-xl border border-perlapp-line/60 bg-perlapp-white py-2 shadow-xl"
+                  role="menu"
+                  aria-label="Cuenta"
+                >
+                  <div className="border-b border-perlapp-line/40 px-4 py-3">
+                    <p className="truncate font-display text-sm font-semibold text-perlapp-ink">{user.name}</p>
+                    <p className="mt-0.5 font-display text-xs text-perlapp-inkMuted">{ROLE_LABELS[role]}</p>
+                  </div>
+                  <button
+                    type="button"
+                    role="menuitem"
+                    onClick={handleLogout}
+                    className="flex w-full items-center gap-2 px-4 py-2.5 text-left font-display text-sm font-semibold text-red-600 transition hover:bg-red-50"
+                  >
+                    <LogOut className="h-4 w-4 shrink-0" strokeWidth={2} />
+                    Cerrar sesión
+                  </button>
+                </div>
+              ) : null}
+            </div>
+          ) : (
+            <Link
+              href="/login"
+              className="shrink-0 rounded-full border border-perlapp-orange/40 bg-perlapp-orange/10 px-3 py-1.5 font-display text-xs font-semibold text-perlapp-orange transition hover:bg-perlapp-orange/15 md:text-sm"
+            >
+              Entrar
+            </Link>
+          )}
         </div>
       </div>
     </header>

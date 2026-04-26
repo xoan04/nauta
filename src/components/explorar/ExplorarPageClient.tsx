@@ -18,11 +18,17 @@ const ExplorarMapDiscoverView = dynamic(
 );
 
 export function ExplorarPageClient() {
-  const [hydrated, setHydrated] = useState(() => usePerlappRoleStore.persist.hasHydrated());
+  const [hydrated, setHydrated] = useState(false);
   const role = usePerlappRoleStore((s) => s.role);
 
   useEffect(() => {
-    const unsub = usePerlappRoleStore.persist.onFinishHydration(() => setHydrated(true));
+    const persistApi = usePerlappRoleStore.persist;
+    if (!persistApi) {
+      setHydrated(true);
+      return;
+    }
+    setHydrated(persistApi.hasHydrated());
+    const unsub = persistApi.onFinishHydration(() => setHydrated(true));
     return unsub;
   }, []);
 

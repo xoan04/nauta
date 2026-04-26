@@ -4,6 +4,7 @@ import Link from "next/link";
 import { Bell, Home, Search, ShoppingCart, User } from "lucide-react";
 import { cartItemCount } from "@/lib/cart.utils";
 import { getProfileHrefForRole } from "@/store/perlapp-role.store";
+import { useAuthStore } from "@/store/auth.store";
 import { useCartStore } from "@/store/cart.store";
 import { usePerlappRoleStore } from "@/store/perlapp-role.store";
 
@@ -24,6 +25,7 @@ type PerlappBottomNavProps = {
 };
 
 export function PerlappBottomNav({ activeTab }: PerlappBottomNavProps) {
+  const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
   const role = usePerlappRoleStore((s) => s.role);
   const profileHref = getProfileHrefForRole(role);
   const itemCount = useCartStore((s) => cartItemCount(s.items));
@@ -73,18 +75,29 @@ export function PerlappBottomNav({ activeTab }: PerlappBottomNavProps) {
         <Bell className="mb-0.5 h-5 w-5 shrink-0 sm:h-6 sm:w-6" strokeWidth={2} />
         <span className="truncate">Alertas</span>
       </Link>
-      <Link
-        href={profileHref}
-        className={tabClass(activeTab === "profile")}
-        aria-current={activeTab === "profile" ? "page" : undefined}
-      >
-        <User
-          className="mb-0.5 h-5 w-5 shrink-0 sm:h-6 sm:w-6"
-          strokeWidth={2}
-          fill={activeTab === "profile" ? "currentColor" : "none"}
-        />
-        <span className="truncate">Perfil</span>
-      </Link>
+      {isAuthenticated ? (
+        <Link
+          href={profileHref}
+          className={tabClass(activeTab === "profile")}
+          aria-current={activeTab === "profile" ? "page" : undefined}
+        >
+          <User
+            className="mb-0.5 h-5 w-5 shrink-0 sm:h-6 sm:w-6"
+            strokeWidth={2}
+            fill={activeTab === "profile" ? "currentColor" : "none"}
+          />
+          <span className="truncate">Perfil</span>
+        </Link>
+      ) : (
+        <Link
+          href="/login"
+          className={tabClass(false)}
+          aria-label="Iniciar sesión"
+        >
+          <User className="mb-0.5 h-5 w-5 shrink-0 sm:h-6 sm:w-6" strokeWidth={2} />
+          <span className="truncate">Entrar</span>
+        </Link>
+      )}
     </nav>
   );
 }

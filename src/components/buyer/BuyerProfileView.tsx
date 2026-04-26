@@ -19,7 +19,6 @@ type TabKey = "actividad" | "favoritos";
 export function BuyerProfileView() {
   const role = usePerlappRoleStore((s) => s.role);
   const activeMarketId = usePerlappRoleStore((s) => s.activeMarketId);
-  const setRole = usePerlappRoleStore((s) => s.setRole);
   const [tab, setTab] = useState<TabKey>("actividad");
 
   const favoriteMerchantIds = useBuyerActivityStore((s) => s.favoriteMerchantIds);
@@ -91,19 +90,15 @@ export function BuyerProfileView() {
             de compras ni otras interacciones guardadas en el perfil.
           </p>
           <p className="mt-3 text-sm text-perlapp-inkMuted">
-            Para comprar, marcar comercios favoritos y ver tu actividad, inicia sesión o prueba el modo{" "}
-            <strong>Comprador</strong> (demostración).
+            Para comprar, marcar comercios favoritos y ver tu actividad,{" "}
+            <Link href="/login" className="font-semibold text-perlapp-orange underline underline-offset-2">
+              inicia sesión
+            </Link>{" "}
+            con una cuenta de comprador.
           </p>
-          <Button
-            type="button"
-            className="mt-6 bg-perlapp-orange text-white hover:bg-perlapp-orange/90"
-            onClick={() => setRole("comprador")}
-          >
-            Probar como comprador
+          <Button asChild className="mt-6 bg-perlapp-orange text-white hover:bg-perlapp-orange/90">
+            <Link href="/login">Ir a iniciar sesión</Link>
           </Button>
-          <p className="mt-4 text-sm text-perlapp-inkMuted">
-            En producción aquí iría el acceso a tu cuenta. El selector de rol arriba sirve solo para maquetar.
-          </p>
         </main>
         <PerlappBottomNav activeTab="profile" />
         <CartDrawer />

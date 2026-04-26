@@ -6,8 +6,9 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
+import { HttpError } from "@/core/http";
+import { loginUseCase } from "@/core/use-cases/auth/login.use-case";
 import { useAuthStore } from "@/store/auth.store";
-import { MOCK_CREDENTIALS, MOCK_USER, MOCK_TOKEN } from "@/lib/mock-user";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -22,26 +23,33 @@ type LoginForm = z.infer<typeof loginSchema>;
 
 function LoginForm() {
   const [authError, setAuthError] = useState("");
-  const { login } = useAuthStore();
+  const loginFromApi = useAuthStore((s) => s.loginFromApi);
   const router = useRouter();
   const searchParams = useSearchParams();
 
   const form = useForm<LoginForm>({
     resolver: zodResolver(loginSchema),
     defaultValues: {
-      email: MOCK_CREDENTIALS.email,
-      password: MOCK_CREDENTIALS.password,
+      email: "",
+      password: "",
     },
   });
 
-  const onSubmit = form.handleSubmit((values) => {
-    if (values.email === MOCK_CREDENTIALS.email && values.password === MOCK_CREDENTIALS.password) {
-      setAuthError("");
-      login(MOCK_USER, MOCK_TOKEN);
-      const redirect = searchParams.get("redirect") ?? "/dashboard";
+  const onSubmit = form.handleSubmit(async (values) => {
+    setAuthError("");
+    try {
+      const data = await loginUseCase({ email: values.email.trim(), password: values.password });
+      loginFromApi(data);
+      const redirect = searchParams.get("redirect") ?? "/";
       router.push(redirect);
-    } else {
-      setAuthError("Credenciales incorrectas");
+    } catch (e) {
+      if (e instanceof HttpError) {
+        setAuthError(e.message);
+      } else if (e instanceof Error && e.message) {
+        setAuthError(e.message);
+      } else {
+        setAuthError("No se pudo iniciar sesión. Revisa tu conexión e inténtalo de nuevo.");
+      }
     }
   });
 
@@ -50,7 +58,7 @@ function LoginForm() {
       <Card className="w-full max-w-md">
         <CardHeader>
           <CardTitle>Iniciar sesión</CardTitle>
-          <CardDescription>Usa las credenciales de prueba o las que ves abajo.</CardDescription>
+          <CardDescription>Entra con tu correo y contraseña de Perlapp.</CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={onSubmit} className="space-y-4">
@@ -80,14 +88,16 @@ function LoginForm() {
               )}
             </div>
             <Button type="submit" className="w-full" disabled={form.formState.isSubmitting}>
-              Entrar
+              {form.formState.isSubmitting ? "Entrando…" : "Entrar"}
             </Button>
           </form>
         </CardContent>
         <CardFooter className="flex flex-col gap-2 text-sm text-muted-foreground text-center sm:text-left">
           <p>
-            Usuario de prueba: <span className="text-foreground">{MOCK_CREDENTIALS.email}</span> /{" "}
-            <span className="text-foreground">{MOCK_CREDENTIALS.password}</span>
+            ¿No tienes cuenta?{" "}
+            <Link href="/registro" className="font-medium text-foreground underline underline-offset-2">
+              Regístrate
+            </Link>
           </p>
           <p>
             <Button variant="link" className="h-auto p-0" asChild>
