@@ -123,21 +123,23 @@ function toMerchantPins(merchants: PublicMerchantListItem[]): MerchantPin[] {
     .filter((p): p is MerchantPin => p !== null);
 }
 
-function ExplorarMerchantPopup({
+function MerchantDetailModal({
   merchant,
   categoryName,
   profileHref,
+  onClose,
 }: {
   merchant: PublicMerchantListItem;
   categoryName: string;
   profileHref: string;
+  onClose: () => void;
 }) {
   const business = merchant.businesses[0]?.business;
   const displayName = getMerchantDisplayName(merchant);
   const description = getMerchantDescription(merchant);
   const bioShort = description
-    ? description.length > 110
-      ? `${description.slice(0, 107).trim()}…`
+    ? description.length > 180
+      ? `${description.slice(0, 177).trim()}…`
       : description
     : "Comercio registrado en Perlapp.";
 
@@ -167,95 +169,116 @@ function ExplorarMerchantPopup({
     : null;
 
   return (
-    <article className="merchant-popup-card w-[min(280px,calc(100vw-3.25rem))] overflow-hidden rounded-2xl bg-white shadow-sm">
-      {/* Header Banner */}
-      <div className="relative h-24 w-full overflow-hidden">
-        <Image src={bannerUrl} alt="" fill className="object-cover brightness-[0.9]" />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent" />
-        <div className="absolute right-3 top-3 flex flex-col items-end gap-1.5">
-          <span className="inline-flex items-center rounded-full bg-white/95 px-2.5 py-0.5 text-[10px] font-bold text-brand-teal shadow-sm backdrop-blur-sm">
-            {categoryName}
-          </span>
-          {stageLabel && (
-            <span className="inline-flex items-center rounded-full bg-brand-orange/90 px-2.5 py-0.5 text-[9px] font-black uppercase tracking-wider text-white shadow-sm backdrop-blur-sm">
-              {stageLabel}
+    <div className="fixed inset-0 z-[1000] flex items-center justify-center p-4 sm:p-6">
+      {/* Backdrop */}
+      <div 
+        className="absolute inset-0 bg-brand-teal/40 backdrop-blur-sm transition-opacity duration-300 animate-in fade-in" 
+        onClick={onClose}
+      />
+      
+      {/* Modal Content */}
+      <article className="relative w-full max-w-sm overflow-hidden rounded-[2rem] bg-white shadow-2xl transition-all duration-300 animate-in zoom-in-95 slide-in-from-bottom-10">
+        <button
+          type="button"
+          onClick={onClose}
+          className="absolute right-4 top-4 z-10 flex h-9 w-9 items-center justify-center rounded-full bg-black/20 text-white backdrop-blur-md transition hover:bg-black/40 active:scale-90"
+        >
+          <X className="h-5 w-5" />
+        </button>
+
+        {/* Header Banner */}
+        <div className="relative h-36 w-full overflow-hidden">
+          <Image src={bannerUrl} alt="" fill className="object-cover" priority />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
+          <div className="absolute left-6 bottom-4 flex flex-col gap-1">
+            <span className="inline-flex w-fit items-center rounded-full bg-white/20 px-2.5 py-0.5 text-[10px] font-bold text-white shadow-sm backdrop-blur-md ring-1 ring-white/30">
+              {categoryName}
             </span>
-          )}
-        </div>
-      </div>
-
-      <div className="relative px-3 pb-3 pt-4">
-        {/* Avatar Overlap */}
-        <div className="absolute -top-10 left-3">
-          <div className="relative h-18 w-18 overflow-hidden rounded-[1.25rem] border-[3px] border-white bg-white shadow-lg ring-1 ring-black/5">
-            <Image src={avatarUrl} alt="" fill className="object-cover" sizes="72px" />
-          </div>
-        </div>
-
-        <div className="ml-[82px] min-h-[44px]">
-          <div className="flex items-center gap-1.5 pt-0.5">
-            <h3 className="line-clamp-1 text-[15px] font-extrabold leading-tight text-brand-teal">
-              {displayName}
-            </h3>
-            {isVerified && (
-              <BadgeCheck
-                className="h-4.5 w-4.5 shrink-0 text-brand-teal"
-                strokeWidth={2.8}
-                aria-label="Verificado"
-              />
+            {stageLabel && (
+              <span className="inline-flex w-fit items-center rounded-full bg-brand-orange px-2.5 py-0.5 text-[10px] font-black uppercase tracking-wider text-white shadow-lg">
+                {stageLabel}
+              </span>
             )}
           </div>
-          <p className="mt-1 flex items-center gap-1 text-[10px] font-semibold text-brand-stone/70">
-            <span>@{merchant.user.name.toLowerCase().replace(/\s+/g, "")}</span>
-            <span className="h-0.5 w-0.5 rounded-full bg-brand-stone/40" />
-            <span>ID: {merchant.user.id.slice(0, 4)}</span>
-          </p>
         </div>
 
-        <p className="mt-5 line-clamp-2 text-xs leading-relaxed text-brand-teal/80">
-          {bioShort}
-        </p>
-
-        <div className="mt-2.5 flex items-center gap-1 text-[10px] font-medium text-brand-stone">
-          <MapPin className="h-3 w-3 shrink-0 text-brand-orange" />
-          <span className="line-clamp-1">{locationLabel}</span>
-        </div>
-
-        <div className="mt-4 flex items-center justify-between border-t border-brand-sand/50 pt-3">
-          <div className="flex gap-4">
-            <div className="flex flex-col">
-              <div className="flex items-center gap-1">
-                <Package className="h-3 w-3 text-brand-orange" />
-                <span className="text-[13px] font-bold text-brand-teal leading-none">
-                  {productCount}
-                </span>
-              </div>
-              <span className="text-[9px] font-medium text-brand-stone uppercase tracking-tight">
-                Productos
-              </span>
-            </div>
-            <div className="flex flex-col">
-              <div className="flex items-center gap-1">
-                <Zap className="h-3 w-3 text-brand-orange" />
-                <span className="text-[13px] font-bold text-brand-teal leading-none">
-                  {postCount}
-                </span>
-              </div>
-              <span className="text-[9px] font-medium text-brand-stone uppercase tracking-tight">
-                Posts
-              </span>
+        <div className="relative px-6 pb-8 pt-5">
+          {/* Avatar Overlap */}
+          <div className="absolute -top-12 right-6">
+            <div className="relative h-24 w-24 overflow-hidden rounded-3xl border-[4px] border-white bg-white shadow-xl">
+              <Image src={avatarUrl} alt="" fill className="object-cover" sizes="96px" />
             </div>
           </div>
 
-          <Link
-            href={profileHref}
-            className="flex h-9 items-center justify-center rounded-xl bg-brand-orange px-4 text-xs font-bold !text-white shadow-lg transition-all hover:bg-brand-orange-dark hover:shadow-orange-200 active:scale-95"
-          >
-            Ver catálogo
-          </Link>
+          <div className="pr-20">
+            <div className="flex items-center gap-1.5 pt-1">
+              <h3 className="line-clamp-1 text-xl font-extrabold leading-tight text-brand-teal">
+                {displayName}
+              </h3>
+              {isVerified && (
+                <BadgeCheck
+                  className="h-5 w-5 shrink-0 text-brand-teal"
+                  strokeWidth={2.8}
+                  aria-label="Verificado"
+                />
+              )}
+            </div>
+            <p className="mt-1 flex items-center gap-1.5 text-[11px] font-semibold text-brand-stone/60">
+              <span>@{merchant.user.name.toLowerCase().replace(/\s+/g, "")}</span>
+              <span className="h-1 w-1 rounded-full bg-brand-stone/20" />
+              <span className="text-[10px]">ID: {merchant.user.id.slice(0, 4)}</span>
+            </p>
+          </div>
+
+          <p className="mt-6 text-[13px] leading-relaxed text-brand-teal/70">
+            {bioShort}
+          </p>
+
+          <div className="mt-4 flex items-center gap-2 text-[11px] font-bold text-brand-stone">
+            <div className="flex h-6 w-6 items-center justify-center rounded-lg bg-brand-sand">
+              <MapPin className="h-3.5 w-3.5 text-brand-orange" />
+            </div>
+            <span className="line-clamp-1">{locationLabel}</span>
+          </div>
+
+          <div className="mt-8 flex flex-col gap-4">
+            <div className="flex items-center justify-center gap-8 rounded-2xl bg-brand-sand/40 p-4 border border-brand-sand-dark/20">
+              <div className="flex flex-col items-center">
+                <div className="mb-1 flex items-center gap-1.5">
+                  <Package className="h-4 w-4 text-brand-orange" />
+                  <span className="text-lg font-black text-brand-teal leading-none">
+                    {productCount}
+                  </span>
+                </div>
+                <span className="text-[9px] font-bold text-brand-stone uppercase tracking-widest">
+                  Productos
+                </span>
+              </div>
+              <div className="h-8 w-[1px] bg-brand-sand-dark/30" />
+              <div className="flex flex-col items-center">
+                <div className="mb-1 flex items-center gap-1.5">
+                  <Zap className="h-4 w-4 text-brand-orange" />
+                  <span className="text-lg font-black text-brand-teal leading-none">
+                    {postCount}
+                  </span>
+                </div>
+                <span className="text-[9px] font-bold text-brand-stone uppercase tracking-widest">
+                  Publicaciones
+                </span>
+              </div>
+            </div>
+
+            <Link
+              href={profileHref}
+              className="flex h-12 w-full items-center justify-center rounded-2xl bg-brand-orange text-sm font-black text-white shadow-[0_12px_24px_-8px_rgba(241,90,41,0.5)] transition-all hover:bg-brand-orange-dark active:scale-[0.98]"
+            >
+              Ver perfil y ofertas
+              <Search className="ml-2 h-4 w-4" strokeWidth={3} />
+            </Link>
+          </div>
         </div>
-      </div>
-    </article>
+      </article>
+    </div>
   );
 }
 
@@ -272,6 +295,7 @@ export default function ExplorarMapDiscoverView() {
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [searchOpen, setSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+  const [selectedMerchant, setSelectedMerchant] = useState<MerchantPin | null>(null);
 
   const mapCenter = userPos ?? MERCHANT_MAP_CENTER;
 
@@ -365,22 +389,10 @@ export default function ExplorarMapDiscoverView() {
             key={pin.merchant.user.id}
             position={[pin.lat, pin.lng]}
             icon={merchantMarkerIcon}
-          >
-            <Popup
-              className="explorar-map-merchant-leaflet-popup"
-              minWidth={288}
-              maxWidth={320}
-              offset={[0, 6]}
-              autoPanPadding={[48, 120]}
-              keepInView
-            >
-              <ExplorarMerchantPopup
-                merchant={pin.merchant}
-                categoryName={pin.categoryName}
-                profileHref={`/merchant/${pin.merchant.user.id}`}
-              />
-            </Popup>
-          </Marker>
+            eventHandlers={{
+              click: () => setSelectedMerchant(pin),
+            }}
+          />
         ))}
       </MapContainer>
 
@@ -615,6 +627,16 @@ export default function ExplorarMapDiscoverView() {
           </nav>
         </div>
       </div>
+
+      {/* Merchant Detail Modal */}
+      {selectedMerchant && (
+        <MerchantDetailModal
+          merchant={selectedMerchant.merchant}
+          categoryName={selectedMerchant.categoryName}
+          profileHref={`/merchant/${selectedMerchant.merchant.user.id}`}
+          onClose={() => setSelectedMerchant(null)}
+        />
+      )}
     </div>
   );
 }
