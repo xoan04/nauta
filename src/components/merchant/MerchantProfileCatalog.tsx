@@ -1,9 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Image from "next/image";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { ImageIcon, Pencil, Plus, ShoppingBag, Trash2, X } from "lucide-react";
+import { ImageIcon, Pencil, Plus, ShoppingBag, Trash2, X, Camera } from "lucide-react";
 import type { ProfileCatalogProduct } from "@/lib/merchant-catalog.types";
 import { formatPrice } from "@/lib/cart.utils";
 import { useCartStore } from "@/store/cart.store";
@@ -19,6 +19,7 @@ type MerchantProfileCatalogProps = {
   merchantId: string;
   merchantName: string;
   isOwner: boolean;
+  products?: ProfileCatalogProduct[];
 };
 
 type FormState = {
@@ -37,7 +38,12 @@ function isHttpsImageUrl(url: string): boolean {
   return normalized.startsWith("https://") || normalized.startsWith("http://");
 }
 
-export function MerchantProfileCatalog({ merchantId, merchantName, isOwner }: MerchantProfileCatalogProps) {
+export function MerchantProfileCatalog({
+  merchantId,
+  merchantName,
+  isOwner,
+  products: initialProducts,
+}: MerchantProfileCatalogProps) {
   const queryClient = useQueryClient();
   const token = useAuthStore((s) => s.token);
   const localProducts = useMerchantCatalogStore((s) => s.byMerchant[merchantId] ?? EMPTY_PRODUCTS);
@@ -61,14 +67,23 @@ export function MerchantProfileCatalog({ merchantId, merchantName, isOwner }: Me
     ? isErrorApiProducts
       ? localProducts
       : (apiProducts ?? EMPTY_PRODUCTS)
-    : localProducts;
+    : (initialProducts ?? localProducts);
 
   const [modal, setModal] = useState<null | { mode: "create" } | { mode: "edit"; product: ProfileCatalogProduct }>(
     null
   );
   const [form, setForm] = useState<FormState>(emptyForm);
   const [formError, setFormError] = useState("");
+  const [previewUrls, setPreviewUrls] = useState<string[]>([]);
   const [deleteTarget, setDeleteTarget] = useState<ProfileCatalogProduct | null>(null);
+
+  useEffect(() => {
+    return () => {
+      previewUrls.forEach((url) => {
+        if (url.startsWith("blob:")) URL.revokeObjectURL(url);
+      });
+    };
+  }, [previewUrls]);
   const refreshProducts = async () => {
     await Promise.all([
       refetchApiProducts(),
@@ -141,24 +156,48 @@ export function MerchantProfileCatalog({ merchantId, merchantName, isOwner }: Me
   const openCreate = () => {
     setForm(emptyForm);
     setFormError("");
+    setPreviewUrls([]);
     setModal({ mode: "create" });
   };
 
   const openEdit = (product: ProfileCatalogProduct) => {
     setForm({
       name: product.name,
-      description: "",
+      description: product.description ?? "",
       price: String(product.price),
       imageUrl: product.imageUrl,
       photos: [],
     });
     setFormError("");
+    setPreviewUrls(product.imageUrl && isHttpsImageUrl(product.imageUrl) ? [product.imageUrl.trim()] : []);
     setModal({ mode: "edit", product });
   };
 
   const closeModal = () => {
+    previewUrls.forEach((url) => {
+      if (url.startsWith("blob:")) URL.revokeObjectURL(url);
+    });
+    setPreviewUrls([]);
     setModal(null);
     setFormError("");
+  };
+
+  const handlePhotoSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files ?? []);
+    setForm((f) => ({ ...f, photos: files }));
+    
+    previewUrls.forEach((url) => {
+      if (url.startsWith("blob:")) URL.revokeObjectURL(url);
+    });
+    
+    const newUrls = files.map((f) => URL.createObjectURL(f));
+    setPreviewUrls(
+      newUrls.length > 0 
+        ? newUrls 
+        : modal?.mode === "edit" && isHttpsImageUrl(modal.product.imageUrl) 
+          ? [modal.product.imageUrl.trim()] 
+          : []
+    );
   };
 
   const validateForm = (): ProfileCatalogProduct | null => {
@@ -421,18 +460,38 @@ export function MerchantProfileCatalog({ merchantId, merchantName, isOwner }: Me
                 />
               </label>
               {isOwner && !isErrorApiProducts ? (
-                <label className="flex flex-col gap-1">
+                <div className="flex flex-col gap-2">
                   <span className="font-display text-perlapp-label-sm font-semibold text-perlapp-inkMuted">
                     Fotos <span className="font-normal text-perlapp-inkMuted/80">(opcional)</span>
                   </span>
-                  <input
-                    type="file"
-                    multiple
-                    accept="image/*"
-                    onChange={(e) => setForm((f) => ({ ...f, photos: Array.from(e.target.files ?? []) }))}
-                    className="block w-full text-sm text-perlapp-inkMuted file:mr-3 file:rounded-md file:border file:border-perlapp-line file:bg-perlapp-surfaceContainer file:px-3 file:py-1.5 file:font-display file:text-xs file:font-semibold file:text-perlapp-ink hover:file:bg-perlapp-surfaceVariant"
-                  />
-                </label>
+                  
+                  {previewUrls.length > 0 ? (
+                    <div className="flex gap-3 overflow-x-auto pb-1">
+                      {previewUrls.map((url, i) => (
+                        <div key={i} className="relative h-20 w-20 shrink-0 overflow-hidden rounded-xl border border-perlapp-line bg-perlapp-surfaceVariant shadow-sm">
+                          {/* eslint-disable-next-line @next/next/no-img-element */}
+                          <img src={url} alt={`Preview ${i}`} className="h-full w-full object-cover" />
+                        </div>
+                      ))}
+                    </div>
+                  ) : null}
+
+                  <label className="group mt-1 flex cursor-pointer flex-col items-center justify-center gap-2 rounded-xl border border-dashed border-perlapp-line bg-perlapp-canvas/50 px-4 py-6 transition-colors hover:bg-perlapp-surfaceContainer active:bg-perlapp-surfaceVariant">
+                    <div className="flex h-10 w-10 items-center justify-center rounded-full bg-perlapp-orange/10 text-perlapp-orange transition-transform group-active:scale-95">
+                      <Camera className="h-5 w-5" />
+                    </div>
+                    <span className="font-display text-sm font-semibold tracking-wide text-perlapp-ink text-center">
+                      Tomar foto o elegir de la galería
+                    </span>
+                    <input
+                      type="file"
+                      multiple
+                      accept="image/*"
+                      onChange={handlePhotoSelect}
+                      className="hidden"
+                    />
+                  </label>
+                </div>
               ) : (
                 <label className="flex flex-col gap-1">
                   <span className="font-display text-perlapp-label-sm font-semibold text-perlapp-inkMuted">

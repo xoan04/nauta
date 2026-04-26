@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Image from "next/image";
 import dynamic from "next/dynamic";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -141,10 +142,17 @@ export default function MerchantRegistrationPage() {
   };
 
   return (
-    <div className="min-h-screen bg-brand-sand flex flex-col">
+    <div className="min-h-screen flex flex-col">
+
+      {/* Logo */}
+      <div className="flex justify-center pt-10 pb-1">
+        <div className="inline-flex items-center justify-center w-12 h-12 rounded-xl overflow-hidden bg-white shadow">
+          <Image src="/logo.png" alt="Perlapp" width={48} height={48} priority />
+        </div>
+      </div>
 
       {/* Header */}
-      <header className="flex items-center gap-3 px-4 pt-10 pb-3">
+      <header className="flex items-center gap-3 px-4 pt-3 pb-3">
         {step > 1 ? (
           <button
             onClick={handleBack}

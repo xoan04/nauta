@@ -32,15 +32,66 @@ const merchantBusinessSchema = z
     id: z.string(),
     user_id: z.string(),
     profile_merchant_id: z.string(),
-    nombre: z.string(),
-    descripcion: z.string(),
+    business_name: z.string(),
+    description: z.string(),
     business_category_id: z.string().nullable(),
+    ciiu_code: z.string().nullable().optional(),
+    stage: z.string().nullable().optional(),
     municipality_id: z.string().nullable(),
-    verificado: z.boolean(),
+    is_verified: z.boolean(),
     created_at: z.string(),
     updated_at: z.string(),
   })
   .passthrough();
+
+const merchantPostPhotoSchema = z.object({
+  id: z.string(),
+  publication_id: z.string(),
+  url: z.string(),
+  order: z.number(),
+  created_at: z.string(),
+  updated_at: z.string(),
+});
+
+const merchantPostSchema = z.object({
+  id: z.string(),
+  user_id: z.string(),
+  profile_merchant_id: z.string(),
+  business_id: z.string(),
+  content: z.string(),
+  publication_type_id: z.string(),
+  publication_type_code: z.string(),
+  publication_type_name: z.string(),
+  likes: z.number(),
+  url: z.string().nullable().optional(),
+  order: z.number(),
+  photos: z.array(merchantPostPhotoSchema),
+  created_at: z.string(),
+  updated_at: z.string(),
+});
+
+const merchantProductPhotoSchema = z.object({
+  id: z.string(),
+  product_id: z.string(),
+  photo: z.string(),
+  order: z.number(),
+  created_at: z.string(),
+  updated_at: z.string(),
+});
+
+const merchantProductSchema = z.object({
+  id: z.string(),
+  user_id: z.string(),
+  profile_merchant_id: z.string(),
+  business_id: z.string(),
+  name: z.string(),
+  description: z.string(),
+  price: z.number(),
+  available: z.boolean(),
+  photos: z.array(merchantProductPhotoSchema),
+  created_at: z.string(),
+  updated_at: z.string(),
+});
 
 const merchantBusinessCategorySchema = z
   .object({
@@ -74,8 +125,8 @@ export const publicMerchantDetailResponseSchema = z.object({
   user: merchantUserSchema,
   profile_merchant: merchantProfileSchema.nullable(),
   businesses: z.array(merchantBusinessItemSchema),
-  posts: z.array(z.unknown()),
-  products: z.array(z.unknown()),
+  posts: z.array(merchantPostSchema),
+  products: z.array(merchantProductSchema),
 });
 
 export type PublicMerchantDetailResponse = z.infer<typeof publicMerchantDetailResponseSchema>;

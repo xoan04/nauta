@@ -1,14 +1,19 @@
+"use client";
+
+import Image from "next/image";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { Search, Heart, Bell, MapPin } from "lucide-react";
 
 export function ExplorarGuestLanding() {
+  const router = useRouter();
   return (
-    <div className="min-h-screen bg-brand-sand flex flex-col items-center justify-between px-4 py-10">
+    <div className="min-h-screen flex flex-col items-center justify-between px-4 py-10">
       <div className="w-full max-w-[420px] mx-auto flex flex-col items-center">
         <div className="w-full flex items-center justify-start mb-10">
           <Link href="/" className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-lg bg-brand-teal flex items-center justify-center">
-              <span className="text-white text-sm font-extrabold">P</span>
+            <div className="w-10 h-10 rounded-xl overflow-hidden bg-white shadow">
+              <Image src="/logo.png" alt="Perlapp" width={40} height={40} priority />
             </div>
             <span className="text-brand-teal font-bold text-lg">Perlapp</span>
           </Link>
@@ -52,12 +57,16 @@ export function ExplorarGuestLanding() {
             Crear mi cuenta gratis
           </Link>
 
-          <Link
-            href="/explorar/mapa"
+          <button
+            type="button"
+            onClick={() => {
+              sessionStorage.setItem("perlapp-guest", "1");
+              router.push("/");
+            }}
             className="w-full py-3.5 border-2 border-brand-orange text-brand-orange hover:bg-brand-orange/5 active:scale-[0.98] font-semibold text-base rounded-2xl transition-all duration-150 text-center"
           >
             Explorar sin cuenta →
-          </Link>
+          </button>
         </div>
 
         <p className="mt-6 text-sm text-brand-stone text-center">

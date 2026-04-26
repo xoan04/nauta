@@ -1,0 +1,2250 @@
+{
+  "info": {
+    "_postman_id": "553abbe4-1670-42f6-a471-7ee73035eaae",
+    "name": "Hackathon sm 2026",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "27656205"
+  },
+  "item": [
+    {
+      "name": "24",
+      "item": [
+        {
+          "name": "Auth",
+          "item": [
+            {
+              "name": "Login",
+              "request": {
+                "method": "POST",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n    \"email\": \"usuario@dominio.com\",\n    \"password\": \"tu_password_min_8\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{URL}}/api/v1/auth/login",
+                  "host": [
+                    "{{URL}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "auth",
+                    "login"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Register",
+              "request": {
+                "method": "POST",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n    \"email\": \"usuario@dominio.com\",\n    \"password\": \"tu_password_min_8\",\n    \"phone\": \"1234567890\",\n    \"auto_verify\": true\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{URL}}/api/v1/auth/register",
+                  "host": [
+                    "{{URL}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "auth",
+                    "register"
+                  ]
+                }
+              },
+              "response": []
+            }
+          ]
+        },
+        {
+          "name": "User",
+          "item": [
+            {
+              "name": "S3",
+              "item": [
+                {
+                  "name": "Get s3 files",
+                  "request": {
+                    "auth": {
+                      "type": "bearer",
+                      "bearer": [
+                        {
+                          "key": "token",
+                          "value": "{{token}}",
+                          "type": "string"
+                        }
+                      ]
+                    },
+                    "method": "GET",
+                    "header": [],
+                    "url": {
+                      "raw": "{{URL}}/api/v1/s3/files",
+                      "host": [
+                        "{{URL}}"
+                      ],
+                      "path": [
+                        "api",
+                        "v1",
+                        "s3",
+                        "files"
+                      ]
+                    }
+                  },
+                  "response": []
+                },
+                {
+                  "name": "Create s3 file",
+                  "request": {
+                    "auth": {
+                      "type": "bearer",
+                      "bearer": [
+                        {
+                          "key": "token",
+                          "value": "{{token}}",
+                          "type": "string"
+                        }
+                      ]
+                    },
+                    "method": "POST",
+                    "header": [],
+                    "body": {
+                      "mode": "formdata",
+                      "formdata": [
+                        {
+                          "key": "file",
+                          "description": "required",
+                          "type": "file",
+                          "uuid": "11e80012-9bf4-43df-9654-c11274c2d3b5",
+                          "src": "postman-cloud:///1f14062e-de61-4e90-9e93-85b1ace3a576"
+                        },
+                        {
+                          "key": "file_type",
+                          "description": "optional",
+                          "type": "text",
+                          "uuid": "db979da7-dbcb-4a40-97c3-09ec8b89884d",
+                          "value": "hey"
+                        },
+                        {
+                          "key": "entity_type",
+                          "value": "user",
+                          "type": "text",
+                          "uuid": "50e3e4ab-95b5-4166-8760-b05dee4d085b"
+                        }
+                      ]
+                    },
+                    "url": {
+                      "raw": "{{URL}}/api/v1/s3/files",
+                      "host": [
+                        "{{URL}}"
+                      ],
+                      "path": [
+                        "api",
+                        "v1",
+                        "s3",
+                        "files"
+                      ]
+                    }
+                  },
+                  "response": []
+                }
+              ]
+            },
+            {
+              "name": "Brevo",
+              "item": [
+                {
+                  "name": "Brevo testing",
+                  "request": {
+                    "auth": {
+                      "type": "bearer",
+                      "bearer": [
+                        {
+                          "key": "token",
+                          "value": "{{token}}",
+                          "type": "string"
+                        }
+                      ]
+                    },
+                    "method": "POST",
+                    "header": [],
+                    "body": {
+                      "mode": "raw",
+                      "raw": "{\n  \"to_email\": \"jgarciacar20@gmail.com\",\n  \"to_name\": \"Tu Nombre\"\n}",
+                      "options": {
+                        "raw": {
+                          "language": "json"
+                        }
+                      }
+                    },
+                    "url": {
+                      "raw": "{{URL}}/api/v1/brevo/test",
+                      "host": [
+                        "{{URL}}"
+                      ],
+                      "path": [
+                        "api",
+                        "v1",
+                        "brevo",
+                        "test"
+                      ]
+                    }
+                  },
+                  "response": []
+                }
+              ]
+            },
+            {
+              "name": "Profile",
+              "item": [
+                {
+                  "name": "Get auth profile",
+                  "request": {
+                    "auth": {
+                      "type": "bearer",
+                      "bearer": [
+                        {
+                          "key": "token",
+                          "value": "{{token}}",
+                          "type": "string"
+                        }
+                      ]
+                    },
+                    "method": "GET",
+                    "header": [],
+                    "url": {
+                      "raw": "{{URL}}/api/v1/auth/profile",
+                      "host": [
+                        "{{URL}}"
+                      ],
+                      "path": [
+                        "api",
+                        "v1",
+                        "auth",
+                        "profile"
+                      ]
+                    }
+                  },
+                  "response": []
+                },
+                {
+                  "name": "Update user profile photo",
+                  "request": {
+                    "auth": {
+                      "type": "bearer",
+                      "bearer": [
+                        {
+                          "key": "token",
+                          "value": "{{token}}",
+                          "type": "string"
+                        }
+                      ]
+                    },
+                    "method": "PUT",
+                    "header": [],
+                    "body": {
+                      "mode": "formdata",
+                      "formdata": [
+                        {
+                          "key": "photo",
+                          "type": "file",
+                          "uuid": "dc48cb02-0e91-4615-bd33-0245ad7a8bf3",
+                          "value": null
+                        }
+                      ]
+                    },
+                    "url": {
+                      "raw": "{{URL}}/api/v1/user/profile/photo",
+                      "host": [
+                        "{{URL}}"
+                      ],
+                      "path": [
+                        "api",
+                        "v1",
+                        "user",
+                        "profile",
+                        "photo"
+                      ]
+                    }
+                  },
+                  "response": []
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Only devs",
+      "item": [
+        {
+          "name": "Dev panel admin",
+          "item": [
+            {
+              "name": "Get admins",
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{token}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "X-License",
+                    "value": "HACKATHON-GO-EXAGONE-2026",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{URL}}/api/v1/portal/admins",
+                  "host": [
+                    "{{URL}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "portal",
+                    "admins"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Create admin",
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{token}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "X-License",
+                    "value": "HACKATHON-GO-EXAGONE-2026",
+                    "type": "text"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n    \"email\": \"admin@ejemplo.com\", // required\n    \"password\": \"secreto12\", // required\n    \"name\": \"María Pérez\", // required\n    \"title\": \"Coordinadora\",\n    \"department\": \"Operaciones\",\n    \"notes\": \"Nota interna\",\n    \"link_instagram\": \"https://instagram.com/usuario\",\n    \"link_linkedin\": \"https://linkedin.com/in/usuario\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{URL}}/api/v1/portal/admins",
+                  "host": [
+                    "{{URL}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "portal",
+                    "admins"
+                  ]
+                },
+                "description": "| Campo | Tipo | Notas |\n| --- | --- | --- |\n| `email` | string | No vacío (trim); si lo usa otro usuario → 409 |\n| `password` | string | Solo si no es cadena vacía |\n| `name` | string | No vacío (trim) |\n| `status` | string | Estado del usuario (p. ej. valores de `UserStatus` en BD) |\n| `title` | string | Si envías la clave, se asigna (puedes usar `\"\"` para vaciar) |\n| `department` | string | Igual |\n| `notes` | string | Igual |\n| `link_instagram` | string | Igual |\n| `link_linkedin` | string | Igual |"
+              },
+              "response": []
+            },
+            {
+              "name": "Update admin",
+              "request": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "X-License",
+                    "value": "HACKATHON-GO-EXAGONE-2026",
+                    "type": "text"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n    \"email\": \"admin.nuevo@ejemplo.com\",\n    \"password\": \"nuevaClave12\",\n    \"name\": \"María Pérez Gómez\",\n    \"status\": \"active\",\n    \"title\": \"Coordinadora regional\",\n    \"department\": \"Operaciones\",\n    \"notes\": \"Contacto principal del hackathon\",\n    \"link_instagram\": \"https://instagram.com/maria_perez\",\n    \"link_linkedin\": \"https://www.linkedin.com/in/maria-perez\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{URL}}/api/v1/portal/admins/:id_admin",
+                  "host": [
+                    "{{URL}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "portal",
+                    "admins",
+                    ":id_admin"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id_admin",
+                      "value": ""
+                    }
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Get admins delete",
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{token}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "DELETE",
+                "header": [
+                  {
+                    "key": "X-License",
+                    "value": "HACKATHON-GO-EXAGONE-2026",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{URL}}/api/v1/portal/admins/:id_admin",
+                  "host": [
+                    "{{URL}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "portal",
+                    "admins",
+                    ":id_admin"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id_admin",
+                      "value": ""
+                    }
+                  ]
+                }
+              },
+              "response": []
+            }
+          ]
+        },
+        {
+          "name": "Dev merchants",
+          "item": [
+            {
+              "name": "Get merchants",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "X-License",
+                    "value": "HACKATHON-GO-EXAGONE-2026",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{URL}}/api/v1/portal/merchants",
+                  "host": [
+                    "{{URL}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "portal",
+                    "merchants"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Get merchant by id",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "X-License",
+                    "value": "HACKATHON-GO-EXAGONE-2026",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{URL}}/api/v1/portal/merchants/:id_merchant",
+                  "host": [
+                    "{{URL}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "portal",
+                    "merchants",
+                    ":id_merchant"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id_merchant",
+                      "value": ""
+                    }
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Create merchants full",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "X-License",
+                    "value": "HACKATHON-GO-EXAGONE-2026",
+                    "type": "text"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"email\": \"comercio@ejemplo.com\", // required\n  \"password\": \"secreto12\", // required\n  \"name\": \"Tienda Centro\", // required\n  \"phone\": \"+573001234567\",\n  \"latitude\": 4.6097,\n  \"longitude\": -74.0817,\n  \"municipality_id\": \"550e8400-e29b-41d4-a716-446655440000\",\n  \"formalized\": false,\n  \"photo\": \"https://cdn.ejemplo.com/fotos/perfil.jpg\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{URL}}/api/v1/portal/merchants",
+                  "host": [
+                    "{{URL}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "portal",
+                    "merchants"
+                  ]
+                },
+                "description": "## Campos del body (JSON)\n\n| Campo | Tipo | Obligatorio | Notas |\n| --- | --- | --- | --- |\n| `email` | string | Sí | Email válido. |\n| `password` | string | Sí | Mínimo 8 caracteres. |\n| `name` | string | Sí | Nombre (1–255 caracteres). |\n| `phone` | string | No | Teléfono del perfil merchant. |\n| `latitude` | number | No | Decimal. |\n| `longitude` | number | No | Decimal. |\n| `municipality_id` | string (UUID) | No | Debe existir en `GET /api/v1/municipalities`. Si omites o envías `\"\"`, el municipio queda sin asignar. UUID mal formado o inexistente → 400. |\n| `formalized` | boolean | No | Si no envías, en backend queda `false`. |\n| `photo` | string | No | URL de la foto. |"
+              },
+              "response": []
+            },
+            {
+              "name": "Create merchants minimum",
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{token}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "X-License",
+                    "value": "HACKATHON-GO-EXAGONE-2026",
+                    "type": "text"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n    \"email\": \"comercio2@testing.com\", // required\n    \"password\": \"123456789\", // required\n    \"name\": \"Tienda Centro\", // required\n    \"latitude\": 4.6097,\n    \"longitude\": -74.0817\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{URL}}/api/v1/portal/merchants",
+                  "host": [
+                    "{{URL}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "portal",
+                    "merchants"
+                  ]
+                },
+                "description": "## Campos del body (JSON)\n\n| Campo | Tipo | Obligatorio | Notas |\n| --- | --- | --- | --- |\n| `email` | string | Sí | Email válido. |\n| `password` | string | Sí | Mínimo 8 caracteres. |\n| `name` | string | Sí | Nombre (1–255 caracteres). |"
+              },
+              "response": []
+            },
+            {
+              "name": "Update merchant",
+              "request": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "X-License",
+                    "value": "HACKATHON-GO-EXAGONE-2026",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{URL}}/api/v1/portal/merchants/:id_merchant",
+                  "host": [
+                    "{{URL}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "portal",
+                    "merchants",
+                    ":id_merchant"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id_merchant",
+                      "value": ""
+                    }
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Delete merchant",
+              "request": {
+                "method": "DELETE",
+                "header": [
+                  {
+                    "key": "X-License",
+                    "value": "HACKATHON-GO-EXAGONE-2026",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{URL}}/api/v1/portal/merchants/:id_merchant",
+                  "host": [
+                    "{{URL}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "portal",
+                    "merchants",
+                    ":id_merchant"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id_merchant",
+                      "value": "375dfd95-7a08-42cd-a7fd-78b93db41701"
+                    }
+                  ]
+                }
+              },
+              "response": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Panel admin",
+      "item": [
+        {
+          "name": "Profile",
+          "item": [
+            {
+              "name": "Get profile admin",
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{token}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{URL}}/api/v1/admin/profile",
+                  "host": [
+                    "{{URL}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "admin",
+                    "profile"
+                  ]
+                }
+              },
+              "response": []
+            }
+          ]
+        },
+        {
+          "name": "Login",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "// Guarda access_token automáticamente en variable de entorno",
+                  "let jsonData = {};",
+                  "try {",
+                  "  jsonData = pm.response.json();",
+                  "} catch (e) {",
+                  "  console.error(\"La respuesta no es JSON válido\");",
+                  "}",
+                  "",
+                  "if (jsonData.access_token) {",
+                  "  pm.environment.set(\"bearerToken\", jsonData.access_token);",
+                  "  pm.environment.set(\"userId\", jsonData.user?.id || \"\");",
+                  "  console.log(\"Token guardado en bearerToken\");",
+                  "} else {",
+                  "  console.warn(\"No se encontró access_token en la respuesta\");",
+                  "}"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "file",
+              "file": {}
+            },
+            "url": {
+              "raw": "{{URL}}/api/v1/auth/login",
+              "host": [
+                "{{URL}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "auth",
+                "login"
+              ]
+            },
+            "description": "**Login** — `POST /api/v1/auth/login`  \nAutentica por **email + contraseña**. Si la respuesta es **200**, incluye **JWT** en `access_token`. En el resto de APIs usa el header `Authorization: Bearer` .\n\n## Request — Headers\n\n| Header | Valor | Obligatorio |\n| --- | --- | --- |\n| `Content-Type` | `application/json` | Sí |\n\n## Request — Body (campos)\n\n| Campo | Tipo | Obligatorio | Descripción |\n| --- | --- | --- | --- |\n| `email` | string | Sí | Email válido. |\n| `password` | string | Sí | Contraseña. |\n\n## Request — Body (ejemplo JSON)\n\n\\`\\`\\`json  \n{  \n\"email\": \"[usuario@ejemplo.com](https://mailto:usuario@ejemplo.com)\",  \n\"password\": \"TuContraseña123\"  \n}"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Perlapp",
+      "item": [
+        {
+          "name": "Buyer",
+          "item": [
+            {
+              "name": "Profile",
+              "item": [
+                {
+                  "name": "Get buyer profile",
+                  "request": {
+                    "auth": {
+                      "type": "bearer",
+                      "bearer": [
+                        {
+                          "key": "token",
+                          "value": "{{token}}",
+                          "type": "string"
+                        }
+                      ]
+                    },
+                    "method": "GET",
+                    "header": [],
+                    "url": {
+                      "raw": "{{URL}}/api/v1/buyer/profile",
+                      "host": [
+                        "{{URL}}"
+                      ],
+                      "path": [
+                        "api",
+                        "v1",
+                        "buyer",
+                        "profile"
+                      ]
+                    }
+                  },
+                  "response": []
+                },
+                {
+                  "name": "Update buyer profile",
+                  "request": {
+                    "auth": {
+                      "type": "bearer",
+                      "bearer": [
+                        {
+                          "key": "token",
+                          "value": "{{token}}",
+                          "type": "string"
+                        }
+                      ]
+                    },
+                    "method": "PUT",
+                    "header": [],
+                    "body": {
+                      "mode": "raw",
+                      "raw": "{\n    \"name\": \"María López\",\n    \"bio\": \"Compradora en Santa Marta.\",\n    \"photo\": \"https://cdn.ejemplo.com/fotos/perfil.jpg\"\n}",
+                      "options": {
+                        "raw": {
+                          "language": "json"
+                        }
+                      }
+                    },
+                    "url": {
+                      "raw": "{{URL}}/api/v1/buyer/profile",
+                      "host": [
+                        "{{URL}}"
+                      ],
+                      "path": [
+                        "api",
+                        "v1",
+                        "buyer",
+                        "profile"
+                      ]
+                    }
+                  },
+                  "response": []
+                }
+              ]
+            },
+            {
+              "name": "Feed",
+              "item": [
+                {
+                  "name": "Get buyer feed",
+                  "request": {
+                    "method": "GET",
+                    "header": [],
+                    "url": {
+                      "raw": "{{URL}}/api/v1/buyer/feed",
+                      "host": [
+                        "{{URL}}"
+                      ],
+                      "path": [
+                        "api",
+                        "v1",
+                        "buyer",
+                        "feed"
+                      ]
+                    }
+                  },
+                  "response": []
+                }
+              ]
+            },
+            {
+              "name": "Get merchants",
+              "item": [
+                {
+                  "name": "Get merchants",
+                  "request": {
+                    "auth": {
+                      "type": "bearer",
+                      "bearer": [
+                        {
+                          "key": "token",
+                          "value": "{{token}}",
+                          "type": "string"
+                        }
+                      ]
+                    },
+                    "method": "GET",
+                    "header": [],
+                    "url": {
+                      "raw": "{{URL}}/api/v1/buyer/merchants",
+                      "host": [
+                        "{{URL}}"
+                      ],
+                      "path": [
+                        "api",
+                        "v1",
+                        "buyer",
+                        "merchants"
+                      ]
+                    }
+                  },
+                  "response": []
+                },
+                {
+                  "name": "Get merchants filter",
+                  "request": {
+                    "auth": {
+                      "type": "bearer",
+                      "bearer": [
+                        {
+                          "key": "token",
+                          "value": "{{token}}",
+                          "type": "string"
+                        }
+                      ]
+                    },
+                    "method": "GET",
+                    "header": [],
+                    "url": {
+                      "raw": "{{URL}}/api/v1/buyer/merchants?municipality_id=<uuid>&nearby_lat=11.2408&nearby_lng=-74.1990&nearby_radius_km=10&page=1&page_size=20",
+                      "host": [
+                        "{{URL}}"
+                      ],
+                      "path": [
+                        "",
+                        "api",
+                        "v1",
+                        "buyer",
+                        "merchants"
+                      ],
+                      "query": [
+                        {
+                          "key": "municipality_id",
+                          "value": "<uuid>"
+                        },
+                        {
+                          "key": "nearby_lat",
+                          "value": "11.2408"
+                        },
+                        {
+                          "key": "nearby_lng",
+                          "value": "-74.1990"
+                        },
+                        {
+                          "key": "nearby_radius_km",
+                          "value": "10"
+                        },
+                        {
+                          "key": "page",
+                          "value": "1"
+                        },
+                        {
+                          "key": "page_size",
+                          "value": "20"
+                        }
+                      ]
+                    }
+                  },
+                  "response": []
+                },
+                {
+                  "name": "Get merchants complete step 2",
+                  "request": {
+                    "auth": {
+                      "type": "bearer",
+                      "bearer": [
+                        {
+                          "key": "token",
+                          "value": "{{token}}",
+                          "type": "string"
+                        }
+                      ]
+                    },
+                    "method": "GET",
+                    "header": [],
+                    "url": {
+                      "raw": "{{URL}}/api/v1/buyer/merchants/stage-2-completed",
+                      "host": [
+                        "{{URL}}"
+                      ],
+                      "path": [
+                        "api",
+                        "v1",
+                        "buyer",
+                        "merchants",
+                        "stage-2-completed"
+                      ]
+                    }
+                  },
+                  "response": []
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "Merchant",
+          "item": [
+            {
+              "name": "Profile",
+              "item": [
+                {
+                  "name": "Get profile merchant",
+                  "request": {
+                    "auth": {
+                      "type": "bearer",
+                      "bearer": [
+                        {
+                          "key": "token",
+                          "value": "{{token}}",
+                          "type": "string"
+                        }
+                      ]
+                    },
+                    "method": "GET",
+                    "header": [],
+                    "url": {
+                      "raw": "{{URL}}/api/v1/merchant/profile",
+                      "host": [
+                        "{{URL}}"
+                      ],
+                      "path": [
+                        "api",
+                        "v1",
+                        "merchant",
+                        "profile"
+                      ]
+                    }
+                  },
+                  "response": []
+                }
+              ]
+            },
+            {
+              "name": "Businesses",
+              "item": [
+                {
+                  "name": "Get businesses",
+                  "request": {
+                    "auth": {
+                      "type": "bearer",
+                      "bearer": [
+                        {
+                          "key": "token",
+                          "value": "{{token}}",
+                          "type": "string"
+                        }
+                      ]
+                    },
+                    "method": "GET",
+                    "header": [],
+                    "url": {
+                      "raw": "{{URL}}/api/v1/merchant/businesses",
+                      "host": [
+                        "{{URL}}"
+                      ],
+                      "path": [
+                        "api",
+                        "v1",
+                        "merchant",
+                        "businesses"
+                      ]
+                    }
+                  },
+                  "response": []
+                }
+              ]
+            },
+            {
+              "name": "Products",
+              "item": [
+                {
+                  "name": "Get products",
+                  "request": {
+                    "auth": {
+                      "type": "bearer",
+                      "bearer": [
+                        {
+                          "key": "token",
+                          "value": "{{token}}",
+                          "type": "string"
+                        }
+                      ]
+                    },
+                    "method": "GET",
+                    "header": [],
+                    "url": {
+                      "raw": "{{URL}}/api/v1/merchant/products",
+                      "host": [
+                        "{{URL}}"
+                      ],
+                      "path": [
+                        "api",
+                        "v1",
+                        "merchant",
+                        "products"
+                      ]
+                    }
+                  },
+                  "response": []
+                },
+                {
+                  "name": "Create product",
+                  "request": {
+                    "auth": {
+                      "type": "bearer",
+                      "bearer": [
+                        {
+                          "key": "token",
+                          "value": "{{token}}",
+                          "type": "string"
+                        }
+                      ]
+                    },
+                    "method": "POST",
+                    "header": [],
+                    "body": {
+                      "mode": "formdata",
+                      "formdata": [
+                        {
+                          "key": "name",
+                          "value": "",
+                          "description": "required",
+                          "type": "text",
+                          "uuid": "32fecdfb-e428-4f31-9a69-bcaba146a9ca"
+                        },
+                        {
+                          "key": "description",
+                          "value": "",
+                          "description": "required",
+                          "type": "text",
+                          "uuid": "8e63ceee-f251-4075-8a27-d3115955d1b0"
+                        },
+                        {
+                          "key": "price",
+                          "value": "",
+                          "description": "required number",
+                          "type": "text",
+                          "uuid": "5e95625a-803e-419b-ae1c-e183abb4f763"
+                        },
+                        {
+                          "key": "photos",
+                          "type": "file",
+                          "uuid": "20c68f49-abca-4070-ad0e-868e09ba142e",
+                          "value": null
+                        },
+                        {
+                          "key": "photos",
+                          "type": "file",
+                          "uuid": "0f6ad044-8975-4e87-9407-a9ac92a95b2a",
+                          "value": null
+                        }
+                      ]
+                    },
+                    "url": {
+                      "raw": "{{URL}}/api/v1/merchant/products",
+                      "host": [
+                        "{{URL}}"
+                      ],
+                      "path": [
+                        "api",
+                        "v1",
+                        "merchant",
+                        "products"
+                      ]
+                    }
+                  },
+                  "response": []
+                },
+                {
+                  "name": "Update product",
+                  "request": {
+                    "auth": {
+                      "type": "bearer",
+                      "bearer": [
+                        {
+                          "key": "token",
+                          "value": "{{token}}",
+                          "type": "string"
+                        }
+                      ]
+                    },
+                    "method": "PUT",
+                    "header": [],
+                    "body": {
+                      "mode": "formdata",
+                      "formdata": [
+                        {
+                          "key": "name",
+                          "value": "",
+                          "type": "text",
+                          "uuid": "8a9fcfae-b4e8-4232-b790-aafd554853c0"
+                        },
+                        {
+                          "key": "description",
+                          "value": "",
+                          "type": "text",
+                          "uuid": "91481993-6a21-41de-a11a-db7cde76918e"
+                        },
+                        {
+                          "key": "price",
+                          "value": "",
+                          "type": "text",
+                          "uuid": "7e8f5b9a-2e55-4dbd-a746-0b6c040dd48f"
+                        },
+                        {
+                          "key": "photos",
+                          "type": "file",
+                          "uuid": "0fefcc25-0df7-46e7-be9a-aa6e7f8da8cc",
+                          "value": null
+                        },
+                        {
+                          "key": "photos",
+                          "type": "file",
+                          "uuid": "8e5df0dc-4040-4c2d-b654-56592c2d355a",
+                          "value": null
+                        }
+                      ]
+                    },
+                    "url": {
+                      "raw": "{{URL}}/api/v1/merchant/products/:id_product",
+                      "host": [
+                        "{{URL}}"
+                      ],
+                      "path": [
+                        "api",
+                        "v1",
+                        "merchant",
+                        "products",
+                        ":id_product"
+                      ],
+                      "variable": [
+                        {
+                          "key": "id_product",
+                          "value": ""
+                        }
+                      ]
+                    }
+                  },
+                  "response": []
+                },
+                {
+                  "name": "Delete product",
+                  "request": {
+                    "auth": {
+                      "type": "bearer",
+                      "bearer": [
+                        {
+                          "key": "token",
+                          "value": "{{token}}",
+                          "type": "string"
+                        }
+                      ]
+                    },
+                    "method": "DELETE",
+                    "header": [],
+                    "url": {
+                      "raw": "{{URL}}/api/v1/merchant/products/:id_product",
+                      "host": [
+                        "{{URL}}"
+                      ],
+                      "path": [
+                        "api",
+                        "v1",
+                        "merchant",
+                        "products",
+                        ":id_product"
+                      ],
+                      "variable": [
+                        {
+                          "key": "id_product",
+                          "value": ""
+                        }
+                      ]
+                    }
+                  },
+                  "response": []
+                }
+              ]
+            },
+            {
+              "name": "Posts",
+              "item": [
+                {
+                  "name": "Get posts",
+                  "request": {
+                    "auth": {
+                      "type": "bearer",
+                      "bearer": [
+                        {
+                          "key": "token",
+                          "value": "{{token}}",
+                          "type": "string"
+                        }
+                      ]
+                    },
+                    "method": "GET",
+                    "header": [],
+                    "url": {
+                      "raw": "{{URL}}/api/v1/merchant/posts",
+                      "host": [
+                        "{{URL}}"
+                      ],
+                      "path": [
+                        "api",
+                        "v1",
+                        "merchant",
+                        "posts"
+                      ]
+                    }
+                  },
+                  "response": []
+                },
+                {
+                  "name": "Create post",
+                  "request": {
+                    "auth": {
+                      "type": "bearer",
+                      "bearer": [
+                        {
+                          "key": "token",
+                          "value": "{{token}}",
+                          "type": "string"
+                        }
+                      ]
+                    },
+                    "method": "POST",
+                    "header": [],
+                    "body": {
+                      "mode": "formdata",
+                      "formdata": [
+                        {
+                          "key": "content",
+                          "value": "",
+                          "description": "required",
+                          "type": "text",
+                          "uuid": "a12f353a-59f1-4fc8-9b46-565cba597545"
+                        },
+                        {
+                          "key": "publication_type_id",
+                          "value": "",
+                          "description": "required",
+                          "type": "text",
+                          "uuid": "c51e46bc-4e6b-449f-8b16-e8c3560e5711"
+                        },
+                        {
+                          "key": "photos",
+                          "type": "file",
+                          "uuid": "54d72794-c908-48c5-8ebe-af4d28bfc11c",
+                          "value": null
+                        },
+                        {
+                          "key": "photos",
+                          "type": "file",
+                          "uuid": "af550d50-682f-4eef-926c-d6a8065dfbf7",
+                          "value": null
+                        }
+                      ]
+                    },
+                    "url": {
+                      "raw": "{{URL}}/api/v1/merchant/posts",
+                      "host": [
+                        "{{URL}}"
+                      ],
+                      "path": [
+                        "api",
+                        "v1",
+                        "merchant",
+                        "posts"
+                      ]
+                    }
+                  },
+                  "response": []
+                },
+                {
+                  "name": "Update post",
+                  "request": {
+                    "method": "PUT",
+                    "header": [],
+                    "body": {
+                      "mode": "formdata",
+                      "formdata": [
+                        {
+                          "key": "contect",
+                          "value": "",
+                          "type": "text",
+                          "uuid": "f90a939e-5253-42de-9ee5-c0524908b299"
+                        },
+                        {
+                          "key": "publication_type_id",
+                          "value": "",
+                          "type": "text",
+                          "uuid": "894c902b-9bb9-4220-90c0-40feee684aff"
+                        },
+                        {
+                          "key": "photos",
+                          "type": "file",
+                          "uuid": "e6baa809-ce94-4450-a45f-d2c19331f5f1",
+                          "value": null
+                        },
+                        {
+                          "key": "photos",
+                          "value": "",
+                          "type": "text",
+                          "uuid": "4a8c08e9-abd5-4888-a312-1d090aa05618"
+                        }
+                      ]
+                    },
+                    "url": {
+                      "raw": "{{URL}}/api/v1/merchant/posts/:id_post",
+                      "host": [
+                        "{{URL}}"
+                      ],
+                      "path": [
+                        "api",
+                        "v1",
+                        "merchant",
+                        "posts",
+                        ":id_post"
+                      ],
+                      "variable": [
+                        {
+                          "key": "id_post",
+                          "value": ""
+                        }
+                      ]
+                    }
+                  },
+                  "response": []
+                },
+                {
+                  "name": "Delete post",
+                  "request": {
+                    "auth": {
+                      "type": "bearer",
+                      "bearer": [
+                        {
+                          "key": "token",
+                          "value": "{{token}}",
+                          "type": "string"
+                        }
+                      ]
+                    },
+                    "method": "DELETE",
+                    "header": [],
+                    "url": {
+                      "raw": "{{URL}}/api/v1/merchant/posts/:id_post",
+                      "host": [
+                        "{{URL}}"
+                      ],
+                      "path": [
+                        "api",
+                        "v1",
+                        "merchant",
+                        "posts",
+                        ":id_post"
+                      ],
+                      "variable": [
+                        {
+                          "key": "id_post",
+                          "value": ""
+                        }
+                      ]
+                    }
+                  },
+                  "response": []
+                }
+              ]
+            },
+            {
+              "name": "Gamification",
+              "item": [
+                {
+                  "name": "Validator general",
+                  "request": {
+                    "auth": {
+                      "type": "bearer",
+                      "bearer": [
+                        {
+                          "key": "token",
+                          "value": "{{token}}",
+                          "type": "string"
+                        }
+                      ]
+                    },
+                    "method": "GET",
+                    "header": [],
+                    "url": {
+                      "raw": "{{URL}}/api/v1/merchant/businesses/onboarding",
+                      "host": [
+                        "{{URL}}"
+                      ],
+                      "path": [
+                        "api",
+                        "v1",
+                        "merchant",
+                        "businesses",
+                        "onboarding"
+                      ]
+                    }
+                  },
+                  "response": []
+                },
+                {
+                  "name": "1. Badge Arquitecto de sueño",
+                  "request": {
+                    "auth": {
+                      "type": "bearer",
+                      "bearer": [
+                        {
+                          "key": "token",
+                          "value": "{{token}}",
+                          "type": "string"
+                        }
+                      ]
+                    },
+                    "method": "PUT",
+                    "header": [],
+                    "body": {
+                      "mode": "raw",
+                      "raw": "{\n    \"business_name\": \"Panaderia Don Pepe\",\n    \"works_alone\": true,\n    \"identification_type\": \"CC\",\n    \"identification_number\": \"123456789\"\n}",
+                      "options": {
+                        "raw": {
+                          "language": "json"
+                        }
+                      }
+                    },
+                    "url": {
+                      "raw": "{{URL}}/api/v1/merchant/businesses/onboarding/stages/1",
+                      "host": [
+                        "{{URL}}"
+                      ],
+                      "path": [
+                        "api",
+                        "v1",
+                        "merchant",
+                        "businesses",
+                        "onboarding",
+                        "stages",
+                        "1"
+                      ]
+                    }
+                  },
+                  "response": []
+                },
+                {
+                  "name": "2. Navegante CIIU",
+                  "request": {
+                    "auth": {
+                      "type": "bearer",
+                      "bearer": [
+                        {
+                          "key": "token",
+                          "value": "{{token}}",
+                          "type": "string"
+                        }
+                      ]
+                    },
+                    "method": "PUT",
+                    "header": [],
+                    "body": {
+                      "mode": "raw",
+                      "raw": "{\n    \"activity_description\": \"Fabricamos y vendemos pan artesanal\",\n    \"economic_sector_ids\": [\n        \"11111111-1111-1111-1111-111111111111\",\n        \"22222222-2222-2222-2222-222222222222\"\n    ],\n    \"ciiu_code\": \"1071\"\n}",
+                      "options": {
+                        "raw": {
+                          "language": "json"
+                        }
+                      }
+                    },
+                    "url": {
+                      "raw": "{{URL}}/api/v1/merchant/businesses/onboarding/stages/2",
+                      "host": [
+                        "{{URL}}"
+                      ],
+                      "path": [
+                        "api",
+                        "v1",
+                        "merchant",
+                        "businesses",
+                        "onboarding",
+                        "stages",
+                        "2"
+                      ]
+                    }
+                  },
+                  "response": []
+                },
+                {
+                  "name": "3. Embajador territorial",
+                  "request": {
+                    "auth": {
+                      "type": "bearer",
+                      "bearer": [
+                        {
+                          "key": "token",
+                          "value": "{{token}}",
+                          "type": "string"
+                        }
+                      ]
+                    },
+                    "method": "PUT",
+                    "header": [],
+                    "body": {
+                      "mode": "raw",
+                      "raw": "{\n    \"municipality_id\": \"f48e8f98-e2be-486f-bf0e-f11f76ed03af\",\n    \"business_address\": \"Calle 10 #5-20, Barrio Centro\" // vacio\n}",
+                      "options": {
+                        "raw": {
+                          "language": "json"
+                        }
+                      }
+                    },
+                    "url": {
+                      "raw": "{{URL}}/api/v1/merchant/businesses/onboarding/stages/3",
+                      "host": [
+                        "{{URL}}"
+                      ],
+                      "path": [
+                        "api",
+                        "v1",
+                        "merchant",
+                        "businesses",
+                        "onboarding",
+                        "stages",
+                        "3"
+                      ]
+                    }
+                  },
+                  "response": []
+                },
+                {
+                  "name": "4.Titan de la microempresa",
+                  "request": {
+                    "auth": {
+                      "type": "bearer",
+                      "bearer": [
+                        {
+                          "key": "token",
+                          "value": "{{token}}",
+                          "type": "string"
+                        }
+                      ]
+                    },
+                    "method": "PUT",
+                    "header": [],
+                    "body": {
+                      "mode": "raw",
+                      "raw": "{\n    \"total_assets_value\": 15000000,\n    \"annual_revenue\": 48000000,\n    \"employee_count\": 3\n}",
+                      "options": {
+                        "raw": {
+                          "language": "json"
+                        }
+                      }
+                    },
+                    "url": {
+                      "raw": "{{URL}}/api/v1/merchant/businesses/onboarding/stages/4",
+                      "host": [
+                        "{{URL}}"
+                      ],
+                      "path": [
+                        "api",
+                        "v1",
+                        "merchant",
+                        "businesses",
+                        "onboarding",
+                        "stages",
+                        "4"
+                      ]
+                    }
+                  },
+                  "response": []
+                },
+                {
+                  "name": "5. Maestro de conexiones",
+                  "request": {
+                    "auth": {
+                      "type": "bearer",
+                      "bearer": [
+                        {
+                          "key": "token",
+                          "value": "{{token}}",
+                          "type": "string"
+                        }
+                      ]
+                    },
+                    "method": "PUT",
+                    "header": [],
+                    "body": {
+                      "mode": "raw",
+                      "raw": "{\n    \"contact_phone\": \"3001234567\",\n    \"contact_email\": \"negocio@email.com\",\n    \"wants_sales_or_financing_support\": true\n}",
+                      "options": {
+                        "raw": {
+                          "language": "json"
+                        }
+                      }
+                    },
+                    "url": {
+                      "raw": "{{URL}}/api/v1/merchant/businesses/onboarding/stages/5",
+                      "host": [
+                        "{{URL}}"
+                      ],
+                      "path": [
+                        "api",
+                        "v1",
+                        "merchant",
+                        "businesses",
+                        "onboarding",
+                        "stages",
+                        "5"
+                      ]
+                    }
+                  },
+                  "response": []
+                },
+                {
+                  "name": "6. NO USAR Emp samario pro",
+                  "request": {
+                    "auth": {
+                      "type": "bearer",
+                      "bearer": [
+                        {
+                          "key": "token",
+                          "value": "{{token}}",
+                          "type": "string"
+                        }
+                      ]
+                    },
+                    "method": "PUT",
+                    "header": [],
+                    "body": {
+                      "mode": "raw",
+                      "raw": "{\n    \"is_commerce_chamber_registered\": true\n}",
+                      "options": {
+                        "raw": {
+                          "language": "json"
+                        }
+                      }
+                    },
+                    "url": {
+                      "raw": "{{URL}}/api/v1/merchant/businesses/onboarding/stages/6",
+                      "host": [
+                        "{{URL}}"
+                      ],
+                      "path": [
+                        "api",
+                        "v1",
+                        "merchant",
+                        "businesses",
+                        "onboarding",
+                        "stages",
+                        "6"
+                      ]
+                    }
+                  },
+                  "response": []
+                }
+              ]
+            },
+            {
+              "name": "Feed",
+              "item": [
+                {
+                  "name": "Get",
+                  "request": {
+                    "method": "GET",
+                    "header": []
+                  },
+                  "response": []
+                }
+              ]
+            },
+            {
+              "name": "Merchant",
+              "item": [
+                {
+                  "name": "Get merchants",
+                  "request": {
+                    "auth": {
+                      "type": "bearer",
+                      "bearer": [
+                        {
+                          "key": "token",
+                          "value": "{{token}}",
+                          "type": "string"
+                        }
+                      ]
+                    },
+                    "method": "GET",
+                    "header": [],
+                    "url": {
+                      "raw": "{{URL}}/api/v1/merchant/merchants",
+                      "host": [
+                        "{{URL}}"
+                      ],
+                      "path": [
+                        "api",
+                        "v1",
+                        "merchant",
+                        "merchants"
+                      ]
+                    }
+                  },
+                  "response": []
+                },
+                {
+                  "name": "Get merchants filter step 2 complete",
+                  "request": {
+                    "auth": {
+                      "type": "bearer",
+                      "bearer": [
+                        {
+                          "key": "token",
+                          "value": "{{token}}",
+                          "type": "string"
+                        }
+                      ]
+                    },
+                    "method": "GET",
+                    "header": [],
+                    "url": {
+                      "raw": "{{URL}}/api/v1/merchant/merchants/stage-2-completed",
+                      "host": [
+                        "{{URL}}"
+                      ],
+                      "path": [
+                        "api",
+                        "v1",
+                        "merchant",
+                        "merchants",
+                        "stage-2-completed"
+                      ]
+                    }
+                  },
+                  "response": []
+                },
+                {
+                  "name": "Get merchants filter sectors CRUSTERS",
+                  "request": {
+                    "auth": {
+                      "type": "bearer",
+                      "bearer": [
+                        {
+                          "key": "token",
+                          "value": "{{token}}",
+                          "type": "string"
+                        }
+                      ]
+                    },
+                    "method": "GET",
+                    "header": [],
+                    "url": {
+                      "raw": "{{URL}}/api/v1/merchant/merchant?economic_sector_id=uuid1&economic_sector_id=uuid2",
+                      "host": [
+                        "{{URL}}"
+                      ],
+                      "path": [
+                        "api",
+                        "v1",
+                        "merchant",
+                        "merchant"
+                      ],
+                      "query": [
+                        {
+                          "key": "economic_sector_id",
+                          "value": "uuid1"
+                        },
+                        {
+                          "key": "economic_sector_id",
+                          "value": "uuid2"
+                        }
+                      ]
+                    }
+                  },
+                  "response": []
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "Public",
+          "item": [
+            {
+              "name": "Get merchants",
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{token}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{URL}}/api/v1/merchants",
+                  "host": [
+                    "{{URL}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "merchants"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Get merchant by id",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{URL}}/api/v1/merchants/:userId",
+                  "host": [
+                    "{{URL}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "merchants",
+                    ":userId"
+                  ],
+                  "variable": [
+                    {
+                      "key": "userId",
+                      "value": "27d45a38-5af8-4938-8679-5ec56616eba1"
+                    }
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Get merchant by id catalog and feed",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{URL}}/api/v1/merchants/:userId/catalog",
+                  "host": [
+                    "{{URL}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "merchants",
+                    ":userId",
+                    "catalog"
+                  ],
+                  "variable": [
+                    {
+                      "key": "userId",
+                      "value": "97f66abe-5b4c-4891-8976-7d9e870228aa"
+                    }
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Get feeds",
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{token}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{URL}}/api/v1/feed",
+                  "host": [
+                    "{{URL}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "feed"
+                  ]
+                }
+              },
+              "response": []
+            }
+          ]
+        },
+        {
+          "name": "Login",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "// Guarda access_token automáticamente en variable de entorno",
+                  "let jsonData = {};",
+                  "try {",
+                  "    jsonData = pm.response.json();",
+                  "} catch (e) {",
+                  "    console.error(\"La respuesta no es JSON válido\");",
+                  "}",
+                  "",
+                  "if (jsonData.access_token) {",
+                  "    pm.environment.set(\"bearerToken\", jsonData.access_token);",
+                  "    pm.environment.set(\"userId\", jsonData.user?.id || \"\");",
+                  "    console.log(\"Token guardado en bearerToken\");",
+                  "} else {",
+                  "    console.warn(\"No se encontró access_token en la respuesta\");",
+                  "}"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n \"email\": \"comercio5@ejemplo.com\",\n    \"password\": \"123456789\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{URL}}/api/v1/auth/login",
+              "host": [
+                "{{URL}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "auth",
+                "login"
+              ]
+            },
+            "description": "**Login** — `POST /api/v1/auth/login`  \nAutentica por **email + contraseña**. Si la respuesta es **200**, incluye **JWT** en `access_token`. En el resto de APIs usa el header `Authorization: Bearer` .\n\n## Request — Headers\n\n| Header | Valor | Obligatorio |\n| --- | --- | --- |\n| `Content-Type` | `application/json` | Sí |\n\n## Request — Body (campos)\n\n| Campo | Tipo | Obligatorio | Descripción |\n| --- | --- | --- | --- |\n| `email` | string | Sí | Email válido. |\n| `password` | string | Sí | Contraseña. |\n\n## Request — Body (ejemplo JSON)\n\n\\`\\`\\`json  \n{  \n\"email\": \"[usuario@ejemplo.com](https://mailto:usuario@ejemplo.com)\",  \n\"password\": \"TuContraseña123\"  \n}"
+          },
+          "response": []
+        },
+        {
+          "name": "Register merchant",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"email\": \"comercio5@ejemplo.com\",\n    \"password\": \"123456789\",\n    \"name\": \"Nombre del comerciante\",\n    \"latitude\": 4.6097,\n    \"longitude\": -74.0817\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{URL}}/api/v1/public/merchants",
+              "host": [
+                "{{URL}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "public",
+                "merchants"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Register buyer",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"email\": \"comprador@ejemplo.com\",\n    \"password\": \"secreto12\",\n    \"name\": \"María López\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{URL}}/api/v1/public/buyers",
+              "host": [
+                "{{URL}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "public",
+                "buyers"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "IA",
+      "item": [
+        {
+          "name": "Create economic sectors CRUSTERS",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "X-License",
+                "value": "HACKATHON-GO-EXAGONE-2026",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"code\": \"servicios_digitales\",\n    \"name\": \"Servicios Digitales\",\n    \"description\": \"Actividades de desarrollo, soporte y servicios en canales digitales.\",\n    \"keywords\": \"software,tecnologia,digital,servicios\",\n    \"is_active\": true\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{URL}}/api/v1/portal/economic-sectors",
+              "host": [
+                "{{URL}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "portal",
+                "economic-sectors"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Master",
+      "item": [
+        {
+          "name": "Get municipalities",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{URL}}/api/v1/municipalities",
+              "host": [
+                "{{URL}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "municipalities"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Type post",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{URL}}/api/v1/publication-types",
+              "host": [
+                "{{URL}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "publication-types"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Economic sectors CRUSTERS",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{URL}}/api/v1/economic-sectors",
+              "host": [
+                "{{URL}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "economic-sectors"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Health",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{URL}}/health",
+          "host": [
+            "{{URL}}"
+          ],
+          "path": [
+            "health"
+          ]
+        }
+      },
+      "response": []
+    }
+  ]
+}

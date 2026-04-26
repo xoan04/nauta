@@ -9,6 +9,7 @@ export async function getMyMerchantProductsUseCase(token: string): Promise<Profi
     return {
       id: product.id,
       name: product.name,
+      description: product.description ?? "",
       price: product.price,
       imageUrl,
     };

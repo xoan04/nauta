@@ -9,8 +9,7 @@ import { CartDrawer } from "@/components/cart/CartDrawer";
 import { Button } from "@/components/ui/button";
 import { HttpError } from "@/core/http";
 import type { PublicMerchantListItem } from "@/core/models/public-merchants-list.model";
-import { createMerchantPostUseCase } from "@/core/use-cases/merchant/create-merchant-post.use-case";
-import { useMasterPublicationTypes } from "@/hooks/use-master-publication-types";
+import { MerchantPostFAB } from "@/components/merchant/MerchantPostFAB";
 import { usePublicMerchants } from "@/hooks/use-public-merchants";
 import { getProductForPost } from "@/lib/cart-catalog";
 import { merchantProfilePath } from "@/lib/merchant-profile.mock";
@@ -41,28 +40,12 @@ function initialsFromName(name: string): string {
 
 export function PerlappHome() {
   const { data: merchantsData, isPending, isError, error, refetch, isFetching } = usePublicMerchants();
-  const { data: publicationTypesData, isPending: isPendingPublicationTypes } = useMasterPublicationTypes();
   const merchants = merchantsData?.merchants ?? [];
-  const publicationTypes = publicationTypesData?.publication_types ?? [];
 
   const role = usePerlappRoleStore((s) => s.role);
   const token = useAuthStore((s) => s.token);
   const registerPostInteraction = useBuyerActivityStore((s) => s.registerPostInteraction);
   const addItem = useCartStore((s) => s.addItem);
-  const [postContent, setPostContent] = useState("");
-  const [publicationTypeId, setPublicationTypeId] = useState("");
-  const [postPhotos, setPostPhotos] = useState<File[]>([]);
-  const [publishing, setPublishing] = useState(false);
-  const [publishError, setPublishError] = useState<string | null>(null);
-  const [publishSuccess, setPublishSuccess] = useState<string | null>(null);
-
-  const canPublish = useMemo(() => {
-    return Boolean(token && postContent.trim() && publicationTypeId.trim());
-  }, [token, postContent, publicationTypeId]);
-  const oversizedPhotos = useMemo(
-    () => postPhotos.filter((file) => file.size > 10 * 1024 * 1024),
-    [postPhotos]
-  );
 
   const addFromPost = (postId: string) => {
     const p = getProductForPost(postId);
@@ -81,39 +64,7 @@ export function PerlappHome() {
     }
   };
 
-  const handleCreatePost = async () => {
-    if (!token) {
-      setPublishError("Tu sesión expiró. Inicia sesión nuevamente.");
-      return;
-    }
-    setPublishError(null);
-    setPublishSuccess(null);
-    setPublishing(true);
-    try {
-      await createMerchantPostUseCase(
-        {
-          content: postContent,
-          publication_type_id: publicationTypeId,
-          photos: postPhotos,
-        },
-        token
-      );
-      setPostContent("");
-      setPublicationTypeId("");
-      setPostPhotos([]);
-      setPublishSuccess("Publicación creada con éxito.");
-    } catch (e) {
-      if (e instanceof HttpError) {
-        setPublishError(e.message);
-      } else if (e instanceof Error && e.message) {
-        setPublishError(e.message);
-      } else {
-        setPublishError("No se pudo crear la publicación. Inténtalo de nuevo.");
-      }
-    } finally {
-      setPublishing(false);
-    }
-  };
+
 
   return (
     <div className="min-h-screen bg-perlapp-canvas text-perlapp-ink antialiased selection:bg-perlapp-orange/20 selection:text-perlapp-ink">
@@ -274,74 +225,6 @@ export function PerlappHome() {
         </section>
 
         {/* Publicaciones */}
-        {role === "market" ? (
-          <section
-            className="w-full px-perlapp-margin-mobile md:px-perlapp-margin-desktop"
-            aria-labelledby="create-post-heading"
-          >
-            <div className="rounded-xl border border-perlapp-line/50 bg-perlapp-white p-perlapp-md shadow-perlapp-float">
-              <h2
-                id="create-post-heading"
-                className="font-display text-[20px] font-semibold leading-7 text-perlapp-ink"
-              >
-                Crear publicación
-              </h2>
-              <div className="mt-3 flex flex-col gap-3">
-                <textarea
-                  value={postContent}
-                  onChange={(e) => setPostContent(e.target.value)}
-                  placeholder="Escribe el contenido de la publicación"
-                  className="min-h-24 w-full rounded-lg border border-perlapp-line/60 px-3 py-2 font-sans text-sm text-perlapp-ink outline-none transition focus:border-perlapp-orange"
-                />
-                <select
-                  value={publicationTypeId}
-                  onChange={(e) => setPublicationTypeId(e.target.value)}
-                  className="h-10 w-full rounded-lg border border-perlapp-line/60 bg-white px-3 font-sans text-sm text-perlapp-ink outline-none transition focus:border-perlapp-orange"
-                >
-                  <option value="">
-                    {isPendingPublicationTypes ? "Cargando categorías…" : "Selecciona una categoría"}
-                  </option>
-                  {publicationTypes.map((type) => (
-                    <option key={type.id} value={type.id}>
-                      {type.name}
-                    </option>
-                  ))}
-                </select>
-                <input
-                  type="file"
-                  multiple
-                  accept="image/*"
-                  onChange={(e) => setPostPhotos(Array.from(e.target.files ?? []))}
-                  className="block w-full text-sm text-perlapp-inkMuted file:mr-3 file:rounded-md file:border file:border-perlapp-line file:bg-perlapp-surfaceContainer file:px-3 file:py-1.5 file:font-display file:text-xs file:font-semibold file:text-perlapp-ink hover:file:bg-perlapp-surfaceVariant"
-                />
-                <p className="text-xs text-perlapp-inkMuted">
-                  Foto de post: sin límite estricto validado en backend (recomendado mantener cada archivo &lt;=
-                  10 MB).
-                </p>
-                {oversizedPhotos.length > 0 ? (
-                  <p className="text-xs text-amber-700">
-                    {oversizedPhotos.length === 1
-                      ? "Hay 1 imagen mayor a 10 MB. Se intentará enviar, pero puede tardar más."
-                      : `Hay ${oversizedPhotos.length} imágenes mayores a 10 MB. Se intentarán enviar, pero puede tardar más.`}
-                  </p>
-                ) : null}
-                {publishError ? (
-                  <p className="text-sm text-red-600">{publishError}</p>
-                ) : publishSuccess ? (
-                  <p className="text-sm text-emerald-700">{publishSuccess}</p>
-                ) : null}
-                <Button
-                  type="button"
-                  disabled={!canPublish || publishing}
-                  onClick={() => void handleCreatePost()}
-                  className="bg-perlapp-orange text-white hover:bg-perlapp-orange/90 disabled:opacity-70"
-                >
-                  {publishing ? "Publicando…" : "Publicar"}
-                </Button>
-              </div>
-            </div>
-          </section>
-        ) : null}
 
         <section
           className="w-full px-perlapp-margin-mobile md:px-perlapp-margin-desktop"
@@ -429,6 +312,7 @@ export function PerlappHome() {
       <PerlappHomeBottomNav />
 
       <CartDrawer />
+      <MerchantPostFAB />
     </div>
   );
 }

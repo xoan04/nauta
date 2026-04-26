@@ -17,6 +17,11 @@ const nextConfig = {
         hostname: "s3hack.kodelabs.dev",
         pathname: "/**",
       },
+      {
+        protocol: "https",
+        hostname: "picsum.photos",
+        pathname: "/**",
+      },
     ],
   },
 };

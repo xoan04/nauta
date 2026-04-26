@@ -1,6 +1,7 @@
 "use client";
 
 import { Suspense, useState } from "react";
+import Image from "next/image";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -54,9 +55,12 @@ function LoginForm() {
   });
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4 bg-secondary/20">
+    <div className="min-h-screen flex items-center justify-center p-4">
       <Card className="w-full max-w-md">
-        <CardHeader>
+        <CardHeader className="items-center text-center">
+          <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl mb-2 shadow-lg overflow-hidden bg-white">
+            <Image src="/logo.png" alt="Perlapp logo" width={64} height={64} priority />
+          </div>
           <CardTitle>Iniciar sesión</CardTitle>
           <CardDescription>Entra con tu correo y contraseña de Perlapp.</CardDescription>
         </CardHeader>
@@ -92,18 +96,25 @@ function LoginForm() {
             </Button>
           </form>
         </CardContent>
-        <CardFooter className="flex flex-col gap-2 text-sm text-muted-foreground text-center sm:text-left">
-          <p>
-            ¿No tienes cuenta?{" "}
-            <Link href="/registro" className="font-medium text-foreground underline underline-offset-2">
-              Regístrate
-            </Link>
-          </p>
-          <p>
-            <Button variant="link" className="h-auto p-0" asChild>
-              <Link href="/">Volver al inicio</Link>
-            </Button>
-          </p>
+        <CardFooter className="flex flex-col gap-3">
+          <div className="flex w-full items-center gap-3">
+            <div className="flex-1 h-px bg-border" />
+            <span className="text-xs text-muted-foreground">o</span>
+            <div className="flex-1 h-px bg-border" />
+          </div>
+          <Button variant="outline" className="w-full" asChild>
+            <Link href="/registro">Soy nuevo — Crear cuenta</Link>
+          </Button>
+          <Button
+            variant="ghost"
+            className="w-full text-muted-foreground"
+            onClick={() => {
+              sessionStorage.setItem("perlapp-guest", "1");
+              router.push("/");
+            }}
+          >
+            Entrar como invitado
+          </Button>
         </CardFooter>
       </Card>
     </div>

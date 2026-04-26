@@ -10,7 +10,7 @@ const ExplorarMapDiscoverView = dynamic(
   {
     ssr: false,
     loading: () => (
-      <div className="flex min-h-[100dvh] items-center justify-center bg-brand-sand text-brand-teal">
+      <div className="flex min-h-[100dvh] items-center justify-center bg-background text-brand-teal">
         <p className="text-sm font-medium">Cargando mapa…</p>
       </div>
     ),
@@ -34,7 +34,7 @@ export function ExplorarPageClient() {
 
   if (!hydrated) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-brand-sand text-brand-stone">
+      <div className="flex min-h-screen items-center justify-center bg-background text-brand-stone">
         <p className="text-sm">Cargando…</p>
       </div>
     );

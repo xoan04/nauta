@@ -1,3 +1,5 @@
+import type { ProfileCatalogProduct } from "./merchant-catalog.types";
+
 export type MerchantPost = {
   id: string;
   body: string;
@@ -23,13 +25,14 @@ export type MerchantProfileData = {
   bannerUrl: string;
   avatarUrl: string;
   location: string;
-  websiteLabel: string;
-  websiteHref: string;
+  websiteLabel?: string;
+  websiteHref?: string;
   joinedLabel: string;
-  followingCount: string;
-  followersCount: string;
+  followingCount?: string;
+  followersCount?: string;
   verified: boolean;
   posts: MerchantPost[];
+  products: ProfileCatalogProduct[];
   /** Texto extra en pestaña Información */
   infoExtra?: string;
 };

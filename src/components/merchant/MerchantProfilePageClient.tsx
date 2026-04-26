@@ -11,7 +11,7 @@ type MerchantProfilePageClientProps = {
 };
 
 export function MerchantProfilePageClient({ userId }: MerchantProfilePageClientProps) {
-  const { data, isLoading, isError, error } = useQuery({
+  const { data, isLoading, isError, error, refetch } = useQuery({
     queryKey: ["merchant-public-profile", userId],
     queryFn: () => getPublicMerchantProfileUseCase(userId),
   });
@@ -43,5 +43,5 @@ export function MerchantProfilePageClient({ userId }: MerchantProfilePageClientP
     );
   }
 
-  return <MerchantProfileView merchant={data} />;
+  return <MerchantProfileView merchant={data} onRefresh={refetch} />;
 }
