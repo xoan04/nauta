@@ -3,28 +3,38 @@
 import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { Link2, Sparkles, Store } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
+import { Sparkles, Store } from "lucide-react";
 import { CartDrawer } from "@/components/cart/CartDrawer";
 import { PerlappBottomNav } from "@/components/home/PerlappBottomNav";
 import { PerlappHomeHeader } from "@/components/home/PerlappHomeHeader";
+import { MerchantProfileView } from "@/components/merchant/MerchantProfileView";
 import { Button } from "@/components/ui/button";
+import { getMyMerchantProfileUseCase } from "@/core/use-cases/merchant/get-my-merchant-profile.use-case";
 import { getMerchantProfileById, merchantProfilePath } from "@/lib/merchant-profile.mock";
 import { RECENT_POSTS } from "@/lib/perlapp-home.constants";
+import { useAuthStore } from "@/store/auth.store";
 import { useBuyerActivityStore } from "@/store/buyer-activity.store";
-import { useMarketConnectionsStore } from "@/store/market-connections.store";
 import { usePerlappRoleStore } from "@/store/perlapp-role.store";
 
 type TabKey = "actividad" | "favoritos";
 
 export function BuyerProfileView() {
   const role = usePerlappRoleStore((s) => s.role);
-  const activeMarketId = usePerlappRoleStore((s) => s.activeMarketId);
+  const authToken = useAuthStore((s) => s.token);
   const [tab, setTab] = useState<TabKey>("actividad");
 
   const favoriteMerchantIds = useBuyerActivityStore((s) => s.favoriteMerchantIds);
   const interactedPostIds = useBuyerActivityStore((s) => s.interactedPostIds);
-  const marketRequests = useMarketConnectionsStore((s) => s.requests);
-  const acceptedPairs = marketRequests.filter((r) => r.status === "aceptada");
+  const {
+    data: myMerchantProfile,
+    isLoading: isLoadingMyMerchantProfile,
+    isError: isErrorMyMerchantProfile,
+  } = useQuery({
+    queryKey: ["merchant-my-profile"],
+    queryFn: () => getMyMerchantProfileUseCase(authToken ?? ""),
+    enabled: role === "market" && Boolean(authToken),
+  });
 
   const postsWithInteraction = RECENT_POSTS.filter((p) => interactedPostIds.includes(p.id));
   const favoriteMerchants = favoriteMerchantIds
@@ -32,58 +42,42 @@ export function BuyerProfileView() {
     .filter(Boolean);
 
   if (role === "market") {
-    return (
-      <div className="min-h-screen bg-perlapp-canvas pb-28 text-perlapp-ink md:pb-0">
-        <PerlappHomeHeader />
-        <main className="mx-auto max-w-2xl px-perlapp-margin-mobile py-perlapp-lg md:px-perlapp-margin-desktop">
-          <p className="font-display text-perlapp-headline-md text-perlapp-ink">Perfil de comercio</p>
-          <p className="mt-2 text-perlapp-inkMuted">
-            Con el rol <strong>Comercio</strong> gestionas tu ficha pública. Las{" "}
-            <strong>conexiones B2B</strong> entre comercios las creas en el home con el botón{" "}
-            <strong>Conectar</strong> en cada tarjeta de comercios destacados.
-          </p>
-          <Button asChild className="mt-6 bg-perlapp-orange text-white hover:bg-perlapp-orange/90">
-            <Link href={merchantProfilePath("me")}>Ir a mi comercio</Link>
-          </Button>
-          {acceptedPairs.length > 0 ? (
-            <div className="mt-10">
-              <h2 className="font-display text-sm font-bold text-perlapp-ink">Conexiones entre comercios</h2>
-              <ul className="mt-3 flex flex-col gap-2">
-                {acceptedPairs.map((pair) => {
-                  const a = getMerchantProfileById(pair.fromMerchantId);
-                  const b = getMerchantProfileById(pair.toMerchantId);
-                  if (!a || !b) return null;
-                  return (
-                    <li
-                      key={pair.id}
-                      className="flex items-center gap-2 rounded-xl border border-perlapp-line/40 bg-perlapp-white px-3 py-2 font-display text-sm"
-                    >
-                      <Link2 className="h-4 w-4 shrink-0 text-perlapp-tertiary" />
-                      <span className="font-semibold">{a.displayName}</span>
-                      <span className="text-perlapp-inkMuted">↔</span>
-                      <span className="font-semibold">{b.displayName}</span>
-                    </li>
-                  );
-                })}
-              </ul>
-            </div>
-          ) : (
-            <p className="mt-8 text-sm text-perlapp-inkMuted">
-              No tienes conexiones aceptadas para {getMerchantProfileById(activeMarketId)?.displayName ?? "este comercio"}.
+    if (isLoadingMyMerchantProfile) {
+      return (
+        <div className="min-h-screen bg-perlapp-canvas pb-28 text-perlapp-ink md:pb-0">
+          <PerlappHomeHeader />
+          <main className="mx-auto max-w-2xl px-perlapp-margin-mobile pb-perlapp-lg pt-24 md:px-perlapp-margin-desktop">
+            <p className="text-sm text-perlapp-inkMuted">Cargando tu perfil…</p>
+          </main>
+          <PerlappBottomNav activeTab="profile" />
+          <CartDrawer />
+        </div>
+      );
+    }
+
+    if (isErrorMyMerchantProfile || !myMerchantProfile) {
+      return (
+        <div className="min-h-screen bg-perlapp-canvas pb-28 text-perlapp-ink md:pb-0">
+          <PerlappHomeHeader />
+          <main className="mx-auto max-w-2xl px-perlapp-margin-mobile pb-perlapp-lg pt-24 md:px-perlapp-margin-desktop">
+            <p className="text-sm text-red-600">
+              No se pudo cargar tu perfil de comercio. Intenta recargar la página.
             </p>
-          )}
-        </main>
-        <PerlappBottomNav activeTab="profile" />
-        <CartDrawer />
-      </div>
-    );
+          </main>
+          <PerlappBottomNav activeTab="profile" />
+          <CartDrawer />
+        </div>
+      );
+    }
+
+    return <MerchantProfileView merchant={myMerchantProfile.profile} />;
   }
 
   if (role === "invitado") {
     return (
       <div className="min-h-screen bg-perlapp-canvas pb-28 text-perlapp-ink md:pb-0">
         <PerlappHomeHeader />
-        <main className="mx-auto max-w-2xl px-perlapp-margin-mobile py-perlapp-lg md:px-perlapp-margin-desktop">
+        <main className="mx-auto max-w-2xl px-perlapp-margin-mobile pb-perlapp-lg pt-24 md:px-perlapp-margin-desktop">
           <p className="font-display text-perlapp-headline-md text-perlapp-ink">Tu perfil</p>
           <p className="mt-2 text-perlapp-inkMuted">
             Como <strong>invitado</strong> este espacio es solo informativo: no hay favoritos, historial
@@ -110,7 +104,7 @@ export function BuyerProfileView() {
     <div className="min-h-screen bg-perlapp-canvas pb-28 text-perlapp-ink antialiased md:pb-0">
       <PerlappHomeHeader />
 
-      <main className="mx-auto w-full max-w-2xl border-x border-perlapp-line/30 bg-perlapp-white">
+      <main className="mx-auto w-full max-w-2xl border-x border-perlapp-line/30 bg-perlapp-white pt-20">
         <header className="border-b border-perlapp-line/50 px-4 py-6">
           <div className="flex items-start gap-3">
             <div className="flex h-14 w-14 items-center justify-center rounded-full bg-perlapp-surfaceContainer text-perlapp-orange">

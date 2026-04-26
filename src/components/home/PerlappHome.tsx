@@ -20,12 +20,11 @@ import { PerlappHomeHeader } from "./PerlappHomeHeader";
 const FEATURED_GRADIENTS = TOP_MERCHANTS.map((m) => m.gradient);
 
 function merchantProfileHref(m: PublicMerchantListItem): string {
-  const raw = m.profile_merchant_id ?? m.user_id;
-  return merchantProfilePath(raw);
+  return merchantProfilePath(m.user.id);
 }
 
 function merchantConnectId(m: PublicMerchantListItem): string {
-  return m.profile_merchant_id ?? m.user_id;
+  return m.profile_merchant?.id ?? m.user.id;
 }
 
 function initialsFromName(name: string): string {
@@ -110,13 +109,13 @@ export function PerlappHome() {
                 const gradient = FEATURED_GRADIENTS[index % FEATURED_GRADIENTS.length];
                 return (
                   <div
-                    key={m.user_id}
+                    key={m.user.id}
                     className="relative h-40 w-[min(280px,85vw)] shrink-0 snap-center"
                   >
                     <Link
                       href={merchantProfileHref(m)}
                       className="group relative block h-full w-full overflow-hidden rounded-xl shadow-perlapp-float outline-none ring-perlapp-orange focus-visible:ring-2"
-                      aria-label={`Ver perfil de ${m.name}`}
+                      aria-label={`Ver perfil de ${m.user.name}`}
                     >
                       <div
                         className={`absolute inset-0 bg-gradient-to-br ${gradient}`}
@@ -124,7 +123,7 @@ export function PerlappHome() {
                       />
                       <div className="absolute inset-0 flex items-center justify-center transition-transform duration-500 group-hover:scale-105">
                         <span className="font-display text-5xl font-bold text-white/25">
-                          {initialsFromName(m.name)}
+                          {initialsFromName(m.user.name)}
                         </span>
                       </div>
                       <div className="absolute inset-0 bg-gradient-to-t from-perlapp-ink/85 via-perlapp-ink/25 to-transparent" aria-hidden />
@@ -133,13 +132,13 @@ export function PerlappHome() {
                           Comercio
                         </span>
                         <h3 className="font-display text-[20px] font-bold leading-tight text-white">
-                          {m.name}
+                          {m.user.name}
                         </h3>
                       </div>
                     </Link>
                     <MerchantFeaturedConnectButton
                       merchantId={merchantConnectId(m)}
-                      merchantTitle={m.name}
+                      merchantTitle={m.user.name}
                     />
                   </div>
                 );
@@ -181,10 +180,10 @@ export function PerlappHome() {
                 const ringGradient = index % 2 === 0;
                 return (
                   <Link
-                    key={m.user_id}
+                    key={m.user.id}
                     href={merchantProfileHref(m)}
                     className="flex w-[72px] shrink-0 flex-col items-center gap-perlapp-xs rounded-xl outline-none ring-perlapp-orange transition-opacity hover:opacity-90 focus-visible:ring-2"
-                    aria-label={`Ver perfil: ${m.name}`}
+                    aria-label={`Ver perfil: ${m.user.name}`}
                   >
                     <div
                       className={`flex h-16 w-16 items-center justify-center rounded-full p-0.5 ${
@@ -194,11 +193,11 @@ export function PerlappHome() {
                       }`}
                     >
                       <div className="flex h-[60px] w-[60px] items-center justify-center rounded-full border-2 border-perlapp-white bg-perlapp-surfaceContainer font-display text-sm font-bold text-perlapp-teal">
-                        {initialsFromName(m.name)}
+                        {initialsFromName(m.user.name)}
                       </div>
                     </div>
                     <span className="w-full truncate text-center font-display text-perlapp-label-sm leading-4 text-perlapp-inkMuted">
-                      {m.name}
+                      {m.user.name}
                     </span>
                   </Link>
                 );

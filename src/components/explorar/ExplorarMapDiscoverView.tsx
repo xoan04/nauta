@@ -18,14 +18,13 @@ import {
 import L from "leaflet";
 import { MapContainer, Marker, Popup, TileLayer, useMap } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
-import { getMerchantProfileById, merchantProfilePath } from "@/lib/merchant-profile.mock";
+import type { PublicMerchantListItem } from "@/core/models/public-merchants-list.model";
+import { usePublicMerchants } from "@/hooks/use-public-merchants";
 import {
   MERCHANT_MAP_CENTER,
   MERCHANT_MAP_CATEGORIES,
-  MERCHANT_MAP_PINS,
   type MerchantMapCategory,
 } from "@/lib/explorar-map.mock";
-import type { MerchantProfileData } from "@/lib/merchant-profile.types";
 
 delete (L.Icon.Default.prototype as unknown as Record<string, unknown>)._getIconUrl;
 L.Icon.Default.mergeOptions({
@@ -89,8 +88,44 @@ const CATEGORY_ICONS: Record<MerchantMapCategory, typeof Wrench> = {
   carpinteria: Hammer,
 };
 
+const MERCHANT_CATEGORY_FALLBACKS: MerchantMapCategory[] = [
+  "plomeria",
+  "electricidad",
+  "limpieza",
+  "carpinteria",
+];
+
+type ApiMerchantPin = {
+  merchant: PublicMerchantListItem;
+  category: MerchantMapCategory;
+  lat: number;
+  lng: number;
+};
+
 function mapServiceCategoryLabel(id: MerchantMapCategory): string {
   return MERCHANT_MAP_CATEGORIES.find((c) => c.id === id)?.label ?? id;
+}
+
+function getMerchantDisplayName(merchant: PublicMerchantListItem): string {
+  const businessName = merchant.businesses[0]?.business?.nombre?.trim();
+  if (businessName) return businessName;
+  return merchant.user.name;
+}
+
+function toMerchantPins(merchants: PublicMerchantListItem[]): ApiMerchantPin[] {
+  return merchants
+    .map((merchant, index) => {
+      const lat = merchant.profile_merchant?.latitude;
+      const lng = merchant.profile_merchant?.longitude;
+      if (lat == null || lng == null) return null;
+      return {
+        merchant,
+        lat,
+        lng,
+        category: MERCHANT_CATEGORY_FALLBACKS[index % MERCHANT_CATEGORY_FALLBACKS.length],
+      } satisfies ApiMerchantPin;
+    })
+    .filter((pin): pin is ApiMerchantPin => pin !== null);
 }
 
 function ExplorarMerchantPopup({
@@ -98,20 +133,29 @@ function ExplorarMerchantPopup({
   mapCategory,
   profileHref,
 }: {
-  merchant: MerchantProfileData;
+  merchant: PublicMerchantListItem;
   mapCategory: MerchantMapCategory;
   profileHref: string;
 }) {
   const serviceLabel = mapServiceCategoryLabel(mapCategory);
-  const bioShort =
-    merchant.bio.length > 128 ? `${merchant.bio.slice(0, 125).trim()}…` : merchant.bio;
+  const displayName = getMerchantDisplayName(merchant);
+  const businessDescription = merchant.businesses[0]?.business?.descripcion?.trim() ?? "";
+  const bioShort = businessDescription
+    ? businessDescription.length > 128
+      ? `${businessDescription.slice(0, 125).trim()}…`
+      : businessDescription
+    : "Comercio registrado en Perlapp.";
+  const categoryLabel = merchant.businesses[0]?.business_category?.name ?? "General";
+  const locationLabel = merchant.businesses[0]?.municipality?.name ?? merchant.profile_merchant?.municipality_name ?? "Ubicación no disponible";
+  const avatarUrl = merchant.profile_merchant?.photo || "/logo.png";
+  const isVerified = Boolean(merchant.businesses[0]?.business?.verificado);
 
   return (
     <article className="merchant-popup-card w-[min(268px,calc(100vw-3.25rem))]">
       <div className="flex gap-3">
         <div className="relative h-14 w-14 shrink-0 overflow-hidden rounded-2xl border-2 border-brand-sand-dark bg-brand-sand shadow-sm ring-2 ring-white">
           <Image
-            src={merchant.avatarUrl}
+            src={avatarUrl}
             alt=""
             width={56}
             height={56}
@@ -121,12 +165,12 @@ function ExplorarMerchantPopup({
         </div>
         <div className="min-w-0 flex-1">
           <div className="flex items-start gap-1">
-            <h3 className="text-[15px] font-bold leading-snug text-brand-teal">{merchant.displayName}</h3>
-            {merchant.verified ? (
+            <h3 className="text-[15px] font-bold leading-snug text-brand-teal">{displayName}</h3>
+            {isVerified ? (
               <BadgeCheck className="mt-0.5 h-4 w-4 shrink-0 text-brand-teal" strokeWidth={2.2} aria-label="Verificado" />
             ) : null}
           </div>
-          <p className="mt-0.5 truncate text-[11px] font-medium text-brand-stone">{merchant.handle}</p>
+          <p className="mt-0.5 truncate text-[11px] font-medium text-brand-stone">@{merchant.user.id.slice(0, 8)}</p>
         </div>
       </div>
 
@@ -135,7 +179,7 @@ function ExplorarMerchantPopup({
           {serviceLabel}
         </span>
         <span className="inline-flex max-w-full items-center rounded-lg border border-brand-sand-dark bg-white px-2 py-1 text-[10px] font-medium leading-tight text-brand-stone">
-          <span className="truncate">{merchant.categoryLabel}</span>
+          <span className="truncate">{categoryLabel}</span>
         </span>
       </div>
 
@@ -143,12 +187,12 @@ function ExplorarMerchantPopup({
 
       <p className="mt-2 flex items-start gap-1.5 text-[11px] leading-snug text-brand-stone">
         <MapPin className="mt-0.5 h-3.5 w-3.5 shrink-0 text-brand-orange" aria-hidden />
-        <span>{merchant.location}</span>
+        <span>{locationLabel}</span>
       </p>
 
       <div className="mt-3 flex items-end justify-between gap-3 border-t border-brand-sand-dark pt-3">
         <div className="min-w-0">
-          <p className="text-sm font-bold tabular-nums text-brand-teal">{merchant.followersCount}</p>
+          <p className="text-sm font-bold tabular-nums text-brand-teal">0</p>
           <p className="text-[10px] font-medium text-brand-stone">seguidores</p>
         </div>
         <Link
@@ -163,6 +207,8 @@ function ExplorarMerchantPopup({
 }
 
 export default function ExplorarMapDiscoverView() {
+  const { data } = usePublicMerchants();
+  const merchantPins = useMemo(() => toMerchantPins(data?.merchants ?? []), [data?.merchants]);
   const [userPos, setUserPos] = useState<{ lat: number; lng: number } | null>(null);
   const geoRequested = useRef(false);
   const [locating, setLocating] = useState(false);
@@ -196,15 +242,14 @@ export default function ExplorarMapDiscoverView() {
 
   const visiblePins = useMemo(() => {
     const q = searchQuery.trim().toLowerCase();
-    return MERCHANT_MAP_PINS.filter((pin) => {
+    return merchantPins.filter((pin) => {
       if (pin.category !== selectedCategory) return false;
       if (!q) return true;
-      const m = getMerchantProfileById(pin.merchantId);
-      const name = m?.displayName?.toLowerCase() ?? "";
-      const handle = m?.handle?.toLowerCase() ?? "";
-      return name.includes(q) || handle.includes(q);
+      const name = getMerchantDisplayName(pin.merchant).toLowerCase();
+      const email = pin.merchant.user.email.toLowerCase();
+      return name.includes(q) || email.includes(q);
     });
-  }, [selectedCategory, searchQuery]);
+  }, [merchantPins, selectedCategory, searchQuery]);
 
   return (
     <div className="relative h-[100dvh] w-full overflow-hidden bg-brand-sand">
@@ -228,11 +273,11 @@ export default function ExplorarMapDiscoverView() {
         </Marker>
 
         {visiblePins.map((pin) => {
-          const merchant = getMerchantProfileById(pin.merchantId);
-          const profileHref = merchantProfilePath(merchant?.id ?? pin.merchantId);
+          const merchant = pin.merchant;
+          const profileHref = `/merchant/${merchant.user.id}`;
           return (
             <Marker
-              key={`${pin.merchantId}-${pin.lat}-${pin.lng}`}
+              key={`${merchant.user.id}-${pin.lat}-${pin.lng}`}
               position={[pin.lat, pin.lng]}
               icon={categoryMarkerIcon(pin.category)}
             >
@@ -244,21 +289,11 @@ export default function ExplorarMapDiscoverView() {
                 autoPanPadding={[48, 120]}
                 keepInView
               >
-                {merchant ? (
-                  <ExplorarMerchantPopup
-                    merchant={merchant}
-                    mapCategory={pin.category}
-                    profileHref={profileHref}
-                  />
-                ) : (
-                  <div className="max-w-[240px] space-y-2 py-0.5">
-                    <p className="text-sm font-semibold text-brand-teal">{pin.merchantId}</p>
-                    <p className="text-xs text-brand-stone">No hay ficha pública para este punto.</p>
-                    <Link href={profileHref} className="inline-block text-xs font-bold text-brand-orange hover:underline">
-                      Intentar abrir perfil →
-                    </Link>
-                  </div>
-                )}
+                <ExplorarMerchantPopup
+                  merchant={merchant}
+                  mapCategory={pin.category}
+                  profileHref={profileHref}
+                />
               </Popup>
             </Marker>
           );
