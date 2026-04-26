@@ -2,7 +2,6 @@ import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import type { AuthSessionUser } from "@/core/models/auth-login.model";
 import { mapApiRoleToPerlappRole } from "@/lib/api-role-map";
-import { merchantProfilePath } from "@/lib/merchant-profile.mock";
 import type { PerlappRole } from "@/types/perlapp-role.types";
 
 type PerlappRoleState = {
@@ -27,7 +26,7 @@ export const usePerlappRoleStore = create<PerlappRoleState>()(
 
 export function getProfileHrefForRole(role: PerlappRole): string {
   if (role === "comprador") return "/perfil";
-  if (role === "market") return merchantProfilePath("me");
+  if (role === "market") return "/perfil";
   return "/perfil";
 }
 
