@@ -1,9 +1,8 @@
 "use client";
 
 import dynamic from "next/dynamic";
-import { useEffect, useState } from "react";
-import { usePerlappRoleStore } from "@/store/perlapp-role.store";
-import { ExplorarGuestLanding } from "@/components/explorar/ExplorarGuestLanding";
+import { CartDrawer } from "@/components/cart/CartDrawer";
+import { PerlappHomeHeader } from "@/components/home/PerlappHomeHeader";
 
 const ExplorarMapDiscoverView = dynamic(
   () => import("@/components/explorar/ExplorarMapDiscoverView"),
@@ -18,31 +17,11 @@ const ExplorarMapDiscoverView = dynamic(
 );
 
 export function ExplorarPageClient() {
-  const [hydrated, setHydrated] = useState(false);
-  const role = usePerlappRoleStore((s) => s.role);
-
-  useEffect(() => {
-    const persistApi = usePerlappRoleStore.persist;
-    if (!persistApi) {
-      setHydrated(true);
-      return;
-    }
-    setHydrated(persistApi.hasHydrated());
-    const unsub = persistApi.onFinishHydration(() => setHydrated(true));
-    return unsub;
-  }, []);
-
-  if (!hydrated) {
-    return (
-      <div className="flex min-h-screen items-center justify-center bg-background text-brand-stone">
-        <p className="text-sm">Cargando…</p>
-      </div>
-    );
-  }
-
-  if (role === "comprador" || role === "market") {
-    return <ExplorarMapDiscoverView />;
-  }
-
-  return <ExplorarGuestLanding />;
+  return (
+    <>
+      <PerlappHomeHeader />
+      <ExplorarMapDiscoverView />
+      <CartDrawer />
+    </>
+  );
 }

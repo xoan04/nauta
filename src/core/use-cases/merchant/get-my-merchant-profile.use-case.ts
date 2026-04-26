@@ -58,6 +58,7 @@ export async function getMyMerchantProfileUseCase(token: string): Promise<MyMerc
       imageUrl: safeImageUrl && safeImageUrl.length > 0 ? safeImageUrl : undefined,
       imageAlt: post.publication_type_name ?? "Imagen de publicación",
       timeAgo: formatPostTimeAgo(post.created_at),
+      url: (post as Record<string, unknown>).url as string | undefined,
       stats: {
         comments: 0,
         reposts: 0,

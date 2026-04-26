@@ -7,6 +7,8 @@ export type MerchantPost = {
   imageUrl?: string;
   imageAlt?: string;
   timeAgo: string;
+  /** Canonical URL of the post, used for sharing */
+  url?: string;
   stats: {
     comments: number;
     reposts: number;

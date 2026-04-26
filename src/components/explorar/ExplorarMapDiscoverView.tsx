@@ -5,13 +5,16 @@ import Image from "next/image";
 import Link from "next/link";
 import {
   BadgeCheck,
-  Hammer,
+  Bell,
+  Home,
   MapPin,
-  Menu,
+  MessageSquare,
   Navigation,
+  Package,
   Search,
-  Sparkles,
-  Wrench,
+  ShoppingCart,
+  Star,
+  User,
   X,
   Zap,
 } from "lucide-react";
@@ -19,12 +22,12 @@ import L from "leaflet";
 import { MapContainer, Marker, Popup, TileLayer, useMap } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
 import type { PublicMerchantListItem } from "@/core/models/public-merchants-list.model";
-import { usePublicMerchants } from "@/hooks/use-public-merchants";
-import {
-  MERCHANT_MAP_CENTER,
-  MERCHANT_MAP_CATEGORIES,
-  type MerchantMapCategory,
-} from "@/lib/explorar-map.mock";
+import { useExplorarMerchants } from "@/hooks/use-explorar-merchants";
+import { MERCHANT_MAP_CENTER } from "@/lib/explorar-map.mock";
+import { cartItemCount } from "@/lib/cart.utils";
+import { useAuthStore } from "@/store/auth.store";
+import { useCartStore } from "@/store/cart.store";
+import { getProfileHrefForRole, usePerlappRoleStore } from "@/store/perlapp-role.store";
 
 delete (L.Icon.Default.prototype as unknown as Record<string, unknown>)._getIconUrl;
 L.Icon.Default.mergeOptions({
@@ -33,28 +36,19 @@ L.Icon.Default.mergeOptions({
   shadowUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png",
 });
 
-const MARKER_SVGS: Record<MerchantMapCategory, string> = {
-  plomeria: `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#374151" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>`,
-  electricidad: `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#374151" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 14a1 1 0 0 1-.78-1.63l9.9-10.2a.5.5 0 0 1 .86.46l-1.92 6.02A1 1 0 0 0 13 10h7a1 1 0 0 1 .78 1.63l-9.9 10.2a.5.5 0 0 1-.86-.46l1.92-6.02A1 1 0 0 0 11 14z"/></svg>`,
-  limpieza: `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#374151" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/><path d="M5 3v4"/><path d="M19 17v4"/><path d="M3 5h4"/><path d="M17 19h4"/></svg>`,
-  carpinteria: `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#374151" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 12-8.373 8.373a1 1 0 1 1-3-3L12 9"/><path d="m18 15 4-4"/><path d="m21.5 11.5-1.914-1.914A2 2 0 0 1 19 8.5v-1a2 2 0 0 0-2-2h-1a2 2 0 0 1-2-2v-1a2 2 0 0 0-2-2h-2.272a2 2 0 0 0-1.789 1.106L9 6.5"/></svg>`,
-};
-
-const categoryIconCache = new Map<MerchantMapCategory, L.DivIcon>();
-
-function categoryMarkerIcon(category: MerchantMapCategory): L.DivIcon {
-  const cached = categoryIconCache.get(category);
-  if (cached) return cached;
-  const svg = MARKER_SVGS[category];
-  const icon = L.divIcon({
-    className: "explorar-cat-marker",
-    html: `<div style="width:44px;height:44px;display:flex;align-items:center;justify-content:center;background:#fff;border-radius:50%;border:3px solid #1D5C4A;box-shadow:0 4px 14px rgba(0,0,0,.12)">${svg}</div>`,
-    iconSize: [44, 44],
-    iconAnchor: [22, 22],
-  });
-  categoryIconCache.set(category, icon);
-  return icon;
-}
+const merchantMarkerIcon = L.divIcon({
+  className: "explorar-merchant-marker",
+  html: `<div style="width:44px;height:44px;display:flex;align-items:center;justify-content:center;background:#fff;border-radius:50%;border:3px solid #1D5C4A;box-shadow:0 4px 14px rgba(0,0,0,.12)">
+    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#1D5C4A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="m2 7 4.41-4.41A2 2 0 0 1 7.83 2h8.34a2 2 0 0 1 1.42.59L22 7"/>
+      <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/>
+      <path d="M15 22v-4a2 2 0 0 0-2-2h-2a2 2 0 0 0-2 2v4"/>
+      <path d="M2 7h20"/>
+    </svg>
+  </div>`,
+  iconSize: [44, 44],
+  iconAnchor: [22, 22],
+});
 
 const userMarkerIcon = L.divIcon({
   className: "explorar-user-marker",
@@ -71,50 +65,40 @@ const userMarkerIcon = L.divIcon({
 function FlyTo({ center, zoom }: { center: { lat: number; lng: number }; zoom: number }) {
   const map = useMap();
   const prev = useRef(center);
-
   useEffect(() => {
     if (prev.current.lat === center.lat && prev.current.lng === center.lng) return;
     prev.current = center;
     map.flyTo([center.lat, center.lng], zoom, { duration: 0.9 });
   }, [center, zoom, map]);
-
   return null;
 }
 
-const CATEGORY_ICONS: Record<MerchantMapCategory, typeof Wrench> = {
-  plomeria: Wrench,
-  electricidad: Zap,
-  limpieza: Sparkles,
-  carpinteria: Hammer,
-};
+function getMerchantDisplayName(merchant: PublicMerchantListItem): string {
+  const b = merchant.businesses[0]?.business;
+  return b?.business_name?.trim() || b?.nombre?.trim() || b?.name?.trim() || merchant.user.name;
+}
 
-const MERCHANT_CATEGORY_FALLBACKS: MerchantMapCategory[] = [
-  "plomeria",
-  "electricidad",
-  "limpieza",
-  "carpinteria",
-];
+function getMerchantDescription(merchant: PublicMerchantListItem): string {
+  const b = merchant.businesses[0]?.business;
+  return b?.description?.trim() || b?.descripcion?.trim() || "";
+}
 
-type ApiMerchantPin = {
+function getMerchantVerified(merchant: PublicMerchantListItem): boolean {
+  const b = merchant.businesses[0]?.business;
+  return Boolean(b?.is_verified || b?.verified || b?.verificado);
+}
+
+type MerchantPin = {
   merchant: PublicMerchantListItem;
-  category: MerchantMapCategory;
   lat: number;
   lng: number;
+  categoryCode: string;
+  categoryName: string;
 };
 
-function mapServiceCategoryLabel(id: MerchantMapCategory): string {
-  return MERCHANT_MAP_CATEGORIES.find((c) => c.id === id)?.label ?? id;
-}
-
-function getMerchantDisplayName(merchant: PublicMerchantListItem): string {
-  const businessName = merchant.businesses[0]?.business?.nombre?.trim();
-  if (businessName) return businessName;
-  return merchant.user.name;
-}
-
-function toMerchantPins(merchants: PublicMerchantListItem[]): ApiMerchantPin[] {
+function toMerchantPins(merchants: PublicMerchantListItem[]): MerchantPin[] {
   return merchants
-    .map((merchant, index) => {
+    .map((merchant) => {
       const lat = merchant.profile_merchant?.latitude;
       const lng = merchant.profile_merchant?.longitude;
       if (lat == null || lng == null) return null;
@@ -122,97 +106,160 @@ function toMerchantPins(merchants: PublicMerchantListItem[]): ApiMerchantPin[] {
         merchant,
         lat,
         lng,
-        category: MERCHANT_CATEGORY_FALLBACKS[index % MERCHANT_CATEGORY_FALLBACKS.length],
-      } satisfies ApiMerchantPin;
+        categoryCode: merchant.businesses[0]?.business_category?.code ?? "GENERAL",
+        categoryName: merchant.businesses[0]?.business_category?.name ?? "General",
+      };
     })
-    .filter((pin): pin is ApiMerchantPin => pin !== null);
+    .filter((p): p is MerchantPin => p !== null);
 }
 
 function ExplorarMerchantPopup({
   merchant,
-  mapCategory,
+  categoryName,
   profileHref,
 }: {
   merchant: PublicMerchantListItem;
-  mapCategory: MerchantMapCategory;
+  categoryName: string;
   profileHref: string;
 }) {
-  const serviceLabel = mapServiceCategoryLabel(mapCategory);
+  const business = merchant.businesses[0]?.business;
   const displayName = getMerchantDisplayName(merchant);
-  const businessDescription = merchant.businesses[0]?.business?.descripcion?.trim() ?? "";
-  const bioShort = businessDescription
-    ? businessDescription.length > 128
-      ? `${businessDescription.slice(0, 125).trim()}…`
-      : businessDescription
+  const description = getMerchantDescription(merchant);
+  const bioShort = description
+    ? description.length > 110
+      ? `${description.slice(0, 107).trim()}…`
+      : description
     : "Comercio registrado en Perlapp.";
-  const categoryLabel = merchant.businesses[0]?.business_category?.name ?? "General";
-  const locationLabel = merchant.businesses[0]?.municipality?.name ?? merchant.profile_merchant?.municipality_name ?? "Ubicación no disponible";
-  const avatarUrl = merchant.profile_merchant?.photo || "/logo.png";
-  const isVerified = Boolean(merchant.businesses[0]?.business?.verificado);
+
+  const locationLabel =
+    merchant.businesses[0]?.municipality?.name ??
+    merchant.profile_merchant?.municipality_name ??
+    "Santa Marta, Magdalena";
+
+  const avatarUrl =
+    business?.profile_photo_url ??
+    merchant.profile_merchant?.photo ??
+    "/logo.png";
+
+  const bannerUrl =
+    business?.banner_photo_url ??
+    merchant.profile_merchant?.photo_banner ??
+    "https://picsum.photos/seed/default-banner/800/200";
+
+  const isVerified = getMerchantVerified(merchant);
+  const productCount = (merchant.products as unknown[]).length;
+  const postCount = (merchant.posts as unknown[]).length;
+
+  const stageLabel = (business as any)?.stage
+    ? (business as any).stage
+        .replace(/_/g, " ")
+        .replace(/\b\w/g, (l: string) => l.toUpperCase())
+    : null;
 
   return (
-    <article className="merchant-popup-card w-[min(268px,calc(100vw-3.25rem))]">
-      <div className="flex gap-3">
-        <div className="relative h-14 w-14 shrink-0 overflow-hidden rounded-2xl border-2 border-brand-sand-dark bg-brand-sand shadow-sm ring-2 ring-white">
-          <Image
-            src={avatarUrl}
-            alt=""
-            width={56}
-            height={56}
-            className="h-full w-full object-cover"
-            sizes="56px"
-          />
+    <article className="merchant-popup-card w-[min(280px,calc(100vw-3.25rem))] overflow-hidden rounded-2xl bg-white shadow-sm">
+      {/* Header Banner */}
+      <div className="relative h-24 w-full overflow-hidden">
+        <Image src={bannerUrl} alt="" fill className="object-cover brightness-[0.9]" />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent" />
+        <div className="absolute right-3 top-3 flex flex-col items-end gap-1.5">
+          <span className="inline-flex items-center rounded-full bg-white/95 px-2.5 py-0.5 text-[10px] font-bold text-brand-teal shadow-sm backdrop-blur-sm">
+            {categoryName}
+          </span>
+          {stageLabel && (
+            <span className="inline-flex items-center rounded-full bg-brand-orange/90 px-2.5 py-0.5 text-[9px] font-black uppercase tracking-wider text-white shadow-sm backdrop-blur-sm">
+              {stageLabel}
+            </span>
+          )}
         </div>
-        <div className="min-w-0 flex-1">
-          <div className="flex items-start gap-1">
-            <h3 className="text-[15px] font-bold leading-snug text-brand-teal">{displayName}</h3>
-            {isVerified ? (
-              <BadgeCheck className="mt-0.5 h-4 w-4 shrink-0 text-brand-teal" strokeWidth={2.2} aria-label="Verificado" />
-            ) : null}
+      </div>
+
+      <div className="relative px-3 pb-3 pt-4">
+        {/* Avatar Overlap */}
+        <div className="absolute -top-10 left-3">
+          <div className="relative h-18 w-18 overflow-hidden rounded-[1.25rem] border-[3px] border-white bg-white shadow-lg ring-1 ring-black/5">
+            <Image src={avatarUrl} alt="" fill className="object-cover" sizes="72px" />
           </div>
-          <p className="mt-0.5 truncate text-[11px] font-medium text-brand-stone">@{merchant.user.id.slice(0, 8)}</p>
         </div>
-      </div>
 
-      <div className="mt-2.5 flex flex-wrap gap-1.5">
-        <span className="inline-flex items-center rounded-lg border border-brand-teal/35 bg-brand-teal/[0.08] px-2 py-1 text-[10px] font-semibold uppercase tracking-wide text-brand-teal">
-          {serviceLabel}
-        </span>
-        <span className="inline-flex max-w-full items-center rounded-lg border border-brand-sand-dark bg-white px-2 py-1 text-[10px] font-medium leading-tight text-brand-stone">
-          <span className="truncate">{categoryLabel}</span>
-        </span>
-      </div>
-
-      <p className="mt-2.5 line-clamp-2 text-xs leading-relaxed text-brand-teal/90">{bioShort}</p>
-
-      <p className="mt-2 flex items-start gap-1.5 text-[11px] leading-snug text-brand-stone">
-        <MapPin className="mt-0.5 h-3.5 w-3.5 shrink-0 text-brand-orange" aria-hidden />
-        <span>{locationLabel}</span>
-      </p>
-
-      <div className="mt-3 flex items-end justify-between gap-3 border-t border-brand-sand-dark pt-3">
-        <div className="min-w-0">
-          <p className="text-sm font-bold tabular-nums text-brand-teal">0</p>
-          <p className="text-[10px] font-medium text-brand-stone">seguidores</p>
+        <div className="ml-[82px] min-h-[44px]">
+          <div className="flex items-center gap-1.5 pt-0.5">
+            <h3 className="line-clamp-1 text-[15px] font-extrabold leading-tight text-brand-teal">
+              {displayName}
+            </h3>
+            {isVerified && (
+              <BadgeCheck
+                className="h-4.5 w-4.5 shrink-0 text-brand-teal"
+                strokeWidth={2.8}
+                aria-label="Verificado"
+              />
+            )}
+          </div>
+          <p className="mt-1 flex items-center gap-1 text-[10px] font-semibold text-brand-stone/70">
+            <span>@{merchant.user.name.toLowerCase().replace(/\s+/g, "")}</span>
+            <span className="h-0.5 w-0.5 rounded-full bg-brand-stone/40" />
+            <span>ID: {merchant.user.id.slice(0, 4)}</span>
+          </p>
         </div>
-        <Link
-          href={profileHref}
-          className="shrink-0 rounded-xl bg-brand-orange px-4 py-2.5 text-center text-xs font-bold text-white shadow-[0_6px_16px_-4px_rgba(241,90,41,0.5)] transition hover:bg-brand-orange-dark active:scale-[0.98]"
-        >
-          Ver perfil
-        </Link>
+
+        <p className="mt-5 line-clamp-2 text-xs leading-relaxed text-brand-teal/80">
+          {bioShort}
+        </p>
+
+        <div className="mt-2.5 flex items-center gap-1 text-[10px] font-medium text-brand-stone">
+          <MapPin className="h-3 w-3 shrink-0 text-brand-orange" />
+          <span className="line-clamp-1">{locationLabel}</span>
+        </div>
+
+        <div className="mt-4 flex items-center justify-between border-t border-brand-sand/50 pt-3">
+          <div className="flex gap-4">
+            <div className="flex flex-col">
+              <div className="flex items-center gap-1">
+                <Package className="h-3 w-3 text-brand-orange" />
+                <span className="text-[13px] font-bold text-brand-teal leading-none">
+                  {productCount}
+                </span>
+              </div>
+              <span className="text-[9px] font-medium text-brand-stone uppercase tracking-tight">
+                Productos
+              </span>
+            </div>
+            <div className="flex flex-col">
+              <div className="flex items-center gap-1">
+                <Zap className="h-3 w-3 text-brand-orange" />
+                <span className="text-[13px] font-bold text-brand-teal leading-none">
+                  {postCount}
+                </span>
+              </div>
+              <span className="text-[9px] font-medium text-brand-stone uppercase tracking-tight">
+                Posts
+              </span>
+            </div>
+          </div>
+
+          <Link
+            href={profileHref}
+            className="flex h-9 items-center justify-center rounded-xl bg-brand-orange px-4 text-xs font-bold text-white shadow-lg transition-all hover:bg-brand-orange-dark hover:shadow-orange-200 active:scale-95"
+          >
+            Ver catálogo
+          </Link>
+        </div>
       </div>
     </article>
   );
 }
 
 export default function ExplorarMapDiscoverView() {
-  const { data } = usePublicMerchants();
-  const merchantPins = useMemo(() => toMerchantPins(data?.merchants ?? []), [data?.merchants]);
+  const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
+  const role = usePerlappRoleStore((s) => s.role);
+  const profileHref = getProfileHrefForRole(role);
+  const itemCount = useCartStore((s) => cartItemCount(s.items));
+  const openDrawer = useCartStore((s) => s.openDrawer);
+
   const [userPos, setUserPos] = useState<{ lat: number; lng: number } | null>(null);
   const geoRequested = useRef(false);
   const [locating, setLocating] = useState(false);
-  const [selectedCategory, setSelectedCategory] = useState<MerchantMapCategory>("plomeria");
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [searchOpen, setSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
 
@@ -240,16 +287,32 @@ export default function ExplorarMapDiscoverView() {
     requestLocation();
   }, [requestLocation]);
 
+  const { data, isPending } = useExplorarMerchants(userPos?.lat, userPos?.lng);
+
+  const allPins = useMemo(() => toMerchantPins(data?.merchants ?? []), [data?.merchants]);
+
+  const categories = useMemo(() => {
+    const seen = new Set<string>();
+    const result: { code: string; name: string }[] = [];
+    for (const pin of allPins) {
+      if (!seen.has(pin.categoryCode)) {
+        seen.add(pin.categoryCode);
+        result.push({ code: pin.categoryCode, name: pin.categoryName });
+      }
+    }
+    return result;
+  }, [allPins]);
+
   const visiblePins = useMemo(() => {
     const q = searchQuery.trim().toLowerCase();
-    return merchantPins.filter((pin) => {
-      if (pin.category !== selectedCategory) return false;
+    return allPins.filter((pin) => {
+      if (selectedCategory && pin.categoryCode !== selectedCategory) return false;
       if (!q) return true;
-      const name = getMerchantDisplayName(pin.merchant).toLowerCase();
-      const email = pin.merchant.user.email.toLowerCase();
-      return name.includes(q) || email.includes(q);
+      return getMerchantDisplayName(pin.merchant).toLowerCase().includes(q);
     });
-  }, [merchantPins, selectedCategory, searchQuery]);
+  }, [allPins, selectedCategory, searchQuery]);
+
+  const isGuest = role === "invitado";
 
   return (
     <div className="relative h-[100dvh] w-full overflow-hidden bg-brand-sand">
@@ -272,33 +335,60 @@ export default function ExplorarMapDiscoverView() {
           </Popup>
         </Marker>
 
-        {visiblePins.map((pin) => {
-          const merchant = pin.merchant;
-          const profileHref = `/merchant/${merchant.user.id}`;
-          return (
-            <Marker
-              key={`${merchant.user.id}-${pin.lat}-${pin.lng}`}
-              position={[pin.lat, pin.lng]}
-              icon={categoryMarkerIcon(pin.category)}
+        {!isGuest && visiblePins.map((pin) => (
+          <Marker
+            key={pin.merchant.user.id}
+            position={[pin.lat, pin.lng]}
+            icon={merchantMarkerIcon}
+          >
+            <Popup
+              className="explorar-map-merchant-leaflet-popup"
+              minWidth={288}
+              maxWidth={320}
+              offset={[0, 6]}
+              autoPanPadding={[48, 120]}
+              keepInView
             >
-              <Popup
-                className="explorar-map-merchant-leaflet-popup"
-                minWidth={288}
-                maxWidth={320}
-                offset={[0, 6]}
-                autoPanPadding={[48, 120]}
-                keepInView
-              >
-                <ExplorarMerchantPopup
-                  merchant={merchant}
-                  mapCategory={pin.category}
-                  profileHref={profileHref}
-                />
-              </Popup>
-            </Marker>
-          );
-        })}
+              <ExplorarMerchantPopup
+                merchant={pin.merchant}
+                categoryName={pin.categoryName}
+                profileHref={`/merchant/${pin.merchant.user.id}`}
+              />
+            </Popup>
+          </Marker>
+        ))}
       </MapContainer>
+
+      {/* Guest overlay */}
+      {isGuest && (
+        <div className="absolute inset-0 z-[600] flex items-center justify-center bg-black/50 px-6 backdrop-blur-sm">
+          <div className="w-full max-w-xs rounded-3xl bg-white px-6 py-8 text-center shadow-2xl">
+            <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-brand-teal/10">
+              <MapPin className="h-8 w-8 text-brand-teal" strokeWidth={1.5} />
+            </div>
+            <h2 className="mb-2 font-display text-xl font-bold text-brand-teal">
+              ¿Quién está cerca de ti?
+            </h2>
+            <p className="mb-6 text-sm leading-relaxed text-brand-stone">
+              Regístrate para ver los comercios de tu zona en el mapa y encontrar lo que necesitas.
+            </p>
+            <div className="flex flex-col gap-3">
+              <Link
+                href="/registro/comprador"
+                className="w-full rounded-2xl bg-brand-teal py-3.5 font-display text-sm font-bold text-white shadow-[0_8px_24px_-8px_rgba(29,92,74,0.4)] transition hover:bg-brand-teal/90 active:scale-[0.98]"
+              >
+                Crear cuenta gratis
+              </Link>
+              <Link
+                href="/login"
+                className="w-full rounded-2xl border-2 border-brand-orange py-3 font-display text-sm font-semibold text-brand-orange transition hover:bg-brand-orange/5 active:scale-[0.98]"
+              >
+                Iniciar sesión
+              </Link>
+            </div>
+          </div>
+        </div>
+      )}
 
       {locating && (
         <div className="pointer-events-none absolute inset-0 z-[400] flex items-center justify-center bg-white/30 backdrop-blur-[2px]">
@@ -308,38 +398,28 @@ export default function ExplorarMapDiscoverView() {
         </div>
       )}
 
-      <header className="pointer-events-none absolute left-0 right-0 top-0 z-[500] flex items-start justify-between p-4 pt-[max(1rem,env(safe-area-inset-top))]">
-        <Link
-          href="/"
+      {/* Floating controls */}
+      <div className="pointer-events-none absolute right-0 top-20 z-[500] flex flex-col items-end gap-2 p-4">
+        <button
+          type="button"
+          onClick={requestLocation}
           className="pointer-events-auto flex h-11 w-11 items-center justify-center rounded-full bg-white text-brand-teal shadow-[0_4px_16px_rgba(0,0,0,.12)] transition hover:bg-brand-sand"
-          aria-label="Ir al inicio"
+          aria-label="Centrar en mi ubicación"
         >
-          <Menu className="h-5 w-5" />
-        </Link>
-        <div className="pointer-events-auto flex flex-col gap-2">
-          <button
-            type="button"
-            onClick={() => {
-              requestLocation();
-            }}
-            className="flex h-11 w-11 items-center justify-center rounded-full bg-white text-brand-teal shadow-[0_4px_16px_rgba(0,0,0,.12)] transition hover:bg-brand-sand"
-            aria-label="Centrar en mi ubicación"
-          >
-            <Navigation className="h-5 w-5" />
-          </button>
-          <button
-            type="button"
-            onClick={() => setSearchOpen((v) => !v)}
-            className="flex h-11 w-11 items-center justify-center rounded-full bg-white text-brand-teal shadow-[0_4px_16px_rgba(0,0,0,.12)] transition hover:bg-brand-sand"
-            aria-label="Buscar comercio"
-          >
-            <Search className="h-5 w-5" />
-          </button>
-        </div>
-      </header>
+          <Navigation className="h-5 w-5" />
+        </button>
+        <button
+          type="button"
+          onClick={() => setSearchOpen((v) => !v)}
+          className="pointer-events-auto flex h-11 w-11 items-center justify-center rounded-full bg-white text-brand-teal shadow-[0_4px_16px_rgba(0,0,0,.12)] transition hover:bg-brand-sand"
+          aria-label="Buscar comercio"
+        >
+          <Search className="h-5 w-5" />
+        </button>
+      </div>
 
       {searchOpen && (
-        <div className="absolute left-0 right-0 top-[max(4.5rem,env(safe-area-inset-top)+3rem)] z-[600] px-4">
+        <div className="absolute left-0 right-0 top-[max(5rem,calc(env(safe-area-inset-top)+5rem))] z-[600] px-4">
           <div className="mx-auto flex max-w-md items-center gap-2 rounded-2xl border border-brand-sand-dark bg-white px-3 py-2 shadow-lg">
             <Search className="h-4 w-4 shrink-0 text-brand-stone" aria-hidden />
             <input
@@ -352,10 +432,7 @@ export default function ExplorarMapDiscoverView() {
             />
             <button
               type="button"
-              onClick={() => {
-                setSearchOpen(false);
-                setSearchQuery("");
-              }}
+              onClick={() => { setSearchOpen(false); setSearchQuery(""); }}
               className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-brand-stone hover:bg-brand-sand"
               aria-label="Cerrar búsqueda"
             >
@@ -365,49 +442,126 @@ export default function ExplorarMapDiscoverView() {
         </div>
       )}
 
-      <div className="pointer-events-none absolute bottom-0 left-0 right-0 z-[500] pb-[max(0.75rem,env(safe-area-inset-bottom))]">
-        <div className="pointer-events-auto mx-auto max-w-lg rounded-t-3xl bg-white px-4 pb-5 pt-4 shadow-[0_-8px_32px_rgba(0,0,0,.1)]">
-          <p className="mb-3 text-center text-[11px] font-semibold uppercase tracking-[0.12em] text-brand-stone">
-            ¿Qué necesitas?
-          </p>
-          <div className="no-scrollbar flex gap-3 overflow-x-auto pb-1 pt-0.5">
-            {MERCHANT_MAP_CATEGORIES.map(({ id, label }) => {
-              const Icon = CATEGORY_ICONS[id];
-              const active = selectedCategory === id;
-              return (
-                <button
-                  key={id}
-                  type="button"
-                  onClick={() => setSelectedCategory(id)}
-                  className={`flex min-w-[76px] flex-shrink-0 flex-col items-center gap-2 rounded-2xl border-2 px-2 py-3 transition ${
-                    active
-                      ? "border-brand-teal bg-brand-teal/10 shadow-sm"
-                      : "border-transparent bg-brand-sand/80 hover:border-brand-sand-dark"
-                  }`}
-                >
-                  <span
-                    className={`flex h-12 w-12 items-center justify-center rounded-xl ${
-                      active ? "bg-white text-brand-teal" : "bg-white text-brand-stone"
+      {/* Bottom unified panel */}
+      <div className="pointer-events-auto absolute bottom-0 left-0 right-0 z-[500]">
+        <div className="mx-auto max-w-lg rounded-t-3xl bg-white shadow-[0_-8px_32px_rgba(0,0,0,.1)]">
+          {/* Categories */}
+          {!isGuest && (
+            <div className="px-4 pb-2 pt-4">
+              <p className="mb-3 text-center text-[11px] font-semibold uppercase tracking-[0.12em] text-brand-stone">
+                Filtrar por categoría
+              </p>
+              {isPending && !data ? (
+                <div className="flex gap-3 pb-1">
+                  {[0, 1, 2, 3].map((i) => (
+                    <div key={i} className="h-[104px] min-w-[76px] animate-pulse rounded-2xl bg-brand-sand" />
+                  ))}
+                </div>
+              ) : categories.length > 0 ? (
+                <div className="no-scrollbar flex gap-3 overflow-x-auto pb-1 pt-0.5">
+                  <button
+                    type="button"
+                    onClick={() => setSelectedCategory(null)}
+                    className={`flex min-w-[72px] flex-shrink-0 flex-col items-center gap-2 rounded-2xl border-2 px-2 py-3 transition ${
+                      selectedCategory === null
+                        ? "border-brand-teal bg-brand-teal/10 shadow-sm"
+                        : "border-transparent bg-brand-sand/80 hover:border-brand-sand-dark"
                     }`}
                   >
-                    <Icon className="h-6 w-6" strokeWidth={2} />
-                  </span>
-                  <span
-                    className={`text-center text-[11px] font-semibold leading-tight ${
-                      active ? "text-brand-teal" : "text-brand-stone"
-                    }`}
-                  >
-                    {label}
-                  </span>
-                </button>
-              );
-            })}
-          </div>
-          <p className="mt-3 text-center text-xs text-brand-stone">
-            {visiblePins.length === 0
-              ? "No hay comercios en esta categoría con ese filtro."
-              : `${visiblePins.length} comercio${visiblePins.length === 1 ? "" : "s"} en el mapa`}
-          </p>
+                    <span className={`flex h-12 w-12 items-center justify-center rounded-xl text-xs font-bold ${selectedCategory === null ? "bg-white text-brand-teal" : "bg-white text-brand-stone"}`}>
+                      Todos
+                    </span>
+                    <span className={`text-center text-[11px] font-semibold leading-tight ${selectedCategory === null ? "text-brand-teal" : "text-brand-stone"}`}>
+                      Todos
+                    </span>
+                  </button>
+                  {categories.map(({ code, name }) => (
+                    <button
+                      key={code}
+                      type="button"
+                      onClick={() => setSelectedCategory(code)}
+                      className={`flex min-w-[76px] flex-shrink-0 flex-col items-center gap-2 rounded-2xl border-2 px-2 py-3 transition ${
+                        selectedCategory === code
+                          ? "border-brand-teal bg-brand-teal/10 shadow-sm"
+                          : "border-transparent bg-brand-sand/80 hover:border-brand-sand-dark"
+                      }`}
+                    >
+                      <span className={`flex h-12 w-12 items-center justify-center rounded-xl p-1 text-center text-[9px] font-bold leading-tight ${selectedCategory === code ? "bg-white text-brand-teal" : "bg-white text-brand-stone"}`}>
+                        {code}
+                      </span>
+                      <span className={`line-clamp-2 text-center text-[11px] font-semibold leading-tight ${selectedCategory === code ? "text-brand-teal" : "text-brand-stone"}`}>
+                        {name}
+                      </span>
+                    </button>
+                  ))}
+                </div>
+              ) : null}
+              <p className="mt-2 text-center text-xs text-brand-stone">
+                {isPending && !data
+                  ? "Buscando comercios cerca de ti…"
+                  : visiblePins.length === 0
+                  ? "No hay comercios con ese filtro."
+                  : `${visiblePins.length} comercio${visiblePins.length === 1 ? "" : "s"} en el mapa`}
+              </p>
+            </div>
+          )}
+
+          {/* Bottom nav */}
+          <nav
+            className="flex h-[4.25rem] items-center justify-between gap-0.5 border-t border-perlapp-divider px-1 pb-[max(0.5rem,env(safe-area-inset-bottom))] pt-1"
+            aria-label="Navegación móvil"
+          >
+            <Link
+              href="/"
+              className="flex min-w-0 flex-1 flex-col items-center justify-center rounded-xl px-1 py-1 font-display text-[10px] font-medium leading-tight text-perlapp-navMuted transition-all duration-100 hover:scale-[1.02] sm:text-[11px]"
+            >
+              <Home className="mb-0.5 h-5 w-5 shrink-0 sm:h-6 sm:w-6" strokeWidth={2.25} />
+              <span className="truncate">Inicio</span>
+            </Link>
+            <span className="flex min-w-0 flex-1 flex-col items-center justify-center rounded-xl bg-perlapp-orange/10 px-1 py-1 font-display text-[10px] font-medium leading-tight text-perlapp-orange sm:text-[11px]">
+              <Search className="mb-0.5 h-5 w-5 shrink-0 sm:h-6 sm:w-6" strokeWidth={2} />
+              <span className="truncate">Explorar</span>
+            </span>
+            <button
+              type="button"
+              onClick={openDrawer}
+              className="relative flex min-w-0 flex-1 flex-col items-center justify-center rounded-xl px-1 py-1 font-display text-[10px] font-medium leading-tight text-perlapp-navMuted transition-all duration-100 hover:scale-[1.02] sm:text-[11px]"
+              aria-label={itemCount > 0 ? `Abrir carrito, ${itemCount} artículos` : "Abrir carrito"}
+            >
+              {itemCount > 0 && (
+                <span className="absolute right-[22%] top-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-perlapp-orange px-0.5 font-display text-[9px] font-bold leading-none text-white sm:right-[26%]">
+                  {itemCount > 99 ? "99+" : itemCount}
+                </span>
+              )}
+              <ShoppingCart className="mb-0.5 h-5 w-5 shrink-0 sm:h-6 sm:w-6" strokeWidth={2} />
+              <span className="truncate">Carrito</span>
+            </button>
+            <Link
+              href="/notifications"
+              className="relative flex min-w-0 flex-1 flex-col items-center justify-center rounded-xl px-1 py-1 font-display text-[10px] font-medium leading-tight text-perlapp-navMuted transition-all duration-100 hover:scale-[1.02] sm:text-[11px]"
+            >
+              <Bell className="mb-0.5 h-5 w-5 shrink-0 sm:h-6 sm:w-6" strokeWidth={2} />
+              <span className="truncate">Alertas</span>
+            </Link>
+            {isAuthenticated ? (
+              <Link
+                href={profileHref}
+                className="flex min-w-0 flex-1 flex-col items-center justify-center rounded-xl px-1 py-1 font-display text-[10px] font-medium leading-tight text-perlapp-navMuted transition-all duration-100 hover:scale-[1.02] sm:text-[11px]"
+              >
+                <User className="mb-0.5 h-5 w-5 shrink-0 sm:h-6 sm:w-6" strokeWidth={2} />
+                <span className="truncate">Perfil</span>
+              </Link>
+            ) : (
+              <Link
+                href="/login"
+                className="flex min-w-0 flex-1 flex-col items-center justify-center rounded-xl px-1 py-1 font-display text-[10px] font-medium leading-tight text-perlapp-navMuted transition-all duration-100 hover:scale-[1.02] sm:text-[11px]"
+                aria-label="Iniciar sesión"
+              >
+                <User className="mb-0.5 h-5 w-5 shrink-0 sm:h-6 sm:w-6" strokeWidth={2} />
+                <span className="truncate">Entrar</span>
+              </Link>
+            )}
+          </nav>
         </div>
       </div>
     </div>

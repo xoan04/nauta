@@ -83,6 +83,7 @@ export async function getPublicMerchantProfileUseCase(userId: string): Promise<M
       publicationTypeId: post.publication_type_id,
       imageUrl: primaryPhoto?.url,
       timeAgo: formatRelativeTime(post.created_at),
+      url: (post as Record<string, unknown>).url as string | undefined,
       stats: {
         comments: 0,
         reposts: 0,

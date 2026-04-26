@@ -3,6 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import type { FeedPost } from "@/core/models/feed.model";
+import { SharePostButton } from "@/components/shared/SharePostButton";
 
 type Props = {
   post: FeedPost;
@@ -95,6 +96,14 @@ export function FeedPostCard({ post, merchantHref }: Props) {
               />
             </div>
           ) : null}
+
+          {/* Share action row */}
+          <div className="mt-3 flex items-center">
+            <SharePostButton
+              postUrl={post.url || undefined}
+              shareText={`${post.business.name}: ${post.content.slice(0, 100)}${post.content.length > 100 ? "…" : ""}`}
+            />
+          </div>
         </div>
       </div>
     </article>

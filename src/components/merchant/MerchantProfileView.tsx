@@ -16,6 +16,7 @@ import {
   Trash2,
   X,
 } from "lucide-react";
+import { SharePostButton } from "@/components/shared/SharePostButton";
 import { CartDrawer } from "@/components/cart/CartDrawer";
 import { PerlappBottomNav } from "@/components/home/PerlappBottomNav";
 import { PerlappHomeHeader } from "@/components/home/PerlappHomeHeader";
@@ -409,58 +410,67 @@ export function MerchantProfileView({ merchant, onRefresh }: MerchantProfileView
                         </div>
                       </div>
                       
-                      {isPostsOwner && (
-                        <div className="relative">
-                          <button
-                            type="button"
-                            onClick={(e) => togglePostMenu(post.id, e)}
-                            className="flex h-8 w-8 items-center justify-center rounded-full text-perlapp-inkMuted/60 transition-colors hover:bg-perlapp-orange/10 hover:text-perlapp-orange"
-                            aria-label="Más opciones"
-                          >
-                            <MoreHorizontal className="h-5 w-5" />
-                          </button>
-                          
-                          {menuOpenPostId === post.id && (
-                            <>
-                              <div 
-                                className="fixed inset-0 z-[50]" 
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  setMenuOpenPostId(null);
-                                }} 
-                                aria-hidden="true" 
-                              />
-                              <div className="absolute right-0 top-10 z-[60] w-44 overflow-hidden rounded-xl border border-perlapp-line/60 bg-perlapp-white py-1.5 shadow-2xl animate-in fade-in zoom-in-95 duration-150">
-                                <button
-                                  type="button"
+                      <div className="flex items-center gap-1">
+                        {/* Share button — visible to everyone */}
+                        <SharePostButton
+                          postUrl={post.url || undefined}
+                          shareText={`${merchant.displayName}: ${post.body.slice(0, 100)}${post.body.length > 100 ? "…" : ""}`}
+                          compact
+                        />
+
+                        {isPostsOwner && (
+                          <div className="relative">
+                            <button
+                              type="button"
+                              onClick={(e) => togglePostMenu(post.id, e)}
+                              className="flex h-8 w-8 items-center justify-center rounded-full text-perlapp-inkMuted/60 transition-colors hover:bg-perlapp-orange/10 hover:text-perlapp-orange"
+                              aria-label="Más opciones"
+                            >
+                              <MoreHorizontal className="h-5 w-5" />
+                            </button>
+                            
+                            {menuOpenPostId === post.id && (
+                              <>
+                                <div 
+                                  className="fixed inset-0 z-[50]" 
                                   onClick={(e) => {
                                     e.stopPropagation();
-                                    handleEditPost(post);
                                     setMenuOpenPostId(null);
-                                  }}
-                                  className="flex w-full items-center gap-3 px-4 py-2.5 text-left font-display text-[14px] font-semibold text-perlapp-ink transition-colors hover:bg-perlapp-surfaceContainer"
-                                >
-                                  <Edit2 className="h-4 w-4 text-perlapp-tertiary" strokeWidth={2.5} />
-                                  Editar publicación
-                                </button>
-                                <div className="mx-2 my-1 border-t border-perlapp-line/20" />
-                                <button
-                                  type="button"
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    handleDeletePost(post);
-                                    setMenuOpenPostId(null);
-                                  }}
-                                  className="flex w-full items-center gap-3 px-4 py-2.5 text-left font-display text-[14px] font-semibold text-red-600 transition-colors hover:bg-red-50"
-                                >
-                                  <Trash2 className="h-4 w-4" strokeWidth={2.5} />
-                                  Eliminar publicación
-                                </button>
-                              </div>
-                            </>
-                          )}
-                        </div>
-                      )}
+                                  }} 
+                                  aria-hidden="true" 
+                                />
+                                <div className="absolute right-0 top-10 z-[60] w-44 overflow-hidden rounded-xl border border-perlapp-line/60 bg-perlapp-white py-1.5 shadow-2xl animate-in fade-in zoom-in-95 duration-150">
+                                  <button
+                                    type="button"
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      handleEditPost(post);
+                                      setMenuOpenPostId(null);
+                                    }}
+                                    className="flex w-full items-center gap-3 px-4 py-2.5 text-left font-display text-[14px] font-semibold text-perlapp-ink transition-colors hover:bg-perlapp-surfaceContainer"
+                                  >
+                                    <Edit2 className="h-4 w-4 text-perlapp-tertiary" strokeWidth={2.5} />
+                                    Editar publicación
+                                  </button>
+                                  <div className="mx-2 my-1 border-t border-perlapp-line/20" />
+                                  <button
+                                    type="button"
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      handleDeletePost(post);
+                                      setMenuOpenPostId(null);
+                                    }}
+                                    className="flex w-full items-center gap-3 px-4 py-2.5 text-left font-display text-[14px] font-semibold text-red-600 transition-colors hover:bg-red-50"
+                                  >
+                                    <Trash2 className="h-4 w-4" strokeWidth={2.5} />
+                                    Eliminar publicación
+                                  </button>
+                                </div>
+                              </>
+                            )}
+                          </div>
+                        )}
+                      </div>
                     </div>
                     
                     <div className="mt-2">
