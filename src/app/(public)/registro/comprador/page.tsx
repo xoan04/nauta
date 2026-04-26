@@ -2,9 +2,12 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { ArrowLeft, User, Mail, Lock, Check, Eye, EyeOff } from "lucide-react";
 import { HttpError } from "@/core/http";
+import { loginUseCase } from "@/core/use-cases/auth/login.use-case";
 import { registerPublicBuyerUseCase } from "@/core/use-cases/buyer/register-public-buyer.use-case";
+import { useAuthStore } from "@/store/auth.store";
 
 type FormData = {
   name: string;
@@ -40,6 +43,8 @@ const inputClass =
   "w-full px-4 py-4 text-base bg-white border-2 border-brand-sand-dark focus:border-brand-teal rounded-xl outline-none transition-colors text-brand-teal placeholder:text-brand-stone/50";
 
 export default function BuyerRegistrationPage() {
+  const router = useRouter();
+  const loginFromApi = useAuthStore((s) => s.loginFromApi);
   const [step, setStep] = useState(1);
   const [data, setData] = useState<FormData>({
     name: "",
@@ -86,7 +91,12 @@ export default function BuyerRegistrationPage() {
           email: data.email,
           password: data.password,
         });
-        setSubmitted(true);
+        const loginData = await loginUseCase({
+          email: data.email.trim(),
+          password: data.password,
+        });
+        loginFromApi(loginData);
+        router.push("/");
       } catch (e) {
         if (e instanceof HttpError) {
           setSubmitError(e.message);

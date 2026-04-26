@@ -2,11 +2,17 @@
 
 import { useState } from "react";
 import Image from "next/image";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { ImageIcon, Pencil, Plus, ShoppingBag, Trash2, X } from "lucide-react";
 import type { ProfileCatalogProduct } from "@/lib/merchant-catalog.types";
 import { formatPrice } from "@/lib/cart.utils";
 import { useCartStore } from "@/store/cart.store";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
+import { getMyMerchantProductsUseCase } from "@/core/use-cases/merchant/get-my-merchant-products.use-case";
+import { createMerchantProductUseCase } from "@/core/use-cases/merchant/create-merchant-product.use-case";
+import { updateMerchantProductUseCase } from "@/core/use-cases/merchant/update-merchant-product.use-case";
+import { deleteMerchantProductUseCase } from "@/core/use-cases/merchant/delete-merchant-product.use-case";
+import { useAuthStore } from "@/store/auth.store";
 import { useMerchantCatalogStore } from "@/store/merchant-catalog.store";
 
 type MerchantProfileCatalogProps = {
@@ -17,23 +23,45 @@ type MerchantProfileCatalogProps = {
 
 type FormState = {
   name: string;
+  description: string;
   price: string;
   imageUrl: string;
+  photos: File[];
 };
 
-const emptyForm: FormState = { name: "", price: "", imageUrl: "" };
+const emptyForm: FormState = { name: "", description: "", price: "", imageUrl: "", photos: [] };
+const EMPTY_PRODUCTS: ProfileCatalogProduct[] = [];
 
 function isHttpsImageUrl(url: string): boolean {
-  return url.trim().startsWith("https://");
+  const normalized = url.trim().toLowerCase();
+  return normalized.startsWith("https://") || normalized.startsWith("http://");
 }
 
 export function MerchantProfileCatalog({ merchantId, merchantName, isOwner }: MerchantProfileCatalogProps) {
-  const products = useMerchantCatalogStore((s) => s.byMerchant[merchantId] ?? []);
+  const queryClient = useQueryClient();
+  const token = useAuthStore((s) => s.token);
+  const localProducts = useMerchantCatalogStore((s) => s.byMerchant[merchantId] ?? EMPTY_PRODUCTS);
   const addProduct = useMerchantCatalogStore((s) => s.addProduct);
   const updateProduct = useMerchantCatalogStore((s) => s.updateProduct);
   const deleteProduct = useMerchantCatalogStore((s) => s.deleteProduct);
   const addToCart = useCartStore((s) => s.addItem);
   const openDrawer = useCartStore((s) => s.openDrawer);
+  const {
+    data: apiProducts,
+    isLoading: isLoadingApiProducts,
+    isError: isErrorApiProducts,
+    refetch: refetchApiProducts,
+  } = useQuery({
+    queryKey: ["merchant-my-products"],
+    queryFn: () => getMyMerchantProductsUseCase(token ?? ""),
+    enabled: isOwner && Boolean(token),
+  });
+  const useApiCatalog = isOwner && Boolean(token) && !isErrorApiProducts;
+  const products = isOwner
+    ? isErrorApiProducts
+      ? localProducts
+      : (apiProducts ?? EMPTY_PRODUCTS)
+    : localProducts;
 
   const [modal, setModal] = useState<null | { mode: "create" } | { mode: "edit"; product: ProfileCatalogProduct }>(
     null
@@ -41,6 +69,74 @@ export function MerchantProfileCatalog({ merchantId, merchantName, isOwner }: Me
   const [form, setForm] = useState<FormState>(emptyForm);
   const [formError, setFormError] = useState("");
   const [deleteTarget, setDeleteTarget] = useState<ProfileCatalogProduct | null>(null);
+  const refreshProducts = async () => {
+    await Promise.all([
+      refetchApiProducts(),
+      queryClient.invalidateQueries({ queryKey: ["merchant-my-products"] }),
+    ]);
+  };
+
+  const { mutateAsync: createApiProduct, isPending: isCreatingApiProduct } = useMutation({
+    mutationFn: async () => {
+      if (!token) {
+        throw new Error("Tu sesión expiró. Inicia sesión de nuevo.");
+      }
+      const name = form.name.trim();
+      const description = form.description.trim();
+      const price = form.price.trim();
+      if (name.length < 2) {
+        throw new Error("El nombre debe tener al menos 2 caracteres.");
+      }
+      if (!price) {
+        throw new Error("Introduce un precio válido (COP).");
+      }
+      await createMerchantProductUseCase(token, {
+        name,
+        description,
+        price,
+        photos: form.photos,
+      });
+    },
+    onSuccess: async () => {
+      await refreshProducts();
+    },
+  });
+  const { mutateAsync: updateApiProduct, isPending: isUpdatingApiProduct } = useMutation({
+    mutationFn: async (productId: string) => {
+      if (!token) {
+        throw new Error("Tu sesión expiró. Inicia sesión de nuevo.");
+      }
+      const name = form.name.trim();
+      const description = form.description.trim();
+      const price = form.price.trim();
+      if (name.length < 2) {
+        throw new Error("El nombre debe tener al menos 2 caracteres.");
+      }
+      if (!price) {
+        throw new Error("Introduce un precio válido (COP).");
+      }
+      await updateMerchantProductUseCase(token, productId, {
+        name,
+        description,
+        price,
+        photos: form.photos,
+      });
+    },
+    onSuccess: async () => {
+      await refreshProducts();
+    },
+  });
+  const { mutateAsync: deleteApiProduct, isPending: isDeletingApiProduct } = useMutation({
+    mutationFn: async (productId: string) => {
+      if (!token) {
+        throw new Error("Tu sesión expiró. Inicia sesión de nuevo.");
+      }
+      await deleteMerchantProductUseCase(token, productId);
+    },
+    onSuccess: async () => {
+      await refreshProducts();
+    },
+  });
 
   const openCreate = () => {
     setForm(emptyForm);
@@ -51,8 +147,10 @@ export function MerchantProfileCatalog({ merchantId, merchantName, isOwner }: Me
   const openEdit = (product: ProfileCatalogProduct) => {
     setForm({
       name: product.name,
+      description: "",
       price: String(product.price),
       imageUrl: product.imageUrl,
+      photos: [],
     });
     setFormError("");
     setModal({ mode: "edit", product });
@@ -82,7 +180,29 @@ export function MerchantProfileCatalog({ merchantId, merchantName, isOwner }: Me
     return { id: "", name, price: Math.round(price), imageUrl };
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
+    if (useApiCatalog && modal?.mode === "create") {
+      try {
+        setFormError("");
+        await createApiProduct();
+        closeModal();
+      } catch (e) {
+        const message = e instanceof Error && e.message ? e.message : "No se pudo crear el producto.";
+        setFormError(message);
+      }
+      return;
+    }
+    if (useApiCatalog && modal?.mode === "edit") {
+      try {
+        setFormError("");
+        await updateApiProduct(modal.product.id);
+        closeModal();
+      } catch (e) {
+        const message = e instanceof Error && e.message ? e.message : "No se pudo actualizar el producto.";
+        setFormError(message);
+      }
+      return;
+    }
     const parsed = validateForm();
     if (!parsed) return;
     if (modal?.mode === "create") {
@@ -101,8 +221,18 @@ export function MerchantProfileCatalog({ merchantId, merchantName, isOwner }: Me
     setDeleteTarget(product);
   };
 
-  const confirmDelete = () => {
+  const confirmDelete = async () => {
     if (!deleteTarget) return;
+    if (useApiCatalog) {
+      try {
+        await deleteApiProduct(deleteTarget.id);
+        setDeleteTarget(null);
+      } catch (e) {
+        const message = e instanceof Error && e.message ? e.message : "No se pudo eliminar el producto.";
+        setFormError(message);
+      }
+      return;
+    }
     deleteProduct(merchantId, deleteTarget.id);
     setDeleteTarget(null);
   };
@@ -140,6 +270,14 @@ export function MerchantProfileCatalog({ merchantId, merchantName, isOwner }: Me
           </button>
         ) : null}
       </div>
+      {isOwner && isLoadingApiProducts ? (
+        <p className="mb-3 text-sm text-perlapp-inkMuted">Cargando productos…</p>
+      ) : null}
+      {isOwner && isErrorApiProducts ? (
+        <p className="mb-3 text-sm text-red-600">
+          No se pudieron cargar los productos del merchant. Se muestra el catálogo local.
+        </p>
+      ) : null}
 
       {products.length === 0 ? (
         <p className="rounded-xl border border-dashed border-perlapp-line/60 bg-perlapp-canvas/40 px-4 py-8 text-center font-sans text-sm text-perlapp-inkMuted">
@@ -202,7 +340,7 @@ export function MerchantProfileCatalog({ merchantId, merchantName, isOwner }: Me
                 <p className="font-display text-sm font-bold text-[#2c6956]">{formatPrice(p.price)}</p>
                 {isOwner ? (
                   <p className="mt-auto pt-1 font-display text-[11px] leading-snug text-perlapp-inkMuted">
-                    Solo gestión del catálogo
+                    {isErrorApiProducts ? "Solo gestión del catálogo" : "Productos obtenidos desde API"}
                   </p>
                 ) : (
                   <button
@@ -260,6 +398,18 @@ export function MerchantProfileCatalog({ merchantId, merchantName, isOwner }: Me
               </label>
               <label className="flex flex-col gap-1">
                 <span className="font-display text-perlapp-label-sm font-semibold text-perlapp-inkMuted">
+                  Descripción <span className="font-normal text-perlapp-inkMuted/80">(opcional)</span>
+                </span>
+                <textarea
+                  value={form.description}
+                  onChange={(e) => setForm((f) => ({ ...f, description: e.target.value }))}
+                  className="min-h-24 rounded-xl border border-perlapp-line bg-perlapp-white px-3 py-2.5 font-sans text-sm text-perlapp-ink outline-none ring-perlapp-orange focus:ring-2"
+                  placeholder="Describe el producto"
+                  maxLength={600}
+                />
+              </label>
+              <label className="flex flex-col gap-1">
+                <span className="font-display text-perlapp-label-sm font-semibold text-perlapp-inkMuted">
                   Precio (COP)
                 </span>
                 <input
@@ -270,21 +420,36 @@ export function MerchantProfileCatalog({ merchantId, merchantName, isOwner }: Me
                   placeholder="25000"
                 />
               </label>
-              <label className="flex flex-col gap-1">
-                <span className="font-display text-perlapp-label-sm font-semibold text-perlapp-inkMuted">
-                  URL de imagen{" "}
-                  <span className="font-normal text-perlapp-inkMuted/80">(opcional)</span>
-                </span>
-                <input
-                  value={form.imageUrl}
-                  onChange={(e) => setForm((f) => ({ ...f, imageUrl: e.target.value }))}
-                  className="rounded-xl border border-perlapp-line bg-perlapp-white px-3 py-2.5 font-sans text-sm text-perlapp-ink outline-none ring-perlapp-orange focus:ring-2"
-                  placeholder="https://… o vacío"
-                />
-                <span className="font-sans text-xs text-perlapp-inkMuted">
-                  Si la dejas vacía, el producto se muestra con un marcador «Sin foto».
-                </span>
-              </label>
+              {isOwner && !isErrorApiProducts ? (
+                <label className="flex flex-col gap-1">
+                  <span className="font-display text-perlapp-label-sm font-semibold text-perlapp-inkMuted">
+                    Fotos <span className="font-normal text-perlapp-inkMuted/80">(opcional)</span>
+                  </span>
+                  <input
+                    type="file"
+                    multiple
+                    accept="image/*"
+                    onChange={(e) => setForm((f) => ({ ...f, photos: Array.from(e.target.files ?? []) }))}
+                    className="block w-full text-sm text-perlapp-inkMuted file:mr-3 file:rounded-md file:border file:border-perlapp-line file:bg-perlapp-surfaceContainer file:px-3 file:py-1.5 file:font-display file:text-xs file:font-semibold file:text-perlapp-ink hover:file:bg-perlapp-surfaceVariant"
+                  />
+                </label>
+              ) : (
+                <label className="flex flex-col gap-1">
+                  <span className="font-display text-perlapp-label-sm font-semibold text-perlapp-inkMuted">
+                    URL de imagen{" "}
+                    <span className="font-normal text-perlapp-inkMuted/80">(opcional)</span>
+                  </span>
+                  <input
+                    value={form.imageUrl}
+                    onChange={(e) => setForm((f) => ({ ...f, imageUrl: e.target.value }))}
+                    className="rounded-xl border border-perlapp-line bg-perlapp-white px-3 py-2.5 font-sans text-sm text-perlapp-ink outline-none ring-perlapp-orange focus:ring-2"
+                    placeholder="https://... o vacío"
+                  />
+                  <span className="font-sans text-xs text-perlapp-inkMuted">
+                    Si la dejas vacía, el producto se muestra con un marcador "Sin foto".
+                  </span>
+                </label>
+              )}
               {formError ? <p className="text-sm text-red-600">{formError}</p> : null}
             </div>
             <div className="mt-5 flex justify-end gap-2">
@@ -297,10 +462,11 @@ export function MerchantProfileCatalog({ merchantId, merchantName, isOwner }: Me
               </button>
               <button
                 type="button"
-                onClick={handleSave}
+                onClick={() => void handleSave()}
+                disabled={isCreatingApiProduct || isUpdatingApiProduct}
                 className="rounded-full bg-perlapp-orange px-5 py-2 font-display text-perlapp-label-md font-semibold text-white shadow-sm hover:bg-perlapp-orange/90"
               >
-                Guardar
+                {isCreatingApiProduct || isUpdatingApiProduct ? "Guardando..." : "Guardar"}
               </button>
             </div>
           </div>
@@ -319,7 +485,7 @@ export function MerchantProfileCatalog({ merchantId, merchantName, isOwner }: Me
         confirmLabel="Eliminar"
         variant="danger"
         onCancel={() => setDeleteTarget(null)}
-        onConfirm={confirmDelete}
+        onConfirm={() => void confirmDelete()}
       />
     </div>
   );

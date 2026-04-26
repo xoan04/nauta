@@ -2,7 +2,8 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useMutation } from "@tanstack/react-query";
 import {
   BarChart2,
   BadgeCheck,
@@ -14,12 +15,18 @@ import {
   MessageCircle,
   Repeat2,
   Star,
+  X,
 } from "lucide-react";
 import { CartDrawer } from "@/components/cart/CartDrawer";
 import { PerlappBottomNav } from "@/components/home/PerlappBottomNav";
 import { PerlappHomeHeader } from "@/components/home/PerlappHomeHeader";
 import { MerchantProfileCatalog } from "@/components/merchant/MerchantProfileCatalog";
+import { deleteMerchantPostUseCase } from "@/core/use-cases/merchant/delete-merchant-post.use-case";
+import { updateMerchantPostUseCase } from "@/core/use-cases/merchant/update-merchant-post.use-case";
+import { useMasterPublicationTypes } from "@/hooks/use-master-publication-types";
 import type { MerchantProfileData } from "@/lib/merchant-profile.types";
+import type { MerchantPost } from "@/lib/merchant-profile.types";
+import { useAuthStore } from "@/store/auth.store";
 import { useBuyerActivityStore } from "@/store/buyer-activity.store";
 import { useMarketConnectionsStore } from "@/store/market-connections.store";
 import { usePerlappRoleStore } from "@/store/perlapp-role.store";
@@ -35,15 +42,25 @@ type MerchantProfileViewProps = {
 export function MerchantProfileView({ merchant }: MerchantProfileViewProps) {
   const role = usePerlappRoleStore((s) => s.role);
   const activeMarketId = usePerlappRoleStore((s) => s.activeMarketId);
+  const token = useAuthStore((s) => s.token);
   const favoriteMerchantIds = useBuyerActivityStore((s) => s.favoriteMerchantIds);
   const toggleFavoriteMerchant = useBuyerActivityStore((s) => s.toggleFavoriteMerchant);
   const requests = useMarketConnectionsStore((s) => s.requests);
   const sendRequest = useMarketConnectionsStore((s) => s.sendRequest);
 
   const [tab, setTab] = useState<"posts" | "catalog" | "info">("posts");
+  const [posts, setPosts] = useState<MerchantPost[]>(merchant.posts);
+  const [postActionError, setPostActionError] = useState("");
+  const [editingPost, setEditingPost] = useState<MerchantPost | null>(null);
+  const [editingContent, setEditingContent] = useState("");
+  const [editingPublicationTypeId, setEditingPublicationTypeId] = useState("");
+  const [editingPhotos, setEditingPhotos] = useState<File[]>([]);
+  const { data: publicationTypesData, isPending: isPendingPublicationTypes } = useMasterPublicationTypes();
+  const publicationTypes = publicationTypesData?.publication_types ?? [];
 
   const isCatalogOwner =
     role === "market" && (merchant.id === "me" || merchant.id === activeMarketId);
+  const isPostsOwner = role === "market" && merchant.id === activeMarketId;
 
   const isBuyerFavorite = role === "comprador" && merchant.id !== "me";
   const isFavorite = favoriteMerchantIds.includes(merchant.id);
@@ -60,6 +77,92 @@ export function MerchantProfileView({ merchant }: MerchantProfileViewProps) {
   const canSendB2b = Boolean(activeMarketId) && !hasAccepted && !hasPending;
 
   const hasProfileActions = isBuyerFavorite || showB2bConnect;
+  useEffect(() => {
+    setPosts(merchant.posts);
+  }, [merchant.posts]);
+
+  const { mutateAsync: updatePost, isPending: isUpdatingPost } = useMutation({
+    mutationFn: async ({
+      postId,
+      content,
+      publicationTypeId,
+      photos,
+    }: {
+      postId: string;
+      content: string;
+      publicationTypeId: string;
+      photos: File[];
+    }) => {
+      if (!token) throw new Error("Tu sesión expiró. Inicia sesión de nuevo.");
+      await updateMerchantPostUseCase(token, postId, {
+        content,
+        publication_type_id: publicationTypeId,
+        photos,
+      });
+    },
+  });
+  const { mutateAsync: deletePost, isPending: isDeletingPost } = useMutation({
+    mutationFn: async (postId: string) => {
+      if (!token) throw new Error("Tu sesión expiró. Inicia sesión de nuevo.");
+      await deleteMerchantPostUseCase(token, postId);
+    },
+  });
+
+  const handleEditPost = async (post: MerchantPost) => {
+    if (!isPostsOwner) return;
+    setPostActionError("");
+    setEditingPost(post);
+    setEditingContent(post.body);
+    setEditingPublicationTypeId(post.publicationTypeId ?? "");
+    setEditingPhotos([]);
+  };
+
+  const closeEditModal = () => {
+    if (isUpdatingPost) return;
+    setEditingPost(null);
+    setEditingContent("");
+    setEditingPublicationTypeId("");
+    setEditingPhotos([]);
+  };
+
+  const saveEditedPost = async () => {
+    if (!editingPost) return;
+    const trimmed = editingContent.trim();
+    if (!trimmed) {
+      setPostActionError("El contenido no puede quedar vacío.");
+      return;
+    }
+    if (!editingPublicationTypeId.trim()) {
+      setPostActionError("Selecciona una categoría.");
+      return;
+    }
+    try {
+      setPostActionError("");
+      await updatePost({
+        postId: editingPost.id,
+        content: trimmed,
+        publicationTypeId: editingPublicationTypeId.trim(),
+        photos: editingPhotos,
+      });
+      setPosts((prev) => prev.map((p) => (p.id === editingPost.id ? { ...p, body: trimmed } : p)));
+      closeEditModal();
+    } catch (e) {
+      setPostActionError(e instanceof Error && e.message ? e.message : "No se pudo actualizar la publicación.");
+    }
+  };
+
+  const handleDeletePost = async (post: MerchantPost) => {
+    if (!isPostsOwner) return;
+    const accepted = window.confirm("¿Eliminar esta publicación? Esta acción no se puede deshacer.");
+    if (!accepted) return;
+    try {
+      setPostActionError("");
+      await deletePost(post.id);
+      setPosts((prev) => prev.filter((p) => p.id !== post.id));
+    } catch (e) {
+      setPostActionError(e instanceof Error && e.message ? e.message : "No se pudo eliminar la publicación.");
+    }
+  };
 
   return (
     <div className="min-h-screen bg-perlapp-canvas pb-28 text-perlapp-ink antialiased selection:bg-perlapp-orange/20 selection:text-perlapp-ink md:pb-0">
@@ -263,7 +366,8 @@ export function MerchantProfileView({ merchant }: MerchantProfileViewProps) {
           />
         ) : tab === "posts" ? (
           <div className="flex flex-col">
-            {merchant.posts.map((post) => (
+            {postActionError ? <p className="px-4 pt-4 text-sm text-red-600">{postActionError}</p> : null}
+            {posts.map((post) => (
               <article
                 key={post.id}
                 className={`border-b border-perlapp-line/30 p-4 transition-colors ${
@@ -294,6 +398,26 @@ export function MerchantProfileView({ merchant }: MerchantProfileViewProps) {
                       <span className="font-normal text-perlapp-inkMuted">· {post.timeAgo}</span>
                     </div>
                     <p className="mt-1 font-sans text-base leading-6 text-perlapp-ink">{post.body}</p>
+                    {isPostsOwner ? (
+                      <div className="mt-2 flex items-center gap-3">
+                        <button
+                          type="button"
+                          onClick={() => void handleEditPost(post)}
+                          disabled={isUpdatingPost || isDeletingPost}
+                          className="text-xs font-semibold text-perlapp-tertiary disabled:opacity-60"
+                        >
+                          Editar
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => void handleDeletePost(post)}
+                          disabled={isUpdatingPost || isDeletingPost}
+                          className="text-xs font-semibold text-red-600 disabled:opacity-60"
+                        >
+                          Eliminar
+                        </button>
+                      </div>
+                    ) : null}
                     {post.imageUrl ? (
                       <div className="mt-3 overflow-hidden rounded-xl border border-perlapp-line/30 shadow-perlapp-float">
                         <div className="relative max-h-64 w-full">
@@ -390,6 +514,100 @@ export function MerchantProfileView({ merchant }: MerchantProfileViewProps) {
 
       <PerlappBottomNav activeTab="profile" />
       <CartDrawer />
+      {editingPost ? (
+        <div className="fixed inset-0 z-[70] flex items-end justify-center p-4 sm:items-center" role="presentation">
+          <button
+            type="button"
+            className="absolute inset-0 bg-perlapp-ink/50 backdrop-blur-[2px]"
+            aria-label="Cerrar"
+            onClick={closeEditModal}
+          />
+          <div
+            className="relative z-10 w-full max-w-md rounded-2xl border border-perlapp-line/50 bg-perlapp-white p-5 shadow-2xl"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="edit-post-title"
+          >
+            <div className="mb-4 flex items-start justify-between gap-3">
+              <h2 id="edit-post-title" className="font-display text-perlapp-headline-md font-bold text-perlapp-ink">
+                Editar publicación
+              </h2>
+              <button
+                type="button"
+                onClick={closeEditModal}
+                className="rounded-full p-2 text-perlapp-inkMuted hover:bg-perlapp-surfaceContainer"
+                aria-label="Cerrar"
+                disabled={isUpdatingPost}
+              >
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+            <div className="flex flex-col gap-3">
+              <label className="flex flex-col gap-1">
+                <span className="font-display text-perlapp-label-sm font-semibold text-perlapp-inkMuted">
+                  Contenido
+                </span>
+                <textarea
+                  value={editingContent}
+                  onChange={(e) => setEditingContent(e.target.value)}
+                  className="min-h-28 rounded-xl border border-perlapp-line bg-perlapp-white px-3 py-2.5 font-sans text-sm text-perlapp-ink outline-none ring-perlapp-orange focus:ring-2"
+                  placeholder="Escribe el contenido de la publicación"
+                  maxLength={1200}
+                />
+              </label>
+              <label className="flex flex-col gap-1">
+                <span className="font-display text-perlapp-label-sm font-semibold text-perlapp-inkMuted">
+                  Categoría
+                </span>
+                <select
+                  value={editingPublicationTypeId}
+                  onChange={(e) => setEditingPublicationTypeId(e.target.value)}
+                  className="h-10 w-full rounded-lg border border-perlapp-line/60 bg-white px-3 font-sans text-sm text-perlapp-ink outline-none transition focus:border-perlapp-orange"
+                >
+                  <option value="">
+                    {isPendingPublicationTypes ? "Cargando categorías…" : "Selecciona una categoría"}
+                  </option>
+                  {publicationTypes.map((type) => (
+                    <option key={type.id} value={type.id}>
+                      {type.name}
+                    </option>
+                  ))}
+                </select>
+              </label>
+              <label className="flex flex-col gap-1">
+                <span className="font-display text-perlapp-label-sm font-semibold text-perlapp-inkMuted">
+                  Fotos <span className="font-normal text-perlapp-inkMuted/80">(opcional)</span>
+                </span>
+                <input
+                  type="file"
+                  multiple
+                  accept="image/*"
+                  onChange={(e) => setEditingPhotos(Array.from(e.target.files ?? []))}
+                  className="block w-full text-sm text-perlapp-inkMuted file:mr-3 file:rounded-md file:border file:border-perlapp-line file:bg-perlapp-surfaceContainer file:px-3 file:py-1.5 file:font-display file:text-xs file:font-semibold file:text-perlapp-ink hover:file:bg-perlapp-surfaceVariant"
+                />
+              </label>
+            </div>
+            <div className="mt-5 flex justify-end gap-2">
+              <button
+                type="button"
+                onClick={closeEditModal}
+                className="rounded-full px-4 py-2 font-display text-perlapp-label-md font-semibold text-perlapp-inkMuted hover:bg-perlapp-surfaceContainer"
+                disabled={isUpdatingPost}
+              >
+                Cancelar
+              </button>
+              <button
+                type="button"
+                onClick={() => void saveEditedPost()}
+                disabled={isUpdatingPost}
+                className="rounded-full bg-perlapp-orange px-5 py-2 font-display text-perlapp-label-md font-semibold text-white shadow-sm hover:bg-perlapp-orange/90 disabled:opacity-70"
+              >
+                {isUpdatingPost ? "Guardando..." : "Guardar"}
+              </button>
+            </div>
+          </div>
+        </div>
+      ) : null}
     </div>
   );
 }
