@@ -22,10 +22,22 @@ export function useGeolocation(): GeoState {
 
     const id = navigator.geolocation.watchPosition(
       (pos) => {
-        setState({
-          status: "resolved",
-          lat: pos.coords.latitude,
-          lng: pos.coords.longitude,
+        const newLat = pos.coords.latitude;
+        const newLng = pos.coords.longitude;
+
+        setState((prev) => {
+          if (
+            prev.status === "resolved" &&
+            Math.abs(prev.lat - newLat) < 0.0001 &&
+            Math.abs(prev.lng - newLng) < 0.0001
+          ) {
+            return prev;
+          }
+          return {
+            status: "resolved",
+            lat: newLat,
+            lng: newLng,
+          };
         });
       },
       (err) => {

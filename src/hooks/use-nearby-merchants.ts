@@ -10,8 +10,10 @@ export function useNearbyMerchants() {
   const geo = useGeolocation();
 
   const hasCoords = geo.status === "resolved";
-  const lat = hasCoords ? geo.lat : undefined;
-  const lng = hasCoords ? geo.lng : undefined;
+  
+  // Round to ~110m to avoid frequent re-fetching due to minor coordinate jitter
+  const lat = hasCoords ? Math.round(geo.lat * 1000) / 1000 : undefined;
+  const lng = hasCoords ? Math.round(geo.lng * 1000) / 1000 : undefined;
 
   return {
     geo,
@@ -21,9 +23,12 @@ export function useNearbyMerchants() {
         fetchNearbyMerchants(
           role as "market" | "comprador",
           token!,
-          { lat: lat!, lng: lng! }
+          { lat: lat!, lng: lng!, pageSize: 5 } // Fetch only 5 merchants as requested
         ),
       enabled: role !== "invitado" && !!token && hasCoords,
+      staleTime: 1000 * 60 * 30, // 30 minutes
+      gcTime: 1000 * 60 * 60, // 1 hour
+      refetchOnWindowFocus: false,
     }),
   };
 }

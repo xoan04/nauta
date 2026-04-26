@@ -15,6 +15,9 @@ import { updateMerchantProductUseCase } from "@/core/use-cases/merchant/update-m
 import { deleteMerchantProductUseCase } from "@/core/use-cases/merchant/delete-merchant-product.use-case";
 import { useAuthStore } from "@/store/auth.store";
 import { useMerchantCatalogStore } from "@/store/merchant-catalog.store";
+import { updateMerchantProfileMerchantPhone } from "@/core/services/merchant-my-profile.service";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 
 type MerchantProfileCatalogProps = {
   merchantId: string;
@@ -81,6 +84,19 @@ export function MerchantProfileCatalog({
   const [previewUrls, setPreviewUrls] = useState<string[]>([]);
   const [deleteTarget, setDeleteTarget] = useState<ProfileCatalogProduct | null>(null);
   const [phonePromptOpen, setPhonePromptOpen] = useState(false);
+  const [phoneInput, setPhoneInput] = useState("");
+  const [phoneUpdateError, setPhoneUpdateError] = useState<string | null>(null);
+
+  const { mutateAsync: updatePhone, isPending: isUpdatingPhone } = useMutation({
+    mutationFn: (phone: string) => updateMerchantProfileMerchantPhone(token ?? "", phone),
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ["merchant-my-profile"] });
+      setPhonePromptOpen(false);
+    },
+    onError: (err) => {
+      setPhoneUpdateError(err instanceof Error ? err.message : "Error al actualizar el teléfono");
+    },
+  });
 
   const hasBusinessPhone = Boolean(businessPhone?.trim());
 
@@ -418,60 +434,56 @@ export function MerchantProfileCatalog({
             onClick={() => setPhonePromptOpen(false)}
           />
           <div
-            className="relative z-10 w-full max-w-2xl overflow-hidden rounded-3xl border border-perlapp-line/40 shadow-2xl"
+            className="relative z-10 w-full max-w-sm overflow-hidden rounded-2xl border border-perlapp-line/40 bg-perlapp-white shadow-2xl"
             role="dialog"
             aria-modal="true"
             aria-labelledby="phone-prompt-title"
           >
-            <div className="bg-gradient-to-br from-rose-500 via-orange-500 to-amber-400 px-6 pb-10 pt-12 text-white sm:px-8">
-              <div className="flex flex-col gap-7">
-                <p className="inline-flex w-fit rounded-full bg-white/25 px-4 py-1.5 font-display text-[11px] font-bold uppercase tracking-widest text-white/95 backdrop-blur-sm">
-                  Un dato y despegas
-                </p>
-                <div
-                  className="flex w-fit rounded-3xl bg-white/20 p-5 backdrop-blur-sm ring-1 ring-white/25"
-                  aria-hidden
+            <div className="p-6">
+              <div className="mb-6 flex items-center justify-between">
+                <h2 id="phone-prompt-title" className="font-display text-xl font-bold text-perlapp-ink">
+                  Completa tu perfil
+                </h2>
+                <button
+                  type="button"
+                  onClick={() => setPhonePromptOpen(false)}
+                  className="rounded-full p-1 text-perlapp-inkMuted hover:bg-perlapp-surfaceContainer"
                 >
-                  <Phone className="h-12 w-12" strokeWidth={1.75} />
-                </div>
-                <div className="space-y-4">
-                  <h2 id="phone-prompt-title" className="font-display text-2xl font-bold leading-snug sm:text-[26px]">
-                    ¡Tu catálogo está a un paso de vivir!
-                  </h2>
-                  <p className="font-display text-[15px] leading-relaxed text-white/95">
-                    Para que los compradores puedan <strong className="text-white">pedirte, reservar y pagarte</strong>,
-                    Perlapp necesita el <strong className="text-white">teléfono de contacto de tu negocio</strong>. Sin
-                    él no publicamos productos: es la línea directa entre tu vitrina y quien ya quiere comprarte.
-                  </p>
-                </div>
-                <div className="flex gap-4 border-t border-white/25 pt-7">
-                  <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-white/15 ring-1 ring-white/20">
-                    <Sparkles className="h-5 w-5 text-amber-100" strokeWidth={2} aria-hidden />
-                  </span>
-                  <p className="min-w-0 flex-1 self-center font-sans text-sm leading-relaxed text-white/90">
-                    En tu recorrido de perfil, el paso de contacto es rápido — y desbloquea todo el catálogo.
-                  </p>
-                </div>
+                  <X className="h-5 w-5" />
+                </button>
               </div>
-            </div>
-            <div className="flex flex-col gap-4 bg-perlapp-white px-6 py-6 sm:px-8">
-              <Link
-                href="/merchant/contacto"
-                className="flex w-full items-center justify-center rounded-2xl bg-perlapp-orange py-3.5 text-center font-display text-sm font-bold text-white shadow-[0_3px_0_0_#862300] transition hover:bg-perlapp-orange/90 active:translate-y-px active:shadow-none"
-                onClick={() => setPhonePromptOpen(false)}
-              >
-                Ir a dejar mi teléfono
-              </Link>
-              <button
-                type="button"
-                className="rounded-xl py-2.5 font-display text-sm font-semibold text-perlapp-inkMuted transition hover:text-perlapp-ink"
-                onClick={() => {
-                  setPhonePromptOpen(false);
-                  void queryClient.invalidateQueries({ queryKey: ["merchant-my-profile"] });
-                }}
-              >
-                Ya lo completé — actualizar
-              </button>
+
+              <p className="mb-6 font-sans text-sm leading-relaxed text-perlapp-inkMuted">
+                Para continuar por favor digita tu número de teléfono, esto para que los clientes puedan enviarte los
+                pedidos de los productos.
+              </p>
+
+              <div className="flex flex-col gap-4">
+                <div className="space-y-1.5">
+                  <Label htmlFor="modal-phone" className="font-display text-xs font-semibold text-perlapp-ink">
+                    Número de teléfono
+                  </Label>
+                  <Input
+                    id="modal-phone"
+                    type="tel"
+                    placeholder="Ej. 300 123 4567"
+                    value={phoneInput}
+                    onChange={(e) => setPhoneInput(e.target.value)}
+                    className="h-11"
+                    autoFocus
+                  />
+                  {phoneUpdateError && <p className="text-xs text-red-600">{phoneUpdateError}</p>}
+                </div>
+
+                <button
+                  type="button"
+                  disabled={isUpdatingPhone || !phoneInput.trim()}
+                  onClick={() => void updatePhone(phoneInput)}
+                  className="flex w-full items-center justify-center rounded-xl bg-perlapp-orange py-3 font-display text-sm font-bold text-white shadow-sm transition hover:bg-perlapp-orange/90 active:scale-[0.98] disabled:opacity-50"
+                >
+                  {isUpdatingPhone ? "Guardando..." : "Continuar"}
+                </button>
+              </div>
             </div>
           </div>
         </div>
