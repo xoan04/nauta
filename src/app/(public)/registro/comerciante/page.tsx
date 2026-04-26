@@ -5,7 +5,8 @@ import dynamic from "next/dynamic";
 import Link from "next/link";
 import { ArrowLeft, Building2, MapPin, Mail, Lock, Check, Eye, EyeOff } from "lucide-react";
 import type { LocationValue } from "@/components/map-picker";
-import { registerMerchant } from "@/lib/mock-merchant";
+import { HttpError } from "@/core/http";
+import { registerPublicMerchantUseCase } from "@/core/use-cases/merchant/register-public-merchant.use-case";
 
 const MapPicker = dynamic(() => import("@/components/map-picker"), {
   ssr: false,
@@ -70,6 +71,7 @@ export default function MerchantRegistrationPage() {
   const [showConfirm, setShowConfirm] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
 
   const current = STEP_META[step - 1];
 
@@ -100,19 +102,32 @@ export default function MerchantRegistrationPage() {
       setStep((s) => s + 1);
     } else {
       setSubmitting(true);
-      await registerMerchant({
-        businessName: data.businessName,
-        location: data.location!,
-        email: data.email,
-        password: data.password,
-      });
-      setSubmitting(false);
-      setSubmitted(true);
+      setSubmitError(null);
+      try {
+        await registerPublicMerchantUseCase({
+          businessName: data.businessName,
+          location: data.location!,
+          email: data.email,
+          password: data.password,
+        });
+        setSubmitted(true);
+      } catch (e) {
+        if (e instanceof HttpError) {
+          setSubmitError(e.message);
+        } else if (e instanceof Error && e.message) {
+          setSubmitError(e.message);
+        } else {
+          setSubmitError("No se pudo completar el registro. Revisa tu conexión e inténtalo de nuevo.");
+        }
+      } finally {
+        setSubmitting(false);
+      }
     }
   };
 
   const handleBack = () => {
     setErrors({});
+    setSubmitError(null);
     setStep((s) => s - 1);
   };
 
@@ -336,6 +351,11 @@ export default function MerchantRegistrationPage() {
 
       {/* CTA sticky footer */}
       <div className="px-4 pb-10 pt-6">
+        {submitError ? (
+          <p className="mb-3 rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-center text-sm text-red-700">
+            {submitError}
+          </p>
+        ) : null}
         <button
           onClick={handleNext}
           disabled={submitting}

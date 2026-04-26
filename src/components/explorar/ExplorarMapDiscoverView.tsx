@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import Image from "next/image";
 import Link from "next/link";
 import {
   BadgeCheck,
@@ -76,7 +77,7 @@ function FlyTo({ center, zoom }: { center: { lat: number; lng: number }; zoom: n
     if (prev.current.lat === center.lat && prev.current.lng === center.lng) return;
     prev.current = center;
     map.flyTo([center.lat, center.lng], zoom, { duration: 0.9 });
-  }, [center.lat, center.lng, zoom, map]);
+  }, [center, zoom, map]);
 
   return null;
 }
@@ -109,14 +110,13 @@ function ExplorarMerchantPopup({
     <article className="merchant-popup-card w-[min(268px,calc(100vw-3.25rem))]">
       <div className="flex gap-3">
         <div className="relative h-14 w-14 shrink-0 overflow-hidden rounded-2xl border-2 border-brand-sand-dark bg-brand-sand shadow-sm ring-2 ring-white">
-          <img
+          <Image
             src={merchant.avatarUrl}
             alt=""
             width={56}
             height={56}
             className="h-full w-full object-cover"
-            loading="lazy"
-            decoding="async"
+            sizes="56px"
           />
         </div>
         <div className="min-w-0 flex-1">

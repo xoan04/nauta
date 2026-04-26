@@ -42,7 +42,8 @@ export function MerchantProfileView({ merchant }: MerchantProfileViewProps) {
 
   const [tab, setTab] = useState<"posts" | "catalog" | "info">("posts");
 
-  const isCatalogOwner = role === "market" && merchant.id === activeMarketId;
+  const isCatalogOwner =
+    role === "market" && (merchant.id === "me" || merchant.id === activeMarketId);
 
   const isBuyerFavorite = role === "comprador" && merchant.id !== "me";
   const isFavorite = favoriteMerchantIds.includes(merchant.id);

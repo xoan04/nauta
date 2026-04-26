@@ -3,7 +3,8 @@
 import { useState } from "react";
 import Link from "next/link";
 import { ArrowLeft, User, Mail, Lock, Check, Eye, EyeOff } from "lucide-react";
-import { registerBuyer } from "@/lib/mock-buyer";
+import { HttpError } from "@/core/http";
+import { registerPublicBuyerUseCase } from "@/core/use-cases/buyer/register-public-buyer.use-case";
 
 type FormData = {
   name: string;
@@ -51,6 +52,7 @@ export default function BuyerRegistrationPage() {
   const [showConfirm, setShowConfirm] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
 
   const current = STEP_META[step - 1];
 
@@ -77,14 +79,31 @@ export default function BuyerRegistrationPage() {
       setStep((s) => s + 1);
     } else {
       setSubmitting(true);
-      await registerBuyer({ name: data.name, email: data.email, password: data.password });
-      setSubmitting(false);
-      setSubmitted(true);
+      setSubmitError(null);
+      try {
+        await registerPublicBuyerUseCase({
+          name: data.name,
+          email: data.email,
+          password: data.password,
+        });
+        setSubmitted(true);
+      } catch (e) {
+        if (e instanceof HttpError) {
+          setSubmitError(e.message);
+        } else if (e instanceof Error && e.message) {
+          setSubmitError(e.message);
+        } else {
+          setSubmitError("No se pudo completar el registro. Revisa tu conexión e inténtalo de nuevo.");
+        }
+      } finally {
+        setSubmitting(false);
+      }
     }
   };
 
   const handleBack = () => {
     setErrors({});
+    setSubmitError(null);
     setStep((s) => s - 1);
   };
 
@@ -278,6 +297,11 @@ export default function BuyerRegistrationPage() {
 
       {/* CTA */}
       <div className="px-4 pb-10 pt-6">
+        {submitError ? (
+          <p className="mb-3 rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-center text-sm text-red-700">
+            {submitError}
+          </p>
+        ) : null}
         <button
           onClick={handleNext}
           disabled={submitting}

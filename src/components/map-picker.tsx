@@ -46,7 +46,7 @@ function FlyTo({ center }: { center: LatLng }) {
     if (prev.current.lat === center.lat && prev.current.lng === center.lng) return;
     prev.current = center;
     map.flyTo([center.lat, center.lng], 16, { duration: 1.0 });
-  }, [center.lat, center.lng, map]);
+  }, [center, map]);
 
   return null;
 }

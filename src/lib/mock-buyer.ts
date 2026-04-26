@@ -10,7 +10,8 @@ export type RegistrationResult = {
   error?: string;
 };
 
-export async function registerBuyer(_data: BuyerFormData): Promise<RegistrationResult> {
+export async function registerBuyer(data: BuyerFormData): Promise<RegistrationResult> {
+  void data;
   await new Promise((r) => setTimeout(r, 1500));
   return { success: true, id: `buyer_${Date.now()}` };
 }

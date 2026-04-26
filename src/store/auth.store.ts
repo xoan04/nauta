@@ -1,12 +1,17 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
-import { User } from "@/types/http.types";
+import type { AuthSessionUser, LoginProfiles, LoginResponse } from "@/core/models/auth-login.model";
+import { applySessionRoleFromLoginUser, resetPerlappRoleToGuest } from "@/store/perlapp-role.store";
 
 interface AuthState {
-  user: User | null;
+  user: AuthSessionUser | null;
   token: string | null;
+  refreshToken: string | null;
+  /** Epoch ms cuando expira el access_token (aprox.). */
+  expiresAt: number | null;
+  profiles: LoginProfiles | null;
   isAuthenticated: boolean;
-  login: (user: User, token: string) => void;
+  loginFromApi: (payload: LoginResponse) => void;
   logout: () => void;
 }
 
@@ -24,16 +29,35 @@ export const useAuthStore = create<AuthState>()(
     (set) => ({
       user: null,
       token: null,
+      refreshToken: null,
+      expiresAt: null,
+      profiles: null,
       isAuthenticated: false,
 
-      login: (user, token) => {
-        setCookie("auth-token", token);
-        set({ user, token, isAuthenticated: true });
+      loginFromApi: (payload) => {
+        setCookie("auth-token", payload.access_token);
+        applySessionRoleFromLoginUser(payload.user);
+        set({
+          user: payload.user,
+          token: payload.access_token,
+          refreshToken: payload.refresh_token ?? null,
+          expiresAt: Date.now() + Math.max(0, payload.expires_in) * 1000,
+          profiles: payload.profiles ?? null,
+          isAuthenticated: true,
+        });
       },
 
       logout: () => {
         deleteCookie("auth-token");
-        set({ user: null, token: null, isAuthenticated: false });
+        resetPerlappRoleToGuest();
+        set({
+          user: null,
+          token: null,
+          refreshToken: null,
+          expiresAt: null,
+          profiles: null,
+          isAuthenticated: false,
+        });
       },
     }),
     { name: "auth-storage" }
