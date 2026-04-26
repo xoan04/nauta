@@ -249,7 +249,7 @@ function ExplorarMerchantPopup({
 
           <Link
             href={profileHref}
-            className="flex h-9 items-center justify-center rounded-xl bg-brand-orange px-4 text-xs font-bold text-white shadow-lg transition-all hover:bg-brand-orange-dark hover:shadow-orange-200 active:scale-95"
+            className="flex h-9 items-center justify-center rounded-xl bg-brand-orange px-4 text-xs font-bold !text-white shadow-lg transition-all hover:bg-brand-orange-dark hover:shadow-orange-200 active:scale-95"
           >
             Ver catálogo
           </Link>
