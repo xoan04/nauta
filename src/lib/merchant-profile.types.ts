@@ -1,6 +1,7 @@
 export type MerchantPost = {
   id: string;
   body: string;
+  publicationTypeId?: string;
   imageUrl?: string;
   imageAlt?: string;
   timeAgo: string;

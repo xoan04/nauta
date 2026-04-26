@@ -3,10 +3,13 @@
 import { useState } from "react";
 import dynamic from "next/dynamic";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { ArrowLeft, Building2, MapPin, Mail, Lock, Check, Eye, EyeOff } from "lucide-react";
 import type { LocationValue } from "@/components/map-picker";
 import { HttpError } from "@/core/http";
+import { loginUseCase } from "@/core/use-cases/auth/login.use-case";
 import { registerPublicMerchantUseCase } from "@/core/use-cases/merchant/register-public-merchant.use-case";
+import { useAuthStore } from "@/store/auth.store";
 
 const MapPicker = dynamic(() => import("@/components/map-picker"), {
   ssr: false,
@@ -58,6 +61,8 @@ const inputClass =
   "w-full px-4 py-4 text-base bg-white border-2 border-brand-sand-dark focus:border-brand-teal rounded-xl outline-none transition-colors text-brand-teal placeholder:text-brand-stone/50";
 
 export default function MerchantRegistrationPage() {
+  const router = useRouter();
+  const loginFromApi = useAuthStore((s) => s.loginFromApi);
   const [step, setStep] = useState(1);
   const [data, setData] = useState<FormData>({
     businessName: "",
@@ -110,7 +115,12 @@ export default function MerchantRegistrationPage() {
           email: data.email,
           password: data.password,
         });
-        setSubmitted(true);
+        const loginData = await loginUseCase({
+          email: data.email.trim(),
+          password: data.password,
+        });
+        loginFromApi(loginData);
+        router.push("/");
       } catch (e) {
         if (e instanceof HttpError) {
           setSubmitError(e.message);
