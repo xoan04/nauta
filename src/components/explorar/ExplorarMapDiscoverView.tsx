@@ -6,15 +6,24 @@ import Link from "next/link";
 import {
   BadgeCheck,
   Bell,
+  Briefcase,
+  Factory,
+  HelpCircle,
   Home,
+  LayoutGrid,
   MapPin,
   MessageSquare,
+  MoreHorizontal,
   Navigation,
   Package,
+  Palette,
   Search,
   ShoppingCart,
+  Sprout,
   Star,
+  Truck,
   User,
+  Utensils,
   X,
   Zap,
 } from "lucide-react";
@@ -22,6 +31,7 @@ import L from "leaflet";
 import { MapContainer, Marker, Popup, TileLayer, useMap } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
 import type { PublicMerchantListItem } from "@/core/models/public-merchants-list.model";
+import { useEconomicSectors } from "@/hooks/use-economic-sectors";
 import { useExplorarMerchants } from "@/hooks/use-explorar-merchants";
 import { MERCHANT_MAP_CENTER } from "@/lib/explorar-map.mock";
 import { cartItemCount } from "@/lib/cart.utils";
@@ -291,22 +301,37 @@ export default function ExplorarMapDiscoverView() {
 
   const allPins = useMemo(() => toMerchantPins(data?.merchants ?? []), [data?.merchants]);
 
-  const categories = useMemo(() => {
-    const seen = new Set<string>();
-    const result: { code: string; name: string }[] = [];
-    for (const pin of allPins) {
-      if (!seen.has(pin.categoryCode)) {
-        seen.add(pin.categoryCode);
-        result.push({ code: pin.categoryCode, name: pin.categoryName });
-      }
-    }
-    return result;
-  }, [allPins]);
+  const { data: sectorsData, isLoading: isLoadingSectors } = useEconomicSectors();
+
+  const SECTOR_ICONS: Record<string, any> = {
+    all: LayoutGrid,
+    campo_cultivos: Sprout,
+    transporte_envios: Truck,
+    comida_hospedaje: Utensils,
+    oficinas_apoyo_negocios: Briefcase,
+    arte_deporte_diversion: Palette,
+    fabricas_creacion_productos: Factory,
+    otros: MoreHorizontal,
+  };
+
+  const sectors = useMemo(() => {
+    return sectorsData?.sectors ?? [];
+  }, [sectorsData]);
 
   const visiblePins = useMemo(() => {
     const q = searchQuery.trim().toLowerCase();
     return allPins.filter((pin) => {
-      if (selectedCategory && pin.categoryCode !== selectedCategory) return false;
+      // Si hay una categoría seleccionada, buscamos coincidencia parcial o total en el código
+      // o inclusive en el nombre por si las moscas, pero priorizamos código.
+      if (selectedCategory) {
+        const pinCode = pin.categoryCode.toLowerCase();
+        const selCode = selectedCategory.toLowerCase();
+        
+        // Mapeo simple de fallback si los códigos no coinciden exactamente entre APIs
+        const isMatch = pinCode.includes(selCode) || selCode.includes(pinCode);
+        if (!isMatch) return false;
+      }
+      
       if (!q) return true;
       return getMerchantDisplayName(pin.merchant).toLowerCase().includes(q);
     });
@@ -447,62 +472,88 @@ export default function ExplorarMapDiscoverView() {
         <div className="mx-auto max-w-lg rounded-t-3xl bg-white shadow-[0_-8px_32px_rgba(0,0,0,.1)]">
           {/* Categories */}
           {!isGuest && (
-            <div className="px-4 pb-2 pt-4">
-              <p className="mb-3 text-center text-[11px] font-semibold uppercase tracking-[0.12em] text-brand-stone">
-                Filtrar por categoría
-              </p>
-              {isPending && !data ? (
-                <div className="flex gap-3 pb-1">
-                  {[0, 1, 2, 3].map((i) => (
-                    <div key={i} className="h-[104px] min-w-[76px] animate-pulse rounded-2xl bg-brand-sand" />
-                  ))}
-                </div>
-              ) : categories.length > 0 ? (
-                <div className="no-scrollbar flex gap-3 overflow-x-auto pb-1 pt-0.5">
-                  <button
-                    type="button"
-                    onClick={() => setSelectedCategory(null)}
-                    className={`flex min-w-[72px] flex-shrink-0 flex-col items-center gap-2 rounded-2xl border-2 px-2 py-3 transition ${
-                      selectedCategory === null
-                        ? "border-brand-teal bg-brand-teal/10 shadow-sm"
-                        : "border-transparent bg-brand-sand/80 hover:border-brand-sand-dark"
+            <div className="pb-6 pt-5">
+              <div className="mb-4 px-6">
+                <h2 className="text-[13px] font-black uppercase tracking-[0.2em] text-brand-teal/40">
+                  Explorar Categorías
+                </h2>
+              </div>
+              
+              <div className="no-scrollbar flex gap-4 overflow-x-auto px-6 pb-2">
+                <button
+                  type="button"
+                  onClick={() => setSelectedCategory(null)}
+                  className={`group relative flex min-w-[84px] flex-col items-center gap-2.5 transition-all duration-300 active:scale-95`}
+                >
+                  <div 
+                    className={`flex h-16 w-16 items-center justify-center rounded-2xl border-2 transition-all duration-300 ${
+                      selectedCategory === null 
+                        ? "border-brand-orange bg-brand-orange text-white shadow-[0_8px_20px_-6px_rgba(241,90,41,0.5)]" 
+                        : "border-brand-sand-dark bg-brand-sand/50 text-brand-stone group-hover:border-brand-stone/30"
                     }`}
                   >
-                    <span className={`flex h-12 w-12 items-center justify-center rounded-xl text-xs font-bold ${selectedCategory === null ? "bg-white text-brand-teal" : "bg-white text-brand-stone"}`}>
-                      Todos
-                    </span>
-                    <span className={`text-center text-[11px] font-semibold leading-tight ${selectedCategory === null ? "text-brand-teal" : "text-brand-stone"}`}>
-                      Todos
-                    </span>
-                  </button>
-                  {categories.map(({ code, name }) => (
-                    <button
-                      key={code}
-                      type="button"
-                      onClick={() => setSelectedCategory(code)}
-                      className={`flex min-w-[76px] flex-shrink-0 flex-col items-center gap-2 rounded-2xl border-2 px-2 py-3 transition ${
-                        selectedCategory === code
-                          ? "border-brand-teal bg-brand-teal/10 shadow-sm"
-                          : "border-transparent bg-brand-sand/80 hover:border-brand-sand-dark"
-                      }`}
-                    >
-                      <span className={`flex h-12 w-12 items-center justify-center rounded-xl p-1 text-center text-[9px] font-bold leading-tight ${selectedCategory === code ? "bg-white text-brand-teal" : "bg-white text-brand-stone"}`}>
-                        {code}
-                      </span>
-                      <span className={`line-clamp-2 text-center text-[11px] font-semibold leading-tight ${selectedCategory === code ? "text-brand-teal" : "text-brand-stone"}`}>
-                        {name}
-                      </span>
-                    </button>
-                  ))}
+                    <LayoutGrid className={`${selectedCategory === null ? "h-7 w-7" : "h-6 w-6"} transition-all`} strokeWidth={2.5} />
+                  </div>
+                  <span className={`text-center text-[11px] font-bold tracking-tight transition-colors duration-300 ${
+                    selectedCategory === null ? "text-brand-orange" : "text-brand-stone/80"
+                  }`}>
+                    Todos
+                  </span>
+                  {selectedCategory === null && (
+                    <div className="absolute -bottom-1 h-1.5 w-1.5 rounded-full bg-brand-orange" />
+                  )}
+                </button>
+
+                {isLoadingSectors ? (
+                  Array.from({ length: 5 }).map((_, i) => (
+                    <div key={i} className="flex min-w-[84px] flex-col items-center gap-2.5 animate-pulse">
+                      <div className="h-16 w-16 rounded-2xl bg-brand-sand" />
+                      <div className="h-3 w-12 rounded bg-brand-sand" />
+                    </div>
+                  ))
+                ) : (
+                  sectors.map((sector) => {
+                    const Icon = SECTOR_ICONS[sector.code] || HelpCircle;
+                    const isSelected = selectedCategory === sector.code;
+                    return (
+                      <button
+                        key={sector.id}
+                        type="button"
+                        onClick={() => setSelectedCategory(isSelected ? null : sector.code)}
+                        className="group relative flex min-w-[84px] flex-col items-center gap-2.5 transition-all duration-300 active:scale-95"
+                      >
+                        <div 
+                          className={`flex h-16 w-16 items-center justify-center rounded-2xl border-2 transition-all duration-300 ${
+                            isSelected 
+                              ? "border-brand-teal bg-brand-teal text-white shadow-[0_8px_20px_-6px_rgba(29,92,74,0.4)]" 
+                              : "border-brand-sand-dark bg-brand-sand/50 text-brand-stone group-hover:border-brand-stone/30"
+                          }`}
+                        >
+                          <Icon className={`${isSelected ? "h-7 w-7" : "h-6 w-6"} transition-all`} strokeWidth={2.2} />
+                        </div>
+                        <span className={`line-clamp-2 px-1 text-center text-[10px] font-bold leading-[1.3] transition-colors duration-300 ${
+                          isSelected ? "text-brand-teal" : "text-brand-stone/80"
+                        }`}>
+                          {sector.name}
+                        </span>
+                        {isSelected && (
+                          <div className="absolute -bottom-1 h-1.5 w-1.5 rounded-full bg-brand-teal" />
+                        )}
+                      </button>
+                    );
+                  })
+                )}
+              </div>
+              
+              <div className="mt-4 px-6">
+                <div className="flex items-center justify-center gap-3">
+                  <div className="h-[1px] flex-1 bg-gradient-to-r from-transparent via-brand-sand-dark to-transparent" />
+                  <p className="whitespace-nowrap text-[11px] font-bold text-brand-stone/60">
+                    {visiblePins.length} comercio{visiblePins.length === 1 ? "" : "s"} encontrados
+                  </p>
+                  <div className="h-[1px] flex-1 bg-gradient-to-r from-transparent via-brand-sand-dark to-transparent" />
                 </div>
-              ) : null}
-              <p className="mt-2 text-center text-xs text-brand-stone">
-                {isPending && !data
-                  ? "Buscando comercios cerca de ti…"
-                  : visiblePins.length === 0
-                  ? "No hay comercios con ese filtro."
-                  : `${visiblePins.length} comercio${visiblePins.length === 1 ? "" : "s"} en el mapa`}
-              </p>
+              </div>
             </div>
           )}
 
