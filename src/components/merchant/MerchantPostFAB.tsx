@@ -5,6 +5,7 @@ import { Camera, Plus, X, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { HttpError } from "@/core/http";
 import { createMerchantPostUseCase } from "@/core/use-cases/merchant/create-merchant-post.use-case";
+import { improveMerchantPostDescription } from "@/core/services/merchant-create-post.service";
 import { useAuthStore } from "@/store/auth.store";
 import { usePerlappRoleStore } from "@/store/perlapp-role.store";
 import { useQueryClient } from "@tanstack/react-query";
@@ -21,6 +22,7 @@ export function MerchantPostFAB() {
   const [postPhotos, setPostPhotos] = useState<File[]>([]);
   const [previewUrls, setPreviewUrls] = useState<string[]>([]);
   const [publishing, setPublishing] = useState(false);
+  const [improvingDescription, setImprovingDescription] = useState(false);
   const [publishError, setPublishError] = useState<string | null>(null);
 
   // Limpiar blobs
@@ -65,8 +67,43 @@ export function MerchantPostFAB() {
   };
 
   const closeModal = () => {
-    if (publishing) return;
+    if (publishing || improvingDescription) return;
     resetModalForm();
+  };
+
+  const handleImproveDescription = async () => {
+    if (!token) {
+      setPublishError("Tu sesión expiró. Inicia sesión nuevamente.");
+      return;
+    }
+    if (postPhotos.length === 0) {
+      setPublishError("Agrega una imagen para mejorar la descripción con IA.");
+      return;
+    }
+
+    setPublishError(null);
+    setImprovingDescription(true);
+    try {
+      const improvedDescription = await improveMerchantPostDescription(
+        { image: postPhotos[0], description: postContent },
+        token
+      );
+      if (improvedDescription.trim()) {
+        setPostContent(improvedDescription);
+      } else {
+        setPublishError("No se recibió una descripción mejorada. Intenta de nuevo.");
+      }
+    } catch (e) {
+      if (e instanceof HttpError) {
+        setPublishError(e.message);
+      } else if (e instanceof Error && e.message) {
+        setPublishError(e.message);
+      } else {
+        setPublishError("No se pudo mejorar la descripción con IA. Inténtalo de nuevo.");
+      }
+    } finally {
+      setImprovingDescription(false);
+    }
   };
 
   const handleCreatePost = async () => {
@@ -149,8 +186,24 @@ export function MerchantPostFAB() {
                   onChange={(e) => setPostContent(e.target.value)}
                   placeholder="¿Qué hay de nuevo en tu comercio?"
                   className="min-h-[120px] w-full resize-none rounded-xl bg-perlapp-surfaceContainer px-4 py-3 font-sans text-base text-perlapp-ink outline-none transition focus:bg-perlapp-white focus:ring-2 focus:ring-perlapp-orange/50"
-                  disabled={publishing}
+                  disabled={publishing || improvingDescription}
                 />
+
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => void handleImproveDescription()}
+                  disabled={publishing || improvingDescription || postPhotos.length === 0}
+                  className="w-full rounded-xl border-perlapp-line text-perlapp-ink hover:bg-perlapp-surfaceContainer"
+                >
+                  {improvingDescription ? (
+                    <span className="flex items-center gap-2">
+                      <Loader2 className="h-4 w-4 animate-spin" /> Mejorando descripción...
+                    </span>
+                  ) : (
+                    "Mejorar descripción con IA"
+                  )}
+                </Button>
 
 
 
@@ -170,7 +223,7 @@ export function MerchantPostFAB() {
                     </div>
                   )}
 
-                  <label className={`group mt-1 flex cursor-pointer flex-col items-center justify-center gap-2 rounded-xl border border-dashed border-perlapp-line bg-perlapp-canvas/70 px-4 py-8 transition-colors hover:bg-perlapp-surfaceContainer active:bg-perlapp-surfaceVariant ${publishing ? 'pointer-events-none opacity-50' : ''}`}>
+                  <label className={`group mt-1 flex cursor-pointer flex-col items-center justify-center gap-2 rounded-xl border border-dashed border-perlapp-line bg-perlapp-canvas/70 px-4 py-8 transition-colors hover:bg-perlapp-surfaceContainer active:bg-perlapp-surfaceVariant ${(publishing || improvingDescription) ? "pointer-events-none opacity-50" : ""}`}>
                     <div className="flex h-12 w-12 items-center justify-center rounded-full bg-perlapp-orange/10 text-perlapp-orange transition-transform group-active:scale-95">
                       <Camera className="h-6 w-6" />
                     </div>
@@ -183,7 +236,7 @@ export function MerchantPostFAB() {
                       accept="image/*"
                       onChange={handlePhotoSelect}
                       className="hidden"
-                      disabled={publishing}
+                      disabled={publishing || improvingDescription}
                     />
                   </label>
 
@@ -206,7 +259,7 @@ export function MerchantPostFAB() {
             <div className="border-t border-perlapp-line/40 p-4">
               <Button
                 type="button"
-                disabled={!canPublish || publishing}
+                disabled={!canPublish || publishing || improvingDescription}
                 onClick={() => void handleCreatePost()}
                 className="w-full h-12 rounded-xl bg-perlapp-orange font-display text-base font-bold text-white shadow-sm hover:bg-perlapp-orange/90 active:scale-[0.98] transition-transform disabled:opacity-70 disabled:active:scale-100"
               >

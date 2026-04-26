@@ -13,6 +13,7 @@ import {
   fetchMunicipalities,
   completeStage1,
   completeStage2,
+  classifyCommerce,
   completeStage3,
   completeStage4,
   completeStage5,
@@ -217,8 +218,9 @@ function Stage2({ token, onDone }: { token: string; onDone: () => void }) {
     setLoading(true);
     setError(null);
     try {
+      const economicSectorIds = await classifyCommerce(description, token);
       await completeStage2(
-        { activity_description: description, economic_sector_ids: [] },
+        { activity_description: description, economic_sector_ids: economicSectorIds },
         token
       );
       onDone();

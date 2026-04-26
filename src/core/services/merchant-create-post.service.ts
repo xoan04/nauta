@@ -59,3 +59,47 @@ export async function createMerchantPost(
     return {};
   }
 }
+
+type ImproveDescriptionResponse = {
+  improved_description?: string;
+};
+
+/**
+ * Mejora la descripción de una publicación con IA usando imagen + descripción opcional.
+ * POST `/api/v1/merchant/posts/improve-description` en multipart/form-data.
+ */
+export async function improveMerchantPostDescription(
+  input: { image: File; description?: string },
+  token: string
+): Promise<string> {
+  const formData = new FormData();
+  formData.append("image", input.image);
+  if (typeof input.description === "string" && input.description.trim()) {
+    formData.append("description", input.description.trim());
+  }
+
+  const response = await fetch(`${resolveApihackBaseUrl()}/api/v1/merchant/posts/improve-description`, {
+    method: "POST",
+    headers: {
+      Accept: "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    body: formData,
+  });
+
+  if (!response.ok) {
+    let message = response.statusText || "Error al mejorar la descripción";
+    try {
+      const errorJson = (await response.json()) as { message?: string };
+      if (typeof errorJson.message === "string" && errorJson.message.trim()) {
+        message = errorJson.message;
+      }
+    } catch {
+      // noop
+    }
+    throw new HttpError({ status: response.status, message });
+  }
+
+  const raw = (await response.json()) as ImproveDescriptionResponse;
+  return typeof raw.improved_description === "string" ? raw.improved_description : "";
+}

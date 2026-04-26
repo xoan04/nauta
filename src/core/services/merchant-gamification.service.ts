@@ -60,6 +60,35 @@ export type Stage2Input = {
   economic_sector_ids: string[];
 };
 
+type ClassifyCommerceResponse = {
+  ids?: string[];
+  sector?: { id?: string };
+};
+
+export async function classifyCommerce(activityDescription: string, token: string): Promise<string[]> {
+  const res = await fetch(`${resolveBase()}/api/v1/merchant/classify-commerce`, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${token}`,
+      Accept: "application/json",
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ description: activityDescription }),
+  });
+  if (!res.ok) throw await parseError(res);
+
+  const json = (await res.json()) as ClassifyCommerceResponse;
+  if (Array.isArray(json.ids) && json.ids.length > 0) {
+    return json.ids.filter((id): id is string => typeof id === "string" && id.trim().length > 0);
+  }
+
+  if (json.sector?.id && typeof json.sector.id === "string" && json.sector.id.trim().length > 0) {
+    return [json.sector.id];
+  }
+
+  return [];
+}
+
 export async function completeStage2(data: Stage2Input, token: string): Promise<void> {
   const res = await fetch(`${resolveBase()}/api/v1/merchant/businesses/onboarding/stages/2`, {
     method: "PUT",
@@ -71,7 +100,7 @@ export async function completeStage2(data: Stage2Input, token: string): Promise<
     body: JSON.stringify({
       activity_description: data.activity_description,
       economic_sector_ids: data.economic_sector_ids,
-      ciiu_code: "",
+      ciiu_code: "1",
     }),
   });
   if (!res.ok) throw await parseError(res);
