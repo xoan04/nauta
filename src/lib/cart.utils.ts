@@ -1,5 +1,35 @@
 import type { CartLine } from "@/types/cart.types";
 
+/** Grupo de líneas del carrito por comercio (UI comprador). */
+export type CartMerchantGroup = {
+  merchantId: string;
+  merchantName: string;
+  merchantPhone?: string | null;
+  lines: CartLine[];
+};
+
+export function groupCartLinesByMerchant(items: CartLine[]): CartMerchantGroup[] {
+  const order: string[] = [];
+  const byId = new Map<string, CartMerchantGroup>();
+  for (const line of items) {
+    let g = byId.get(line.merchantId);
+    if (!g) {
+      g = {
+        merchantId: line.merchantId,
+        merchantName: line.merchantName,
+        merchantPhone: line.merchantPhone,
+        lines: [],
+      };
+      byId.set(line.merchantId, g);
+      order.push(line.merchantId);
+    }
+    g.lines.push(line);
+    const p = line.merchantPhone?.trim();
+    if (p && !g.merchantPhone?.trim()) g.merchantPhone = p;
+  }
+  return order.map((id) => byId.get(id)!);
+}
+
 const cop = new Intl.NumberFormat("es-CO", {
   style: "currency",
   currency: "COP",

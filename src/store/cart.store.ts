@@ -29,13 +29,18 @@ function mergeAdd(items: CartLine[], input: CartItemInput): CartLine[] {
         imageUrl: input.imageUrl,
         merchantId: input.merchantId,
         merchantName: input.merchantName,
+        merchantPhone: input.merchantPhone,
         quantity: qty,
       },
     ];
   }
   const next = [...items];
   const cur = next[idx]!;
-  next[idx] = { ...cur, quantity: cur.quantity + qty };
+  next[idx] = {
+    ...cur,
+    quantity: cur.quantity + qty,
+    merchantPhone: input.merchantPhone ?? cur.merchantPhone,
+  };
   return next;
 }
 

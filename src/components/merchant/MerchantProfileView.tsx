@@ -372,6 +372,7 @@ export function MerchantProfileView({ merchant, onRefresh }: MerchantProfileView
             merchantId={merchant.id}
             merchantName={merchant.displayName}
             isOwner={isCatalogOwner}
+            businessPhone={merchant.businessPhone}
             products={merchant.products}
           />
         ) : (

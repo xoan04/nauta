@@ -31,6 +31,9 @@ const myMerchantProfileSchema = z.object({
   user_id: z.string(),
   latitude: z.number().nullable(),
   longitude: z.number().nullable(),
+  municipality_id: z.string().nullable().optional(),
+  /** Teléfono de contacto del negocio (p. ej. etapa de conexiones del onboarding). */
+  phone: z.string().nullable().optional(),
   formalized: z.boolean(),
   created_at: z.string(),
   updated_at: z.string(),

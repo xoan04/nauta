@@ -20,6 +20,8 @@ export type MerchantPost = {
 export type MerchantProfileData = {
   id: string;
   slug: string;
+  /** Teléfono del negocio en perfil merchant (API). Vacío → no permitir crear productos hasta completarlo. */
+  businessPhone?: string | null;
   displayName: string;
   handle: string;
   categoryLabel: string;

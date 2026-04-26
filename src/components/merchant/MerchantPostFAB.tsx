@@ -53,8 +53,7 @@ export function MerchantPostFAB() {
     setPreviewUrls(newUrls);
   };
 
-  const closeModal = () => {
-    if (publishing) return;
+  const resetModalForm = () => {
     setIsOpen(false);
     setPostContent("");
     setPostPhotos([]);
@@ -63,6 +62,11 @@ export function MerchantPostFAB() {
       if (url.startsWith("blob:")) URL.revokeObjectURL(url);
     });
     setPreviewUrls([]);
+  };
+
+  const closeModal = () => {
+    if (publishing) return;
+    resetModalForm();
   };
 
   const handleCreatePost = async () => {
@@ -81,11 +85,14 @@ export function MerchantPostFAB() {
         },
         token
       );
-      
-      // Invalidar consultas para refrescar los feeds si es necesario
-      await queryClient.invalidateQueries({ queryKey: ["merchant-public-profile"] });
-      
-      closeModal();
+
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: ["feed"] }),
+        queryClient.invalidateQueries({ queryKey: ["merchant-my-profile"] }),
+      ]);
+
+      setPublishing(false);
+      resetModalForm();
     } catch (e) {
       if (e instanceof HttpError) {
         setPublishError(e.message);

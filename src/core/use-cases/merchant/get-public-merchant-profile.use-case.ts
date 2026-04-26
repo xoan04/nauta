@@ -108,6 +108,7 @@ export async function getPublicMerchantProfileUseCase(userId: string): Promise<M
   return {
     id: data.user.id,
     slug: slugify(displayName) || data.user.id,
+    businessPhone: phone,
     displayName,
     handle: `@${slugify(handleBase) || data.user.id}`,
     categoryLabel: firstBusiness?.business_category?.name ?? "General",
