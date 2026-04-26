@@ -45,6 +45,7 @@ export async function getMyMerchantProfileUseCase(token: string): Promise<MyMerc
   const lat = data.profile_merchant?.latitude;
   const lng = data.profile_merchant?.longitude;
   const coords = lat != null && lng != null ? `Lat ${lat.toFixed(6)}, Lng ${lng.toFixed(6)}` : null;
+  const businessPhone = data.profile_merchant?.phone?.trim() || null;
 
   const mappedPosts = myPosts.posts.map((post) => {
     const primaryPhoto = post.photos
@@ -73,6 +74,7 @@ export async function getMyMerchantProfileUseCase(token: string): Promise<MyMerc
     profile: {
       id: data.user.id,
       slug: slugify(displayName) || data.user.id,
+      businessPhone,
       displayName,
       handle: `@${slugify(handleBase) || data.user.id}`,
       categoryLabel: "Tu perfil de comercio",

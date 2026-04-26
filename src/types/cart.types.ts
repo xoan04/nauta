@@ -8,6 +8,8 @@ export type CartLine = {
   imageUrl?: string;
   merchantId: string;
   merchantName: string;
+  /** Teléfono del comercio (para WhatsApp por merchant). Opcional en líneas antiguas persistidas. */
+  merchantPhone?: string | null;
 };
 
 export type CartItemInput = Omit<CartLine, "quantity"> & { quantity?: number };

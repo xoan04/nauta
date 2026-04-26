@@ -2,8 +2,9 @@
 
 import { useState, useEffect } from "react";
 import Image from "next/image";
+import Link from "next/link";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { ImageIcon, Pencil, Plus, ShoppingBag, Trash2, X, Camera } from "lucide-react";
+import { ImageIcon, Pencil, Phone, Plus, ShoppingBag, Sparkles, Trash2, X, Camera } from "lucide-react";
 import type { ProfileCatalogProduct } from "@/lib/merchant-catalog.types";
 import { formatPrice } from "@/lib/cart.utils";
 import { useCartStore } from "@/store/cart.store";
@@ -19,6 +20,8 @@ type MerchantProfileCatalogProps = {
   merchantId: string;
   merchantName: string;
   isOwner: boolean;
+  /** Si falta y el dueño usa API, no se puede abrir el alta de producto hasta completar contacto. */
+  businessPhone?: string | null;
   products?: ProfileCatalogProduct[];
 };
 
@@ -42,6 +45,7 @@ export function MerchantProfileCatalog({
   merchantId,
   merchantName,
   isOwner,
+  businessPhone,
   products: initialProducts,
 }: MerchantProfileCatalogProps) {
   const queryClient = useQueryClient();
@@ -76,6 +80,9 @@ export function MerchantProfileCatalog({
   const [formError, setFormError] = useState("");
   const [previewUrls, setPreviewUrls] = useState<string[]>([]);
   const [deleteTarget, setDeleteTarget] = useState<ProfileCatalogProduct | null>(null);
+  const [phonePromptOpen, setPhonePromptOpen] = useState(false);
+
+  const hasBusinessPhone = Boolean(businessPhone?.trim());
 
   useEffect(() => {
     return () => {
@@ -154,6 +161,10 @@ export function MerchantProfileCatalog({
   });
 
   const openCreate = () => {
+    if (isOwner && !hasBusinessPhone) {
+      setPhonePromptOpen(true);
+      return;
+    }
     setForm(emptyForm);
     setFormError("");
     setPreviewUrls([]);
@@ -285,6 +296,7 @@ export function MerchantProfileCatalog({
       ...(isHttpsImageUrl(p.imageUrl) ? { imageUrl: p.imageUrl.trim() } : {}),
       merchantId,
       merchantName,
+      ...(businessPhone?.trim() ? { merchantPhone: businessPhone.trim() } : {}),
       quantity: 1,
     });
     openDrawer();
@@ -396,6 +408,74 @@ export function MerchantProfileCatalog({
           ))}
         </ul>
       )}
+
+      {phonePromptOpen ? (
+        <div className="fixed inset-0 z-[60] flex items-end justify-center p-4 sm:items-center" role="presentation">
+          <button
+            type="button"
+            className="absolute inset-0 bg-perlapp-ink/55 backdrop-blur-[3px]"
+            aria-label="Cerrar"
+            onClick={() => setPhonePromptOpen(false)}
+          />
+          <div
+            className="relative z-10 w-full max-w-2xl overflow-hidden rounded-3xl border border-perlapp-line/40 shadow-2xl"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="phone-prompt-title"
+          >
+            <div className="bg-gradient-to-br from-rose-500 via-orange-500 to-amber-400 px-6 pb-10 pt-12 text-white sm:px-8">
+              <div className="flex flex-col gap-7">
+                <p className="inline-flex w-fit rounded-full bg-white/25 px-4 py-1.5 font-display text-[11px] font-bold uppercase tracking-widest text-white/95 backdrop-blur-sm">
+                  Un dato y despegas
+                </p>
+                <div
+                  className="flex w-fit rounded-3xl bg-white/20 p-5 backdrop-blur-sm ring-1 ring-white/25"
+                  aria-hidden
+                >
+                  <Phone className="h-12 w-12" strokeWidth={1.75} />
+                </div>
+                <div className="space-y-4">
+                  <h2 id="phone-prompt-title" className="font-display text-2xl font-bold leading-snug sm:text-[26px]">
+                    ¡Tu catálogo está a un paso de vivir!
+                  </h2>
+                  <p className="font-display text-[15px] leading-relaxed text-white/95">
+                    Para que los compradores puedan <strong className="text-white">pedirte, reservar y pagarte</strong>,
+                    Perlapp necesita el <strong className="text-white">teléfono de contacto de tu negocio</strong>. Sin
+                    él no publicamos productos: es la línea directa entre tu vitrina y quien ya quiere comprarte.
+                  </p>
+                </div>
+                <div className="flex gap-4 border-t border-white/25 pt-7">
+                  <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-white/15 ring-1 ring-white/20">
+                    <Sparkles className="h-5 w-5 text-amber-100" strokeWidth={2} aria-hidden />
+                  </span>
+                  <p className="min-w-0 flex-1 self-center font-sans text-sm leading-relaxed text-white/90">
+                    En tu recorrido de perfil, el paso de contacto es rápido — y desbloquea todo el catálogo.
+                  </p>
+                </div>
+              </div>
+            </div>
+            <div className="flex flex-col gap-4 bg-perlapp-white px-6 py-6 sm:px-8">
+              <Link
+                href="/merchant/contacto"
+                className="flex w-full items-center justify-center rounded-2xl bg-perlapp-orange py-3.5 text-center font-display text-sm font-bold text-white shadow-[0_3px_0_0_#862300] transition hover:bg-perlapp-orange/90 active:translate-y-px active:shadow-none"
+                onClick={() => setPhonePromptOpen(false)}
+              >
+                Ir a dejar mi teléfono
+              </Link>
+              <button
+                type="button"
+                className="rounded-xl py-2.5 font-display text-sm font-semibold text-perlapp-inkMuted transition hover:text-perlapp-ink"
+                onClick={() => {
+                  setPhonePromptOpen(false);
+                  void queryClient.invalidateQueries({ queryKey: ["merchant-my-profile"] });
+                }}
+              >
+                Ya lo completé — actualizar
+              </button>
+            </div>
+          </div>
+        </div>
+      ) : null}
 
       {modal ? (
         <div className="fixed inset-0 z-[55] flex items-end justify-center p-4 sm:items-center" role="presentation">
